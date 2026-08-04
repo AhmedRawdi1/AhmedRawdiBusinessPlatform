@@ -65,8 +65,36 @@
             border-color: rgba(255, 255, 255, 0.12) !important;
             color: #f8fafc !important;
         }
-        [data-theme="dark"] .security-badge {
-            color: #94a3b8 !important;
+        /* Lang & Theme Switcher Top Buttons */
+        .lang-switcher-top {
+            position: absolute;
+            top: 1.5rem;
+            @(Lang.IsRightToLeft ? "left: 1.5rem;" : "right: 1.5rem;")
+            z-index: 100;
+        }
+
+        [data-theme="light"] .lang-switcher-top .btn {
+            background-color: #ffffff !important;
+            color: #1e293b !important;
+            border: 1px solid #cbd5e1 !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+        }
+        [data-theme="light"] .lang-switcher-top .btn #themeToggleIcon {
+            color: #f59e0b !important;
+        }
+        [data-theme="light"] .lang-switcher-top .btn:hover {
+            background-color: #f1f5f9 !important;
+            color: #0061f2 !important;
+        }
+
+        [data-theme="dark"] .lang-switcher-top .btn {
+            background-color: rgba(15, 23, 42, 0.75) !important;
+            color: #f8fafc !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        }
+        [data-theme="dark"] .lang-switcher-top .btn:hover {
+            background-color: rgba(30, 41, 59, 0.9) !important;
+            color: #ffffff !important;
         }
 
         * {
@@ -505,7 +533,7 @@
             <div class="form-card">
                 <div class="form-header">
                     <h1 class="form-title">@Lang.Get("SignIn")</h1>
-                    <p class="form-subtitle">@Lang.Get("EmpoweringDesc")</p>
+                    <p class="form-subtitle">@Lang.Get("SignInSubtitle")</p>
                 </div>
 
                 @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
