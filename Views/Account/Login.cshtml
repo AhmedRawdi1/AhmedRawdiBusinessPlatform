@@ -4,35 +4,80 @@
 <!DOCTYPE html>
 <html lang="@(Lang.IsRightToLeft ? "ar" : "en")" dir="@(Lang.IsRightToLeft ? "rtl" : "ltr")" data-theme="light" data-bs-theme="light">
 <head>
-    <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>@Lang.Get("SignIn") · @Lang.Get("BrandShort")</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>@Lang.Get("SignIn") · @Lang.Get("BrandShort")</title>
     <script>document.documentElement.dataset.theme=localStorage.getItem('arbp-theme')||'light';</script>
-    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/@(Lang.IsRightToLeft ? "bootstrap.rtl.min.css" : "bootstrap.min.css")"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"><link rel="stylesheet" href="~/css/site.css" asp-append-version="true">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/@(Lang.IsRightToLeft ? "bootstrap.rtl.min.css" : "bootstrap.min.css")">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true">
 </head>
 <body class="login-page">
     <main class="login-shell">
-        <section class="login-story">
-            <div class="login-story-glow"></div>
-            <a class="login-brand" href="/"><span class="brand-mark"><i class="bi bi-command"></i></span><span><strong>ARBP</strong><small>@Lang.Get("BrandShort")</small></span></a>
-            <div class="story-copy"><span class="story-badge"><i class="bi bi-stars"></i>@Lang.Get("EnterpriseBadge")</span><h1>@Lang.Get("OnePlatform")<br><span>@Lang.Get("ClearerDecisions")</span></h1><p>@Lang.Get("EmpoweringDesc")</p><div class="story-stats"><div><strong>@Lang.Get("Secure")</strong><small>@Lang.Get("RoleBasedAccess")</small></div><div><strong>@Lang.Get("Live")</strong><small>@Lang.Get("BusinessIntelligence")</small></div><div><strong>@Lang.Get("Unified")</strong><small>@Lang.Get("CentralizedWorkflows")</small></div></div></div>
-            <div class="story-quote"><i class="bi bi-quote"></i><p>@Lang.Get("PrecisionQuote")</p><small>@Lang.Get("BrandShort")</small></div>
+        <section class="login-story" aria-label="@Lang.Get("BrandShort")">
+            <a class="login-brand" href="/">
+                <span class="brand-mark"><i class="bi bi-command"></i></span>
+                <span><strong>ARBP</strong><small>@Lang.Get("BrandShort")</small></span>
+            </a>
+
+            <div class="story-copy">
+                <span class="story-badge"><i class="bi bi-stars"></i>@Lang.Get("EnterpriseBadge")</span>
+                <h1>@Lang.Get("OnePlatform")<br><span>@Lang.Get("ClearerDecisions")</span></h1>
+                <p>@Lang.Get("EmpoweringDesc")</p>
+                <div class="story-stats">
+                    <div><span class="story-stat-icon"><i class="bi bi-shield-check"></i></span><span><strong>@Lang.Get("Secure")</strong><small>@Lang.Get("RoleBasedAccess")</small></span></div>
+                    <div><span class="story-stat-icon"><i class="bi bi-activity"></i></span><span><strong>@Lang.Get("Live")</strong><small>@Lang.Get("BusinessIntelligence")</small></span></div>
+                    <div><span class="story-stat-icon"><i class="bi bi-diagram-3"></i></span><span><strong>@Lang.Get("Unified")</strong><small>@Lang.Get("CentralizedWorkflows")</small></span></div>
+                </div>
+            </div>
+
+            <div class="story-quote">
+                <i class="bi bi-quote"></i>
+                <div><p>@Lang.Get("PrecisionQuote")</p><small>@Lang.Get("BrandShort")</small></div>
+            </div>
         </section>
+
         <section class="login-form-side">
-            <div class="login-controls"><button class="icon-button" id="themeToggle" aria-label="Toggle color theme"><i class="bi bi-moon-stars" id="themeToggleIcon"></i></button><a class="language-pill" href="/Language/SetLanguage?culture=@Lang.Get("SwitchLangCulture")&returnUrl=@(Context.Request.Path + Context.Request.QueryString)"><i class="bi bi-globe2"></i>@Lang.Get("SwitchLang")</a></div>
+            <div class="login-controls">
+                <button class="icon-button" id="themeToggle" type="button" aria-label="Toggle color theme"><i class="bi bi-moon-stars" id="themeToggleIcon"></i></button>
+                <a class="language-pill" href="/Language/SetLanguage?culture=@Lang.Get("SwitchLangCulture")&returnUrl=@(Context.Request.Path + Context.Request.QueryString)"><i class="bi bi-globe2"></i><span>@Lang.Get("SwitchLang")</span></a>
+            </div>
+
             <div class="login-card">
                 <div class="login-mobile-brand"><span class="brand-mark"><i class="bi bi-command"></i></span><strong>ARBP</strong></div>
-                <span class="eyebrow-text">@Lang.Get("SecureWorkspace")</span><h2>@Lang.Get("WelcomeBack")</h2><p class="login-intro">@Lang.Get("SignInSubtitle")</p>
-                @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0){<div class="form-alert"><i class="bi bi-exclamation-circle"></i><div>@foreach(var error in ViewData.ModelState[string.Empty]!.Errors){<span>@error.ErrorMessage</span>}</div></div>}
+                <header class="login-form-header">
+                    <span class="eyebrow-text"><i class="bi bi-shield-lock"></i>@Lang.Get("SecureWorkspace")</span>
+                    <h2>@Lang.Get("WelcomeBack")</h2>
+                    <p class="login-intro">@Lang.Get("SignInSubtitle")</p>
+                </header>
+
+                @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+                {
+                    <div class="form-alert"><i class="bi bi-exclamation-circle"></i><div>@foreach(var error in ViewData.ModelState[string.Empty]!.Errors){<span>@error.ErrorMessage</span>}</div></div>
+                }
+
                 <form asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" id="loginForm">
                     @Html.AntiForgeryToken()
-                    <div class="field-group"><label asp-for="UserCode">@Lang.Get("UserCode")</label><div class="field-control"><i class="bi bi-person"></i><input asp-for="UserCode" placeholder="@Lang.Get("UserCodePlaceholder")" autocomplete="username" autofocus></div><span asp-validation-for="UserCode" class="field-error"></span></div>
-                    <div class="field-group"><div class="label-row"><label asp-for="Password">@Lang.Get("Password")</label><span>@Lang.Get("CaseSensitive")</span></div><div class="field-control"><i class="bi bi-lock"></i><input asp-for="Password" type="password" placeholder="@Lang.Get("PasswordPlaceholder")" autocomplete="current-password" id="PasswordInput"><button type="button" id="togglePasswordBtn" aria-label="@Lang.Get("ShowPassword")" data-show-label="@Lang.Get("ShowPassword")" data-hide-label="@Lang.Get("HidePassword")"><i class="bi bi-eye" id="togglePasswordIcon"></i></button></div><span asp-validation-for="Password" class="field-error"></span></div>
+                    <div class="field-group">
+                        <label asp-for="UserCode">@Lang.Get("UserCode")</label>
+                        <div class="field-control"><i class="bi bi-person"></i><input asp-for="UserCode" placeholder="@Lang.Get("UserCodePlaceholder")" autocomplete="username" autofocus></div>
+                        <span asp-validation-for="UserCode" class="field-error"></span>
+                    </div>
+                    <div class="field-group">
+                        <div class="label-row"><label asp-for="Password">@Lang.Get("Password")</label><span>@Lang.Get("CaseSensitive")</span></div>
+                        <div class="field-control"><i class="bi bi-lock"></i><input asp-for="Password" type="password" placeholder="@Lang.Get("PasswordPlaceholder")" autocomplete="current-password" id="PasswordInput"><button type="button" id="togglePasswordBtn" aria-label="@Lang.Get("ShowPassword")" data-show-label="@Lang.Get("ShowPassword")" data-hide-label="@Lang.Get("HidePassword")"><i class="bi bi-eye" id="togglePasswordIcon"></i></button></div>
+                        <span asp-validation-for="Password" class="field-error"></span>
+                    </div>
                     <label class="remember-check"><input asp-for="RememberMe" type="checkbox"><span>@Lang.Get("RememberMe")</span></label>
-                    <button class="login-submit" type="submit"><span>@Lang.Get("SignIn")</span><i class="bi bi-arrow-right"></i></button>
+                    <button class="login-submit" type="submit"><span>@Lang.Get("SignIn")</span><i class="bi @(Lang.IsRightToLeft ? "bi-arrow-left" : "bi-arrow-right")"></i></button>
                 </form>
                 <div class="login-security"><i class="bi bi-shield-check"></i><span>@Lang.Get("EncryptedBadge")</span></div>
             </div>
         </section>
     </main>
     <script src="~/js/site.js" asp-append-version="true"></script>
-</body></html>
+</body>
+</html>
