@@ -1,212 +1,70 @@
 @inject AhmedRawdiBusinessPlatform.Services.ILanguageService Lang
-
+@{
+    var engName = User.FindFirst("UserEnglishName")?.Value;
+    var arbName = User.FindFirst("UserArabicName")?.Value;
+    var displayName = Lang.IsRightToLeft ? (!string.IsNullOrWhiteSpace(arbName) ? arbName : engName) : (!string.IsNullOrWhiteSpace(engName) ? engName : User.Identity?.Name);
+    var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "Business User";
+    var initial = !string.IsNullOrWhiteSpace(displayName) ? displayName[0].ToString().ToUpperInvariant() : "U";
+}
 <!DOCTYPE html>
 <html lang="@(Lang.IsRightToLeft ? "ar" : "en")" dir="@(Lang.IsRightToLeft ? "rtl" : "ltr")" data-theme="light" data-bs-theme="light">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - @Lang.Get("BrandShort")</title>
-
-    <script>
-        (function() {
-            var theme = localStorage.getItem('sb|theme-mode') || 'light';
-            document.documentElement.setAttribute('data-theme', theme);
-            document.documentElement.setAttribute('data-bs-theme', theme);
-        })();
-    </script>
-    
-    <!-- Google Fonts & Bootstrap Icons -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#101828" />
+    <title>@ViewData["Title"] · @Lang.Get("BrandShort")</title>
+    <script>document.documentElement.dataset.theme=localStorage.getItem('arbp-theme')||'light';document.documentElement.setAttribute('data-bs-theme',document.documentElement.dataset.theme);</script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-    
-    @if (Lang.IsRightToLeft)
-    {
-        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.rtl.min.css" />
-    }
-    else
-    {
-        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    }
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/@(Lang.IsRightToLeft ? "bootstrap.rtl.min.css" : "bootstrap.min.css")" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
-    <!-- SB Admin Pro Custom Theme CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-
-    @if (Lang.IsRightToLeft)
-    {
-        <style>
-            body { font-family: 'Cairo', 'Plus Jakarta Sans', sans-serif !important; }
-            #layoutSidenav_nav { left: auto; right: 0; }
-            #layoutSidenav_content { margin-left: 0; margin-right: var(--sb-sidenav-width); }
-            body.sidenav-toggled #layoutSidenav_nav { margin-right: calc(-1 * var(--sb-sidenav-width)); margin-left: 0; }
-            body.sidenav-toggled #layoutSidenav_content { margin-right: 0; }
-            .sidenav-menu .nav-link .nav-link-icon { margin-right: 0; margin-left: 0.85rem; }
-            .sidenav-menu .nav-link { border-left: none; border-right: 3px solid transparent; }
-            .sidenav-menu .nav-link.active { border-right-color: var(--sb-primary); }
-            .card.border-start-lg { border-left: none !important; border-right: 0.35rem solid !important; }
-            .page-header-icon { margin-left: 0.75rem; }
-        </style>
-    }
 </head>
-<body class="nav-fixed">
-
-    <!-- Top Navigation Bar -->
-    <nav class="topnav navbar navbar-expand shadow-sm justify-content-between justify-content-sm-start" id="sidenavAccordion">
-        <!-- Sidebar Toggle Button -->
-        <button class="btn btn-icon me-2 ms-2" id="sidebarToggle" title="Toggle Navigation">
-            <i class="bi bi-list fs-4"></i>
-        </button>
-
-        <!-- Navbar Brand -->
-        <a class="navbar-brand me-auto me-lg-4" asp-controller="Home" asp-action="Index">
-            <div class="brand-icon">
-                <i class="bi bi-speedometer2"></i>
-            </div>
-            <span>@Lang.Get("BrandShort")</span>
+<body class="app-shell">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <div class="mobile-backdrop" id="mobileBackdrop"></div>
+    <aside class="app-sidebar" id="appSidebar" aria-label="Primary navigation">
+        <a class="sidebar-brand" asp-controller="Home" asp-action="Index">
+            <span class="brand-mark"><i class="bi bi-command"></i></span>
+            <span><strong>ARBP</strong><small>Business Platform</small></span>
         </a>
+        <div class="sidebar-scroll">@await Component.InvokeAsync("NavigationMenu")</div>
+        <div class="sidebar-user">
+            <span class="avatar">@initial</span>
+            <span class="sidebar-user-copy"><strong>@(displayName ?? "Guest")</strong><small>@role</small></span>
+            <span class="status-dot" title="Online"></span>
+        </div>
+    </aside>
 
-        <!-- Header Search Bar -->
-        <form class="form-inline me-auto d-none d-lg-block me-3 ms-3">
-            <div class="input-group input-group-joined input-group-solid" style="width: 280px;">
-                <input class="form-control pe-0 bg-light border-0" type="search" placeholder="@Lang.Get("SearchPlaceholder")" aria-label="Search">
-                <span class="input-group-text bg-light border-0">
-                    <i class="bi bi-search text-muted"></i>
-                </span>
+    <div class="app-frame">
+        <header class="app-topbar">
+            <div class="topbar-start">
+                <button class="icon-button" id="sidebarToggle" type="button" aria-label="Toggle navigation" aria-expanded="false"><i class="bi bi-list"></i></button>
+                <div class="page-context d-none d-sm-block"><small>@Lang.Get("BrandShort")</small><strong>@ViewData["Title"]</strong></div>
             </div>
-        </form>
-
-        <!-- User & Theme & Language Items Navbar -->
-        <ul class="navbar-nav align-items-center ms-auto me-2">
-            <!-- Theme Toggle Button -->
-            <li class="nav-item me-2">
-                <button class="btn btn-icon me-1" id="themeToggle" title="Toggle Light / Dark Mode">
-                    <i class="bi bi-sun-fill fs-5 text-warning" id="themeToggleIcon"></i>
-                </button>
-            </li>
-
-            <!-- Language Switcher Button -->
-            <li class="nav-item me-2">
-                <a class="btn btn-outline-primary btn-sm px-2 py-1" 
-                   href="/Language/SetLanguage?culture=@Lang.Get("SwitchLangCulture")&returnUrl=@(Context.Request.Path + Context.Request.QueryString)">
-                    <i class="bi bi-globe me-1"></i> @Lang.Get("SwitchLang")
-                </a>
-            </li>
-
-            @if (User.Identity != null && User.Identity.IsAuthenticated)
-            {
-                var engName = User.FindFirst("UserEnglishName")?.Value;
-                var arbName = User.FindFirst("UserArabicName")?.Value;
-                var userDisplayName = Lang.IsRightToLeft ? (!string.IsNullOrEmpty(arbName) ? arbName : engName) : (!string.IsNullOrEmpty(engName) ? engName : User.Identity.Name);
-                var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "Group";
-                var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "user@arbp.com";
-                var initial = !string.IsNullOrEmpty(userDisplayName) ? userDisplayName[0].ToString().ToUpper() : "U";
-
-                <!-- User Dropdown -->
-                <li class="nav-item dropdown no-caret me-3 dropdown-user">
-                    <a class="btn btn-icon btn-transparent-dark dropdown-toggle" id="navbarDropdownUserImage" href="javascript:void(0);" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <div class="avatar">@initial</div>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-end border-0 shadow animated--fade-in-up" aria-labelledby="navbarDropdownUserImage" style="min-width: 240px;">
-                        <div class="dropdown-user-details">
-                            <div class="d-flex align-items-center">
-                                <div class="avatar me-3 ms-3">@initial</div>
-                                <div>
-                                    <div class="dropdown-user-details-name">@userDisplayName</div>
-                                    <div class="dropdown-user-details-email">@userEmail</div>
-                                    <span class="badge badge-soft-primary mt-1">@userRole</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="dropdown-divider my-0"></div>
-                        <a class="dropdown-item py-2 mt-1" href="javascript:void(0);" data-set-theme="light">
-                            <i class="bi bi-sun me-2 ms-2 text-warning"></i>
-                            <span>Light Mode</span>
-                        </a>
-                        <a class="dropdown-item py-2" href="javascript:void(0);" data-set-theme="dark">
-                            <i class="bi bi-moon-stars me-2 ms-2 text-primary"></i>
-                            <span>Dark Mode</span>
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item py-2" href="javascript:void(0);">
-                            <i class="bi bi-person me-2 ms-2 text-primary"></i>
-                            <span>@Lang.Get("MyProfile")</span>
-                        </a>
-                        <a class="dropdown-item py-2" href="javascript:void(0);">
-                            <i class="bi bi-gear me-2 ms-2 text-secondary"></i>
-                            <span>@Lang.Get("AccountSettings")</span>
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <form asp-controller="Account" asp-action="Logout" method="post">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="dropdown-item py-2 text-danger">
-                                <i class="bi bi-box-arrow-right me-2 ms-2"></i>
-                                <span>@Lang.Get("SignOut")</span>
-                            </button>
-                        </form>
-                    </div>
-                </li>
-            }
-            else
-            {
-                <li class="nav-item me-3">
-                    <a class="btn btn-primary btn-sm px-3" asp-controller="Account" asp-action="Login">
-                        <i class="bi bi-box-arrow-in-right me-1 ms-1"></i> @Lang.Get("SignIn")
-                    </a>
-                </li>
-            }
-        </ul>
-    </nav>
-
-    <!-- Main Layout Container -->
-    <div id="layoutSidenav">
-        <!-- Sidebar Navigation -->
-        <div id="layoutSidenav_nav">
-            <nav class="sidenav sidenav-dark">
-                <div class="sidenav-menu">
-                    @await Component.InvokeAsync("NavigationMenu")
-                </div>
-
-                <!-- Sidenav Footer -->
-                <div class="sidenav-footer">
-                    <div class="sidenav-footer-heading">@Lang.Get("LoggedInAs")</div>
-                    <div class="sidenav-footer-title">
-                        @{
-                            var engFooter = User.FindFirst("UserEnglishName")?.Value;
-                            var arbFooter = User.FindFirst("UserArabicName")?.Value;
-                            var footerName = Lang.IsRightToLeft ? (!string.IsNullOrEmpty(arbFooter) ? arbFooter : engFooter) : (!string.IsNullOrEmpty(engFooter) ? engFooter : User.Identity?.Name);
-                        }
-                        @(footerName ?? "Guest")
-                    </div>
-                </div>
-            </nav>
-        </div>
-
-        <!-- Main Content Area -->
-        <div id="layoutSidenav_content">
-            <main>
-                @RenderBody()
-            </main>
-
-            <!-- SB Admin Pro Footer -->
-            <footer class="footer-admin">
-                <div class="container-fluid px-4">
-                    <div class="row align-items-center justify-content-between small">
-                        <div class="col-md-6 text-muted">
-                            @Lang.Get("Copyright") &copy; @DateTime.Now.Year @Lang.Get("BrandTitle").
-                        </div>
-                        <div class="col-md-6 text-md-end">
-                            <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-muted me-3 ms-3">@Lang.Get("PrivacyPolicy")</a>
-                            <a href="javascript:void(0);" class="text-decoration-none text-muted">@Lang.Get("TermsAndConditions")</a>
+            <div class="topbar-actions">
+                <button class="icon-button d-none d-md-inline-flex" type="button" aria-label="Search"><i class="bi bi-search"></i></button>
+                <button class="icon-button" id="themeToggle" type="button" aria-label="Toggle color theme"><i class="bi bi-moon-stars" id="themeToggleIcon"></i></button>
+                <a class="language-pill" href="/Language/SetLanguage?culture=@Lang.Get("SwitchLangCulture")&returnUrl=@(Context.Request.Path + Context.Request.QueryString)"><i class="bi bi-globe2"></i><span>@Lang.Get("SwitchLang")</span></a>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <div class="dropdown">
+                        <button class="profile-button dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><span class="avatar">@initial</span><span class="d-none d-lg-block"><strong>@displayName</strong><small>@role</small></span></button>
+                        <div class="dropdown-menu dropdown-menu-end profile-menu">
+                            <div class="profile-menu-head"><span class="avatar avatar-lg">@initial</span><div><strong>@displayName</strong><small>@(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value)</small></div></div>
+                            <a class="dropdown-item" href="javascript:void(0)"><i class="bi bi-person"></i>@Lang.Get("MyProfile")</a>
+                            <a class="dropdown-item" href="javascript:void(0)"><i class="bi bi-sliders"></i>@Lang.Get("AccountSettings")</a>
+                            <div class="dropdown-divider"></div>
+                            <form asp-controller="Account" asp-action="Logout" method="post">@Html.AntiForgeryToken()<button class="dropdown-item text-danger" type="submit"><i class="bi bi-box-arrow-right"></i>@Lang.Get("SignOut")</button></form>
                         </div>
                     </div>
-                </div>
-            </footer>
-        </div>
+                }
+            </div>
+        </header>
+        <main id="main-content" class="app-content">@RenderBody()</main>
+        <footer class="app-footer"><span>© @DateTime.Now.Year @Lang.Get("BrandTitle")</span><span><a asp-controller="Home" asp-action="Privacy">@Lang.Get("PrivacyPolicy")</a><span class="mx-2">·</span>v1.0</span></footer>
     </div>
-
-    <!-- Scripts -->
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
