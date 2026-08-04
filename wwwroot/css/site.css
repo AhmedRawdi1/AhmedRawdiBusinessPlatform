@@ -182,3 +182,28 @@
 [data-theme="light"] .sidebar-scroll::-webkit-scrollbar-thumb {
     background: #c5d3dc;
 }
+
+/* Business intelligence artwork for the login experience */
+.login-story {
+    background-image:
+        linear-gradient(115deg, rgba(8, 25, 43, .96) 0%, rgba(13, 41, 62, .88) 48%, rgba(18, 70, 82, .68) 100%),
+        url('/images/login_pro_background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.login-story::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 18% 22%, rgba(58, 142, 166, .24), transparent 30%),
+        linear-gradient(180deg, rgba(4, 15, 27, .06), rgba(4, 15, 27, .42));
+    pointer-events: none;
+}
+
+.login-story::after {
+    opacity: .58;
+    pointer-events: none;
+}

@@ -24,7 +24,7 @@
             if (password) password.type = show ? 'text' : 'password';
             const icon = document.getElementById('togglePasswordIcon');
             if (icon) icon.className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
-            passwordButton.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+            passwordButton.setAttribute('aria-label', show ? passwordButton.dataset.hideLabel : passwordButton.dataset.showLabel);
         });
 
         // Enter moves between form fields; Shift+Enter moves backwards.
