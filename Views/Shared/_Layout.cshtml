@@ -3,66 +3,177 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - AhmedRawdiBusinessPlatform</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - Ahmed Rawdi Business Platform</title>
+    
+    <!-- Google Fonts & Bootstrap Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- SB Admin Pro Custom Theme CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/AhmedRawdiBusinessPlatform.styles.css" asp-append-version="true" />
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AhmedRawdiBusinessPlatform</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                    <ul class="navbar-nav">
-                        @if (User.Identity != null && User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item d-flex align-items-center me-3">
-                                <span class="badge bg-primary me-2">@User.FindFirst("UserEnglishName")?.Value (@User.Identity.Name)</span>
-                                <span class="badge bg-secondary">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</span>
-                            </li>
-                            <li class="nav-item">
-                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-outline-danger btn-sm">Sign Out</button>
-                                </form>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="btn btn-outline-primary btn-sm" asp-controller="Account" asp-action="Login">Sign In</a>
-                            </li>
-                        }
-                    </ul>
-                </div>
+<body class="nav-fixed">
+
+    <!-- Top Navigation Bar -->
+    <nav class="topnav navbar navbar-expand shadow-sm justify-content-between justify-content-sm-start" id="sidenavAccordion">
+        <!-- Sidebar Toggle Button -->
+        <button class="btn btn-icon me-2" id="sidebarToggle" title="Toggle Navigation">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+
+        <!-- Navbar Brand -->
+        <a class="navbar-brand me-auto me-lg-4" asp-controller="Home" asp-action="Index">
+            <div class="brand-icon">
+                <i class="bi bi-speedometer2"></i>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+            <span>AR Business Platform</span>
+        </a>
+
+        <!-- Header Search Bar -->
+        <form class="form-inline me-auto d-none d-lg-block me-3">
+            <div class="input-group input-group-joined input-group-solid" style="width: 280px;">
+                <input class="form-control pe-0 bg-light border-0" type="search" placeholder="Search platform records..." aria-label="Search">
+                <span class="input-group-text bg-light border-0">
+                    <i class="bi bi-search text-muted"></i>
+                </span>
+            </div>
+        </form>
+
+        <!-- User Items Navbar -->
+        <ul class="navbar-nav align-items-center ms-auto">
+            @if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                var userEngName = User.FindFirst("UserEnglishName")?.Value ?? User.Identity.Name ?? "User";
+                var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "Group";
+                var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "user@arbp.com";
+                var initial = !string.IsNullOrEmpty(userEngName) ? userEngName[0].ToString().ToUpper() : "U";
+
+                <!-- User Dropdown -->
+                <li class="nav-item dropdown no-caret me-3 dropdown-user">
+                    <a class="btn btn-icon btn-transparent-dark dropdown-toggle" id="navbarDropdownUserImage" href="javascript:void(0);" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="avatar">@initial</div>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end border-0 shadow animated--fade-in-up" aria-labelledby="navbarDropdownUserImage" style="min-width: 240px;">
+                        <div class="dropdown-user-details">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar me-3">@initial</div>
+                                <div>
+                                    <div class="dropdown-user-details-name">@userEngName</div>
+                                    <div class="dropdown-user-details-email">@userEmail</div>
+                                    <span class="badge badge-soft-primary mt-1">@userRole</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider my-0"></div>
+                        <a class="dropdown-item py-2 mt-1" href="javascript:void(0);">
+                            <i class="bi bi-person me-2 text-primary"></i>
+                            <span>My Profile</span>
+                        </a>
+                        <a class="dropdown-item py-2" href="javascript:void(0);">
+                            <i class="bi bi-gear me-2 text-secondary"></i>
+                            <span>Account Settings</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <form asp-controller="Account" asp-action="Logout" method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="dropdown-item py-2 text-danger">
+                                <i class="bi bi-box-arrow-right me-2"></i>
+                                <span>Sign Out</span>
+                            </button>
+                        </form>
+                    </div>
+                </li>
+            }
+            else
+            {
+                <li class="nav-item me-3">
+                    <a class="btn btn-primary btn-sm px-3" asp-controller="Account" asp-action="Login">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                    </a>
+                </li>
+            }
+        </ul>
+    </nav>
+
+    <!-- Main Layout Container -->
+    <div id="layoutSidenav">
+        <!-- Sidebar Navigation -->
+        <div id="layoutSidenav_nav">
+            <nav class="sidenav sidenav-dark">
+                <div class="sidenav-menu">
+                    <div class="nav">
+                        <!-- Heading: CORE -->
+                        <div class="sidenav-menu-heading">Core</div>
+                        <a class="nav-link active" asp-controller="Home" asp-action="Index">
+                            <i class="bi bi-speedometer2 nav-link-icon"></i>
+                            <span>Dashboard</span>
+                        </a>
+
+                        <!-- Heading: BUSINESS MODULES -->
+                        <div class="sidenav-menu-heading">Business Modules</div>
+                        <a class="nav-link" href="javascript:void(0);">
+                            <i class="bi bi-people-fill nav-link-icon"></i>
+                            <span>System Users</span>
+                        </a>
+                        <a class="nav-link" href="javascript:void(0);">
+                            <i class="bi bi-shield-lock-fill nav-link-icon"></i>
+                            <span>System Groups</span>
+                        </a>
+                        <a class="nav-link" href="javascript:void(0);">
+                            <i class="bi bi-bar-chart-line-fill nav-link-icon"></i>
+                            <span>Business Analytics</span>
+                        </a>
+
+                        <!-- Heading: SYSTEM MANAGEMENT -->
+                        <div class="sidenav-menu-heading">System & Data</div>
+                        <a class="nav-link" href="javascript:void(0);">
+                            <i class="bi bi-database-fill-check nav-link-icon"></i>
+                            <span>SQL Server (ARBP)</span>
+                        </a>
+                        <a class="nav-link" asp-controller="Home" asp-action="Privacy">
+                            <i class="bi bi-shield-check nav-link-icon"></i>
+                            <span>Privacy & Security</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Sidenav Footer -->
+                <div class="sidenav-footer">
+                    <div class="sidenav-footer-heading">Logged in as:</div>
+                    <div class="sidenav-footer-title">
+                        @(User.FindFirst("UserEnglishName")?.Value ?? User.Identity?.Name ?? "Guest User")
+                    </div>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content Area -->
+        <div id="layoutSidenav_content">
+            <main>
+                @RenderBody()
+            </main>
+
+            <!-- SB Admin Pro Footer -->
+            <footer class="footer-admin">
+                <div class="container-fluid px-4">
+                    <div class="row align-items-center justify-content-between small">
+                        <div class="col-md-6 text-muted">
+                            Copyright &copy; @DateTime.Now.Year Ahmed Rawdi Business Platform. All rights reserved.
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-muted me-3">Privacy Policy</a>
+                            <a href="javascript:void(0);" class="text-decoration-none text-muted">Terms &amp; Conditions</a>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - AhmedRawdiBusinessPlatform - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
+    <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

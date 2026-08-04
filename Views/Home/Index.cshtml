@@ -1,8 +1,235 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Dashboard";
+    var userEngName = User.FindFirst("UserEnglishName")?.Value ?? User.Identity?.Name ?? "Administrator";
+    var userArbName = User.FindFirst("UserArabicName")?.Value ?? "";
+    var userCode = User.Identity?.Name ?? "Admin";
+    var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "ahmedroodhy@gmail.com";
+    var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "System Administrator Group";
+    var groupCode = User.FindFirst("GroupCode")?.Value ?? "SAG";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- SB Admin Pro Page Header Banner -->
+<header class="page-header page-header-dark bg-gradient-primary-to-secondary mb-4">
+    <div class="container-fluid px-4">
+        <div class="page-header-content pt-4 pb-4">
+            <div class="row align-items-center justify-content-between">
+                <div class="col-auto mt-2 mb-2">
+                    <h1 class="page-header-title">
+                        <div class="page-header-icon">
+                            <i class="bi bi-speedometer2"></i>
+                        </div>
+                        <span>Business Platform Dashboard</span>
+                    </h1>
+                    <div class="page-header-subtitle">
+                        Welcome back, <strong>@userEngName</strong> (@userCode)! Overview of SQL Server ARBP database & platform activity.
+                    </div>
+                </div>
+                <div class="col-12 col-xl-auto mt-2 mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-white text-primary px-3 py-2 fs-6 shadow-sm">
+                            <i class="bi bi-calendar3 me-1"></i> @DateTime.Now.ToString("dd MMMM yyyy")
+                        </span>
+                        <a class="btn btn-light text-primary fw-semibold px-3 py-2 shadow-sm" asp-controller="Home" asp-action="Index">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Refresh Data
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Main Page Content Container -->
+<div class="container-fluid px-4">
+    
+    <!-- 4 SB Admin Pro Metric KPI Cards -->
+    <div class="row">
+        <!-- Metric Card 1: System User -->
+        <div class="col-lg-6 col-xl-3 mb-4">
+            <div class="card border-start-lg border-primary h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="me-3">
+                            <div class="metric-label text-primary">Logged User</div>
+                            <div class="metric-value">@userCode</div>
+                            <div class="small text-muted mt-1">
+                                <i class="bi bi-check-circle-fill text-success me-1"></i> Authentication Active
+                            </div>
+                        </div>
+                        <div class="avatar bg-primary text-white fs-4 p-3 rounded-3" style="width: 48px; height: 48px;">
+                            <i class="bi bi-person-badge-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metric Card 2: User Group -->
+        <div class="col-lg-6 col-xl-3 mb-4">
+            <div class="card border-start-lg border-secondary h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="me-3">
+                            <div class="metric-label text-secondary">System Group</div>
+                            <div class="metric-value fs-4 text-truncate" style="max-width: 180px;">@groupCode</div>
+                            <div class="small text-muted mt-1">@userRole</div>
+                        </div>
+                        <div class="avatar bg-secondary text-white fs-4 p-3 rounded-3" style="width: 48px; height: 48px;">
+                            <i class="bi bi-shield-lock-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metric Card 3: SQL Server Database -->
+        <div class="col-lg-6 col-xl-3 mb-4">
+            <div class="card border-start-lg border-success h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="me-3">
+                            <div class="metric-label text-success">SQL Database</div>
+                            <div class="metric-value">ARBP</div>
+                            <div class="small text-muted mt-1">
+                                <i class="bi bi-hdd-network-fill text-success me-1"></i> Data Source: AHMEDRAWDI
+                            </div>
+                        </div>
+                        <div class="avatar bg-success text-white fs-4 p-3 rounded-3" style="width: 48px; height: 48px;">
+                            <i class="bi bi-database-fill-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metric Card 4: Stored Procedure -->
+        <div class="col-lg-6 col-xl-3 mb-4">
+            <div class="card border-start-lg border-info h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="me-3">
+                            <div class="metric-label text-info">Auth Stored Proc</div>
+                            <div class="metric-value fs-5 text-truncate" style="max-width: 180px;">usp_Get_UserInfo</div>
+                            <div class="small text-muted mt-1">
+                                <i class="bi bi-code-slash text-info me-1"></i> Executed Successfully
+                            </div>
+                        </div>
+                        <div class="avatar bg-info text-white fs-4 p-3 rounded-3" style="width: 48px; height: 48px;">
+                            <i class="bi bi-cpu-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Row: Data Grid Table & System Status -->
+    <div class="row">
+        <!-- Left Table Card: Authenticated User Claims -->
+        <div class="col-lg-8 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-table me-2 text-primary"></i>
+                        <span>Authenticated User Account Details</span>
+                    </div>
+                    <span class="badge badge-soft-success">
+                        <i class="bi bi-shield-check me-1"></i> Active Session
+                    </span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>User Info</th>
+                                    <th>Email & Mobile</th>
+                                    <th>Group / Role</th>
+                                    <th>Account Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar me-3">@(!string.IsNullOrEmpty(userEngName) ? userEngName[0].ToString() : "A")</div>
+                                            <div>
+                                                <div class="fw-bold text-dark">@userEngName</div>
+                                                <div class="small text-muted">Code: <code>@userCode</code></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div><i class="bi bi-envelope me-1 text-muted"></i>@userEmail</div>
+                                        <div class="small text-muted"><i class="bi bi-phone me-1"></i>0567772285</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-soft-primary mb-1 d-inline-block">@groupCode</span>
+                                        <div class="small text-muted">@userRole</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-soft-success">
+                                            <i class="bi bi-check-circle-fill me-1"></i> Active
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-light py-3 border-0">
+                    <div class="d-flex align-items-center justify-content-between small text-muted">
+                        <span>Query source: <code>dbo.usp_Get_UserInfo @@UserCode = '@userCode'</code></span>
+                        <span>SQL Server: <strong>AHMEDRAWDI</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Card: System Status & Integration Links -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-gear-wide-connected me-2 text-primary"></i>
+                        <span>System Architecture & Integration</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-bottom">
+                            <div>
+                                <div class="fw-semibold text-dark">Framework</div>
+                                <div class="small text-muted">ASP.NET Core Web App</div>
+                            </div>
+                            <span class="badge bg-dark">.NET 10</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-bottom">
+                            <div>
+                                <div class="fw-semibold text-dark">Database Engine</div>
+                                <div class="small text-muted">Microsoft SQL Server</div>
+                            </div>
+                            <span class="badge badge-soft-primary">MSSQLSERVER</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-bottom">
+                            <div>
+                                <div class="fw-semibold text-dark">ORM / Data Provider</div>
+                                <div class="small text-muted">Entity Framework Core 10</div>
+                            </div>
+                            <span class="badge badge-soft-info">SqlServer</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-0">
+                            <div>
+                                <div class="fw-semibold text-dark">GitHub Integration</div>
+                                <div class="small text-muted">AhmedRawdiBusinessPlatform</div>
+                            </div>
+                            <a href="https://github.com/AhmedRawdi1/AhmedRawdiBusinessPlatform" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-github me-1"></i> Repo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

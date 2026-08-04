@@ -1,31 +1,413 @@
-html {
-  font-size: 14px;
-}
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+:root {
+    /* SB Admin Pro Color Palette */
+    --sb-primary: #0061f2;
+    --sb-primary-hover: #0052cc;
+    --sb-secondary: #6900c7;
+    --sb-success: #00ac69;
+    --sb-info: #00cfd5;
+    --sb-warning: #f4a100;
+    --sb-danger: #e81500;
+    --sb-dark: #1e293b;
+    --sb-light: #f2f6fc;
+    
+    /* Layout Variables */
+    --sb-topnav-height: 3.625rem;
+    --sb-sidenav-width: 15rem;
+    --sb-sidenav-bg: #1e293b;
+    --sb-sidenav-text: #94a3b8;
+    --sb-sidenav-text-active: #ffffff;
+    --sb-sidenav-active-bg: rgba(255, 255, 255, 0.08);
+    
+    --sb-body-bg: #f2f6fc;
+    --sb-card-border-radius: 0.5rem;
 }
 
 body {
-  margin-bottom: 60px;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--sb-body-bg);
+    color: #4a5568;
+    overflow-x: hidden;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+/* ----------------------------------------------------
+   LAYOUT: Topnav & Sidenav Structure
+---------------------------------------------------- */
+.topnav {
+    height: var(--sb-topnav-height);
+    background-color: #ffffff;
+    border-bottom: 1px solid #e3e8ee;
+    z-index: 1039;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 1.25rem;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+.topnav .navbar-brand {
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: var(--sb-dark);
+    width: calc(var(--sb-sidenav-width) - 1.25rem);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+}
+
+.topnav .navbar-brand .brand-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--sb-primary), var(--sb-secondary));
+    color: #fff;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+/* Sidenav Toggle Button */
+.btn-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.35rem;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    transition: all 0.15s ease-in-out;
+}
+
+.btn-icon:hover {
+    background-color: #f1f5f9;
+    color: var(--sb-primary);
+}
+
+/* Main Layout Sidenav Container */
+#layoutSidenav {
+    display: flex;
+    margin-top: var(--sb-topnav-height);
+    min-height: calc(100vh - var(--sb-topnav-height));
+}
+
+#layoutSidenav_nav {
+    flex-basis: var(--sb-sidenav-width);
+    flex-shrink: 0;
+    transition: margin-left 0.25s ease-in-out;
+    z-index: 1038;
+    position: fixed;
+    top: var(--sb-topnav-height);
+    bottom: 0;
+    left: 0;
+    width: var(--sb-sidenav-width);
+}
+
+#layoutSidenav_content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 0;
+    flex-grow: 1;
+    min-height: calc(100vh - var(--sb-topnav-height));
+    margin-left: var(--sb-sidenav-width);
+    transition: margin-left 0.25s ease-in-out;
+}
+
+/* Toggled State for Sidebar */
+body.sidenav-toggled #layoutSidenav_nav {
+    margin-left: calc(-1 * var(--sb-sidenav-width));
+}
+
+body.sidenav-toggled #layoutSidenav_content {
+    margin-left: 0;
+}
+
+/* ----------------------------------------------------
+   SIDENAV STYLING (SB Admin Pro Sidenav Dark)
+---------------------------------------------------- */
+.sidenav-dark {
+    background-color: var(--sb-sidenav-bg);
+    color: var(--sb-sidenav-text);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.sidenav-menu {
+    padding: 1rem 0;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.sidenav-menu .nav {
+    display: flex;
+    flex-direction: column;
+}
+
+.sidenav-menu .sidenav-menu-heading {
+    padding: 1.25rem 1.25rem 0.5rem;
+    font-size: 0.675rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+}
+
+.sidenav-menu .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    color: var(--sb-sidenav-text);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+    border-left: 3px solid transparent;
+}
+
+.sidenav-menu .nav-link .nav-link-icon {
+    font-size: 1.1rem;
+    margin-right: 0.85rem;
+    color: #64748b;
+    transition: color 0.15s ease-in-out;
+}
+
+.sidenav-menu .nav-link:hover {
+    color: var(--sb-sidenav-text-active);
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.sidenav-menu .nav-link:hover .nav-link-icon {
+    color: var(--sb-primary);
+}
+
+.sidenav-menu .nav-link.active {
+    color: #ffffff;
+    background-color: var(--sb-sidenav-active-bg);
+    border-left-color: var(--sb-primary);
+    font-weight: 600;
+}
+
+.sidenav-menu .nav-link.active .nav-link-icon {
+    color: var(--sb-primary);
+}
+
+.sidenav-footer {
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 1rem 1.25rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sidenav-footer .sidenav-footer-heading {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    margin-bottom: 0.2rem;
+}
+
+.sidenav-footer .sidenav-footer-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #f8fafc;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ----------------------------------------------------
+   PAGE HEADERS (SB Admin Pro Banners)
+---------------------------------------------------- */
+.page-header {
+    padding: 2.5rem 0;
+    position: relative;
+}
+
+.page-header-dark {
+    color: #ffffff;
+}
+
+.bg-gradient-primary-to-secondary {
+    background: linear-gradient(135deg, var(--sb-primary) 0%, var(--sb-secondary) 100%) !important;
+}
+
+.page-header-title {
+    font-size: 1.85rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.35rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.page-header-subtitle {
+    font-size: 1rem;
+    opacity: 0.85;
+    margin-bottom: 0;
+}
+
+.page-header-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+/* ----------------------------------------------------
+   SB ADMIN PRO CARDS & METRICS
+---------------------------------------------------- */
+.card {
+    border: none;
+    border-radius: var(--sb-card-border-radius);
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(33, 40, 50, 0.06);
+    background-color: #ffffff;
+    margin-bottom: 1.5rem;
+    transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 2rem 0 rgba(33, 40, 50, 0.1);
+}
+
+.card .card-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e3e8ee;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--sb-dark);
+    padding: 1rem 1.35rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card .card-body {
+    padding: 1.35rem;
+}
+
+/* Border Accent Cards */
+.card.border-start-lg {
+    border-left: 0.35rem solid !important;
+}
+
+.card.border-primary { border-left-color: var(--sb-primary) !important; }
+.card.border-secondary { border-left-color: var(--sb-secondary) !important; }
+.card.border-success { border-left-color: var(--sb-success) !important; }
+.card.border-info { border-left-color: var(--sb-info) !important; }
+.card.border-warning { border-left-color: var(--sb-warning) !important; }
+.card.border-danger { border-left-color: var(--sb-danger) !important; }
+
+/* Metric Card Content */
+.metric-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--sb-dark);
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+}
+
+.metric-label {
+    font-size: 0.775rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+}
+
+/* ----------------------------------------------------
+   SOFT BADGES (SB Admin Pro Style)
+---------------------------------------------------- */
+.badge-soft-primary {
+    background-color: rgba(0, 97, 242, 0.12);
+    color: var(--sb-primary);
+}
+
+.badge-soft-secondary {
+    background-color: rgba(105, 0, 199, 0.12);
+    color: var(--sb-secondary);
+}
+
+.badge-soft-success {
+    background-color: rgba(0, 172, 105, 0.12);
+    color: var(--sb-success);
+}
+
+.badge-soft-info {
+    background-color: rgba(0, 207, 213, 0.15);
+    color: #008389;
+}
+
+.badge-soft-warning {
+    background-color: rgba(244, 161, 0, 0.15);
+    color: #a36c00;
+}
+
+.badge-soft-danger {
+    background-color: rgba(232, 21, 0, 0.12);
+    color: var(--sb-danger);
+}
+
+.badge {
+    padding: 0.4em 0.7em;
+    font-weight: 600;
+    font-size: 0.775rem;
+    border-radius: 0.35rem;
+}
+
+/* ----------------------------------------------------
+   USER AVATARS & DROPDOWNS
+---------------------------------------------------- */
+.avatar {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--sb-primary), var(--sb-secondary));
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.dropdown-user-details {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e3e8ee;
+    background-color: #f8fafc;
+}
+
+.dropdown-user-details-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--sb-dark);
+}
+
+.dropdown-user-details-email {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+/* Footer Styling */
+.footer-admin {
+    padding: 1.5rem 0;
+    background-color: #ffffff;
+    border-top: 1px solid #e3e8ee;
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-top: auto;
 }

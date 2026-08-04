@@ -1,4 +1,19 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+// SB Admin Pro Sidebar Toggle & Layout JS
+window.addEventListener('DOMContentLoaded', event => {
 
-// Write your JavaScript code.
+    // Toggle the side navigation
+    const sidebarToggle = document.body.querySelector('#sidebarToggle');
+    if (sidebarToggle) {
+        // Restore sidebar state from localStorage
+        if (localStorage.getItem('sb|sidebar-toggle') === 'true') {
+            document.body.classList.add('sidenav-toggled');
+        }
+
+        sidebarToggle.addEventListener('click', event => {
+            event.preventDefault();
+            document.body.classList.toggle('sidenav-toggled');
+            localStorage.setItem('sb|sidebar-toggle', document.body.classList.contains('sidenav-toggled'));
+        });
+    }
+
+});
