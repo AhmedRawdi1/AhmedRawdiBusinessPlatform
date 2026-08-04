@@ -1,0 +1,84 @@
+@model AhmedRawdiBusinessPlatform.Models.NavigationMenuViewModel
+@inject AhmedRawdiBusinessPlatform.Services.ILanguageService Lang
+
+<div class="nav">
+    <!-- Heading: CORE -->
+    <div class="sidenav-menu-heading">@Lang.Get("Core")</div>
+    <a class="nav-link active" asp-controller="Home" asp-action="Index">
+        <div class="nav-link-icon"><i class="bi bi-speedometer2"></i></div>
+        <span>@Lang.Get("Dashboard")</span>
+    </a>
+
+    @if (Model != null && Model.Modules.Any())
+    {
+        @foreach (var module in Model.Modules)
+        {
+            <!-- Heading for Module -->
+            <div class="sidenav-menu-heading text-primary fw-bold text-uppercase d-flex align-items-center gap-1">
+                <i class="@module.IconClass me-1 ms-1"></i>
+                <span>@module.Name</span>
+            </div>
+
+            @foreach (var subMod in module.SubModules)
+            {
+                var collapseId = $"collapseSub_{subMod.SubModuleID}";
+
+                <a class="nav-link collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
+                    <div class="nav-link-icon"><i class="@subMod.IconClass"></i></div>
+                    <span>@subMod.Name</span>
+                    <div class="sidenav-collapse-arrow">
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                </a>
+
+                <div class="collapse" id="@collapseId" data-bs-parent="#sidenavAccordion">
+                    <nav class="sidenav-menu-nested nav" id="accordionSub_@subMod.SubModuleID">
+                        @foreach (var form in subMod.Forms)
+                        {
+                            <a class="nav-link py-1 d-flex align-items-center justify-content-between" href="@form.Url" title="@form.Name">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="@form.IconClass text-info fs-6"></i>
+                                    <span>@form.Name</span>
+                                </div>
+                                @if (form.CanSave || form.CanUpdate)
+                                {
+                                    <span class="badge bg-soft-success text-success border border-success-subtle px-1 py-0 fs-8" style="font-size: 0.65rem;" title="Full Access">
+                                        <i class="bi bi-check2"></i>
+                                    </span>
+                                }
+                            </a>
+                        }
+                    </nav>
+                </div>
+            }
+        }
+    }
+    else
+    {
+        <!-- Static / Fallback Business Modules if no permissions loaded -->
+        <div class="sidenav-menu-heading">@Lang.Get("BusinessModules")</div>
+        <a class="nav-link" href="javascript:void(0);">
+            <div class="nav-link-icon"><i class="bi bi-people-fill"></i></div>
+            <span>@Lang.Get("SystemUsers")</span>
+        </a>
+        <a class="nav-link" href="javascript:void(0);">
+            <div class="nav-link-icon"><i class="bi bi-shield-lock-fill"></i></div>
+            <span>@Lang.Get("SystemGroups")</span>
+        </a>
+        <a class="nav-link" href="javascript:void(0);">
+            <div class="nav-link-icon"><i class="bi bi-bar-chart-line-fill"></i></div>
+            <span>@Lang.Get("BusinessAnalytics")</span>
+        </a>
+    }
+
+    <!-- Heading: SYSTEM MANAGEMENT -->
+    <div class="sidenav-menu-heading">@Lang.Get("SystemAndData")</div>
+    <a class="nav-link" href="javascript:void(0);">
+        <div class="nav-link-icon"><i class="bi bi-database-fill-check"></i></div>
+        <span>@Lang.Get("SqlServer")</span>
+    </a>
+    <a class="nav-link" asp-controller="Home" asp-action="Privacy">
+        <div class="nav-link-icon"><i class="bi bi-shield-check"></i></div>
+        <span>@Lang.Get("PrivacyAndSecurity")</span>
+    </a>
+</div>

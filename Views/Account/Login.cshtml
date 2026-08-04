@@ -37,13 +37,14 @@
     
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --primary-light: rgba(37, 99, 235, 0.08);
-            --primary-glow: rgba(37, 99, 235, 0.2);
-            --secondary: #4f46e5;
+            --primary: #0061f2;
+            --primary-hover: #0052cc;
+            --primary-light: rgba(0, 97, 242, 0.08);
+            --primary-glow: rgba(0, 97, 242, 0.22);
+            --secondary: #6900c7;
             
-            /* Eye-Comfort Color Palette */
+            /* Slate Color Tokens */
+            --slate-950: #020617;
             --slate-900: #0f172a;
             --slate-800: #1e293b;
             --slate-700: #334155;
@@ -57,26 +58,26 @@
         }
 
         /* ----------------------------------------------------
-           LIGHT MODE EYE-COMFORT OVERRIDES
+           LIGHT MODE STYLES
         ---------------------------------------------------- */
         [data-theme="light"] .form-panel {
-            background-color: var(--slate-50) !important;
+            background-color: #f8fafc !important;
             color: var(--slate-800) !important;
         }
         [data-theme="light"] .form-title {
-            color: var(--slate-900) !important;
+            color: #0f172a !important;
         }
         [data-theme="light"] .form-subtitle {
-            color: var(--slate-600) !important;
+            color: #64748b !important;
         }
         [data-theme="light"] .form-label {
-            color: var(--slate-700) !important;
+            color: #334155 !important;
         }
         [data-theme="light"] .form-input {
             background-color: #ffffff !important;
-            border-color: var(--slate-200) !important;
-            color: var(--slate-900) !important;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+            border: 1.5px solid #e2e8f0 !important;
+            color: #0f172a !important;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
         }
         [data-theme="light"] .form-input:focus {
             border-color: var(--primary) !important;
@@ -84,70 +85,74 @@
             background-color: #ffffff !important;
         }
         [data-theme="light"] .checkbox-container {
-            color: var(--slate-600) !important;
+            color: #475569 !important;
         }
         [data-theme="light"] .security-badge {
-            color: var(--slate-500) !important;
-            border-top-color: var(--slate-200) !important;
+            color: #64748b !important;
+            border-top-color: #e2e8f0 !important;
         }
-        [data-theme="light"] .lang-switcher-top .btn {
+        [data-theme="light"] .floating-control-btn {
             background-color: #ffffff !important;
-            color: var(--slate-800) !important;
-            border: 1px solid var(--slate-300) !important;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05) !important;
+            color: #1e293b !important;
+            border: 1px solid #cbd5e1 !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
         }
-        [data-theme="light"] .lang-switcher-top .btn #themeToggleIcon {
+        [data-theme="light"] .floating-control-btn #themeToggleIcon {
             color: #d97706 !important;
         }
-        [data-theme="light"] .lang-switcher-top .btn:hover {
-            background-color: var(--slate-100) !important;
+        [data-theme="light"] .floating-control-btn:hover {
+            background-color: #f1f5f9 !important;
             color: var(--primary) !important;
         }
 
         /* ----------------------------------------------------
-           DARK MODE EYE-COMFORT OVERRIDES
+           DARK MODE STYLES
         ---------------------------------------------------- */
         [data-theme="dark"] .form-panel {
-            background-color: var(--slate-900) !important;
-            color: var(--slate-300) !important;
+            background-color: #0f172a !important;
+            color: #cbd5e1 !important;
         }
         [data-theme="dark"] .form-title {
             color: #f8fafc !important;
         }
         [data-theme="dark"] .form-subtitle {
-            color: var(--slate-400) !important;
+            color: #94a3b8 !important;
         }
         [data-theme="dark"] .form-label {
-            color: var(--slate-300) !important;
+            color: #cbd5e1 !important;
         }
         [data-theme="dark"] .form-input {
-            background-color: var(--slate-800) !important;
-            border-color: rgba(255, 255, 255, 0.12) !important;
+            background-color: #1e293b !important;
+            border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
             color: #f8fafc !important;
         }
         [data-theme="dark"] .form-input:focus {
             border-color: #60a5fa !important;
-            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2) !important;
+            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.22) !important;
         }
         [data-theme="dark"] .checkbox-container {
-            color: var(--slate-300) !important;
+            color: #cbd5e1 !important;
         }
         [data-theme="dark"] .security-badge {
-            color: var(--slate-400) !important;
+            color: #94a3b8 !important;
             border-top-color: rgba(255, 255, 255, 0.1) !important;
         }
-        [data-theme="dark"] .lang-switcher-top .btn {
-            background-color: rgba(30, 41, 59, 0.8) !important;
+        [data-theme="dark"] .floating-control-btn {
+            background-color: rgba(30, 41, 59, 0.85) !important;
             color: #f8fafc !important;
             border: 1px solid rgba(255, 255, 255, 0.18) !important;
+            backdrop-filter: blur(8px);
         }
-        [data-theme="dark"] .lang-switcher-top .btn:hover {
-            background-color: var(--slate-800) !important;
+        [data-theme="dark"] .floating-control-btn #themeToggleIcon {
+            color: #fbbf24 !important;
+        }
+        [data-theme="dark"] .floating-control-btn:hover {
+            background-color: #1e293b !important;
             color: #ffffff !important;
         }
 
         /* ----------------------------------------------------
-           CORE BASE LAYOUT
+           CORE LAYOUT & SHOWCASE STYLES
         ---------------------------------------------------- */
         * {
             box-sizing: border-box;
@@ -157,7 +162,7 @@
 
         body {
             font-family: @(Lang.IsRightToLeft ? "'Cairo', 'Plus Jakarta Sans', sans-serif" : "'Plus Jakarta Sans', sans-serif");
-            background-color: var(--slate-900);
+            background-color: var(--slate-950);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -171,19 +176,37 @@
             display: flex;
         }
 
-        /* Lang & Theme Switcher Top Controls */
-        .lang-switcher-top {
+        /* Floating Top Controls Bar */
+        .top-controls-bar {
             position: absolute;
             top: 1.5rem;
             @(Lang.IsRightToLeft ? "left: 1.5rem;" : "right: 1.5rem;")
             z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .floating-control-btn {
+            height: 38px;
+            padding: 0 0.85rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            text-decoration: none;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
         }
 
         /* Left Showcase Panel */
         .showcase-panel {
-            flex: 1.15;
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.70) 0%, rgba(2, 6, 23, 0.88) 100%),
-                        url('/images/login-bg-matched.png') no-repeat center center / cover;
+            flex: 1.2;
+            background: linear-gradient(135deg, rgba(2, 6, 23, 0.82) 0%, rgba(15, 23, 42, 0.92) 100%),
+                        url('/images/login_pro_background.png') no-repeat center center / cover;
             position: relative;
             display: flex;
             flex-direction: column;
@@ -193,13 +216,23 @@
             overflow: hidden;
         }
 
-        .showcase-glow {
+        .showcase-glow-orb-1 {
             position: absolute;
-            top: -20%;
-            left: -20%;
-            width: 80%;
-            height: 80%;
-            background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+            top: -15%;
+            left: -15%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 97, 242, 0.28) 0%, rgba(0, 0, 0, 0) 70%);
+            pointer-events: none;
+        }
+
+        .showcase-glow-orb-2 {
+            position: absolute;
+            bottom: -20%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(105, 0, 199, 0.25) 0%, rgba(0, 0, 0, 0) 70%);
             pointer-events: none;
         }
 
@@ -221,11 +254,11 @@
             justify-content: center;
             font-size: 1.35rem;
             color: #ffffff;
-            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+            box-shadow: 0 4px 16px rgba(0, 97, 242, 0.4);
         }
 
         .brand-name {
-            font-size: 1.25rem;
+            font-size: 1.3rem;
             font-weight: 800;
             letter-spacing: -0.025em;
             color: #ffffff;
@@ -243,20 +276,20 @@
             align-items: center;
             gap: 0.5rem;
             padding: 0.45rem 1rem;
-            background: rgba(37, 99, 235, 0.18);
-            border: 1px solid rgba(96, 165, 250, 0.3);
+            background: rgba(0, 97, 242, 0.2);
+            border: 1px solid rgba(96, 165, 250, 0.35);
             border-radius: 50px;
             font-size: 0.825rem;
             font-weight: 600;
             color: #93c5fd;
             margin-bottom: 1.5rem;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(10px);
         }
 
         .showcase-headline {
-            font-size: 2.35rem;
+            font-size: 2.5rem;
             font-weight: 800;
-            line-height: 1.25;
+            line-height: 1.2;
             letter-spacing: -0.03em;
             margin-bottom: 1rem;
             background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
@@ -265,9 +298,9 @@
         }
 
         .showcase-desc {
-            font-size: 1rem;
-            line-height: 1.6;
-            color: var(--slate-300);
+            font-size: 1.025rem;
+            line-height: 1.65;
+            color: #cbd5e1;
             margin-bottom: 2rem;
         }
 
@@ -275,8 +308,8 @@
             position: relative;
             border-radius: 16px;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
         }
 
         .feature-grid {
@@ -287,21 +320,21 @@
         }
 
         .feature-card {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 14px;
             padding: 1.25rem;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px);
             transition: transform 0.2s ease, background 0.2s ease;
         }
 
         .feature-card:hover {
-            background: rgba(255, 255, 255, 0.07);
+            background: rgba(255, 255, 255, 0.09);
             transform: translateY(-2px);
         }
 
         .feature-icon {
-            font-size: 1.35rem;
+            font-size: 1.4rem;
             color: #60a5fa;
             margin-bottom: 0.5rem;
         }
@@ -315,7 +348,7 @@
 
         .feature-sub {
             font-size: 0.825rem;
-            color: var(--slate-400);
+            color: #94a3b8;
             line-height: 1.4;
         }
 
@@ -323,15 +356,13 @@
             position: relative;
             z-index: 2;
             font-size: 0.85rem;
-            color: var(--slate-400);
+            color: #94a3b8;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
 
-        /* ----------------------------------------------------
-           RIGHT FORM PANEL (EYE-COMFORT DESIGN)
-        ---------------------------------------------------- */
+        /* Right Form Panel */
         .form-panel {
             flex: 0.85;
             display: flex;
@@ -352,14 +383,14 @@
         }
 
         .form-title {
-            font-size: 2rem;
+            font-size: 2.15rem;
             font-weight: 800;
             letter-spacing: -0.03em;
             margin-bottom: 0.4rem;
         }
 
         .form-subtitle {
-            font-size: 0.925rem;
+            font-size: 0.95rem;
             line-height: 1.5;
         }
 
@@ -382,20 +413,20 @@
 
         .form-input {
             width: 100%;
-            height: 3.25rem;
+            height: 3.35rem;
             border-radius: 0.75rem;
             font-size: 0.95rem;
             font-weight: 500;
             outline: none;
             transition: all 0.2s ease-in-out;
-            @(Lang.IsRightToLeft ? "padding: 0 3rem 0 1rem;" : "padding: 0 1rem 0 3rem;")
+            @(Lang.IsRightToLeft ? "padding: 0 3.2rem 0 1rem;" : "padding: 0 1rem 0 3.2rem;")
         }
 
         .input-icon-left {
             position: absolute;
-            @(Lang.IsRightToLeft ? "right: 1.1rem;" : "left: 1.1rem;")
+            @(Lang.IsRightToLeft ? "right: 1.15rem;" : "left: 1.15rem;")
             color: var(--slate-400);
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             pointer-events: none;
             transition: color 0.2s ease;
         }
@@ -410,7 +441,7 @@
             background: transparent;
             border: none;
             color: var(--slate-400);
-            font-size: 1.15rem;
+            font-size: 1.2rem;
             padding: 0.35rem;
             cursor: pointer;
             border-radius: 0.35rem;
@@ -451,7 +482,7 @@
 
         .btn-login {
             width: 100%;
-            height: 3.25rem;
+            height: 3.35rem;
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: #ffffff;
             border: none;
@@ -463,13 +494,13 @@
             justify-content: center;
             gap: 0.6rem;
             cursor: pointer;
-            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
-            transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+            box-shadow: 0 4px 16px rgba(0, 97, 242, 0.35);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
 
         .btn-login:hover {
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+            box-shadow: 0 6px 22px rgba(0, 97, 242, 0.5);
         }
 
         .btn-login:active {
@@ -489,8 +520,8 @@
         }
 
         .alert-error {
-            background-color: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.25);
+            background-color: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.3);
             color: #ef4444;
             padding: 0.85rem 1.15rem;
             border-radius: 0.75rem;
@@ -501,9 +532,7 @@
             gap: 0.75rem;
         }
 
-        /* ----------------------------------------------------
-           RESPONSIVE BREAKPOINTS
-        ---------------------------------------------------- */
+        /* Responsive Breakpoints */
         @@media (max-width: 992px) {
             .showcase-panel {
                 display: none;
@@ -517,20 +546,22 @@
 </head>
 <body>
     <div class="login-container">
-        <!-- Top Language & Theme Switcher -->
-        <div class="lang-switcher-top d-flex align-items-center gap-2">
-            <button class="btn btn-sm rounded-circle p-2 shadow-sm" id="themeToggle" title="Toggle Light / Dark Mode" style="width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center;">
-                <i class="bi bi-sun-fill fs-6" id="themeToggleIcon"></i>
+        <!-- Floating Top Bar Controls -->
+        <div class="top-controls-bar">
+            <button class="floating-control-btn" id="themeToggle" title="Toggle Light / Dark Mode">
+                <i class="bi bi-sun-fill" id="themeToggleIcon"></i>
             </button>
             <a href="/Language/SetLanguage?culture=@Lang.Get("SwitchLangCulture")&returnUrl=@(Context.Request.Path + Context.Request.QueryString)" 
-               class="btn btn-sm rounded-pill px-3 shadow-sm font-weight-bold">
-                <i class="bi bi-globe me-1 ms-1"></i> @Lang.Get("SwitchLang")
+               class="floating-control-btn">
+                <i class="bi bi-globe"></i>
+                <span>@Lang.Get("SwitchLang")</span>
             </a>
         </div>
 
         <!-- Left Showcase Panel -->
         <div class="showcase-panel">
-            <div class="showcase-glow"></div>
+            <div class="showcase-glow-orb-1"></div>
+            <div class="showcase-glow-orb-2"></div>
 
             <div class="brand-logo-group">
                 <div class="brand-icon-box">
@@ -551,7 +582,7 @@
                 </p>
 
                 <div class="showcase-hero-box my-3">
-                    <img src="~/images/login-bg-matched.png" alt="@Lang.Get("BrandTitle")" class="img-fluid rounded-4 shadow-lg" style="max-height: 210px; width: 100%; object-fit: cover;" />
+                    <img src="~/images/login_pro_dashboard_hero.png" alt="@Lang.Get("BrandTitle")" class="img-fluid rounded-4 shadow-lg" style="max-height: 220px; width: 100%; object-fit: cover;" />
                 </div>
 
                 <div class="feature-grid">

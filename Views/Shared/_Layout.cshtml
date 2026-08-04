@@ -164,40 +164,7 @@
         <div id="layoutSidenav_nav">
             <nav class="sidenav sidenav-dark">
                 <div class="sidenav-menu">
-                    <div class="nav">
-                        <!-- Heading: CORE -->
-                        <div class="sidenav-menu-heading">@Lang.Get("Core")</div>
-                        <a class="nav-link active" asp-controller="Home" asp-action="Index">
-                            <i class="bi bi-speedometer2 nav-link-icon"></i>
-                            <span>@Lang.Get("Dashboard")</span>
-                        </a>
-
-                        <!-- Heading: BUSINESS MODULES -->
-                        <div class="sidenav-menu-heading">@Lang.Get("BusinessModules")</div>
-                        <a class="nav-link" href="javascript:void(0);">
-                            <i class="bi bi-people-fill nav-link-icon"></i>
-                            <span>@Lang.Get("SystemUsers")</span>
-                        </a>
-                        <a class="nav-link" href="javascript:void(0);">
-                            <i class="bi bi-shield-lock-fill nav-link-icon"></i>
-                            <span>@Lang.Get("SystemGroups")</span>
-                        </a>
-                        <a class="nav-link" href="javascript:void(0);">
-                            <i class="bi bi-bar-chart-line-fill nav-link-icon"></i>
-                            <span>@Lang.Get("BusinessAnalytics")</span>
-                        </a>
-
-                        <!-- Heading: SYSTEM MANAGEMENT -->
-                        <div class="sidenav-menu-heading">@Lang.Get("SystemAndData")</div>
-                        <a class="nav-link" href="javascript:void(0);">
-                            <i class="bi bi-database-fill-check nav-link-icon"></i>
-                            <span>@Lang.Get("SqlServer")</span>
-                        </a>
-                        <a class="nav-link" asp-controller="Home" asp-action="Privacy">
-                            <i class="bi bi-shield-check nav-link-icon"></i>
-                            <span>@Lang.Get("PrivacyAndSecurity")</span>
-                        </a>
-                    </div>
+                    @await Component.InvokeAsync("NavigationMenu")
                 </div>
 
                 <!-- Sidenav Footer -->

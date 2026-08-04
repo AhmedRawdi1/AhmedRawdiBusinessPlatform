@@ -1,4 +1,4 @@
-// SB Admin Pro Sidebar & Theme Toggle JS
+// SB Admin Pro Sidebar, Theme Toggle & Keyboard Enter Key Field Navigation JS
 (function () {
     // Apply saved theme immediately to prevent FOUC (Flash of Unstyled Content)
     const savedTheme = localStorage.getItem('sb|theme-mode') || 'light';
@@ -63,6 +63,72 @@ window.addEventListener('DOMContentLoaded', () => {
             const chosenTheme = el.getAttribute('data-set-theme');
             updateThemeUI(chosenTheme);
         });
+    });
+
+    // 3. ENTER KEY FIELD NAVIGATION
+    // Move focus between input fields using the Keyboard Enter Key
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter') return;
+
+        const target = e.target;
+        if (!target) return;
+
+        const tagName = target.tagName.toLowerCase();
+        const isInputControl = tagName === 'input' || tagName === 'select' || tagName === 'textarea';
+
+        // Ignore if target is not an input control
+        if (!isInputControl) return;
+
+        // Allow normal enter behavior for submit buttons, regular buttons, links, or image inputs
+        const inputType = (target.type || '').toLowerCase();
+        if (inputType === 'submit' || inputType === 'button' || inputType === 'reset' || inputType === 'image') {
+            return;
+        }
+
+        // For multi-line textareas, allow Shift+Enter to insert newline
+        if (tagName === 'textarea' && e.shiftKey) {
+            return;
+        }
+
+        // Determine scope container (enclosing form or entire document)
+        const container = target.form || document;
+
+        // Query all focusable form controls
+        const selector = 'input:not([type="hidden"]):not([disabled]):not([readonly]), select:not([disabled]):not([readonly]), textarea:not([disabled]):not([readonly]), button:not([disabled]):not([tabindex="-1"])';
+        
+        const focusables = Array.from(container.querySelectorAll(selector)).filter(el => {
+            // Must be visible and interactable
+            return el.offsetWidth > 0 && el.offsetHeight > 0 && getComputedStyle(el).visibility !== 'hidden' && getComputedStyle(el).display !== 'none';
+        });
+
+        const currentIndex = focusables.indexOf(target);
+        if (currentIndex !== -1) {
+            e.preventDefault();
+
+            let nextIndex;
+            if (e.shiftKey) {
+                // Shift + Enter: Move to previous field
+                nextIndex = currentIndex - 1;
+                if (nextIndex < 0) nextIndex = focusables.length - 1;
+            } else {
+                // Enter: Move to next field
+                nextIndex = currentIndex + 1;
+                if (nextIndex >= focusables.length) nextIndex = 0;
+            }
+
+            const nextElement = focusables[nextIndex];
+            if (nextElement) {
+                nextElement.focus();
+                
+                // Automatically select text in text inputs for quick editing
+                if (typeof nextElement.select === 'function') {
+                    const type = (nextElement.type || '').toLowerCase();
+                    if (type === 'text' || type === 'password' || type === 'number' || type === 'email' || type === 'tel' || type === 'search' || type === 'url') {
+                        nextElement.select();
+                    }
+                }
+            }
+        }
     });
 
 });
