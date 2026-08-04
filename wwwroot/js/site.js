@@ -29,6 +29,10 @@ window.addEventListener('DOMContentLoaded', () => {
     function updateThemeUI(theme) {
         document.documentElement.setAttribute('data-theme', theme);
         document.documentElement.setAttribute('data-bs-theme', theme);
+        if (document.body) {
+            document.body.setAttribute('data-theme', theme);
+            document.body.setAttribute('data-bs-theme', theme);
+        }
         localStorage.setItem('sb|theme-mode', theme);
 
         if (themeToggleIcon) {
