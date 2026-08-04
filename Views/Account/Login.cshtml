@@ -13,175 +13,281 @@
     <title>@ViewData["Title"]</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
         :root {
-            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #31104b 100%);
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --card-border: rgba(255, 255, 255, 0.12);
-            --accent-color: #6366f1;
-            --accent-hover: #4f46e5;
-            --accent-glow: rgba(99, 102, 241, 0.4);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: rgba(37, 99, 235, 0.1);
+            --primary-glow: rgba(37, 99, 235, 0.25);
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --text-heading: #f8fafc;
+            --text-body: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: rgba(255, 255, 255, 0.1);
             --input-bg: rgba(15, 23, 42, 0.6);
-            --input-border: rgba(255, 255, 255, 0.15);
+            --input-border: rgba(255, 255, 255, 0.12);
         }
 
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            font-family: 'Outfit', sans-serif;
-            background: var(--bg-gradient);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-heading);
             min-height: 100vh;
-            margin: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 1.5rem;
-            color: var(--text-main);
             overflow-x: hidden;
-            position: relative;
         }
 
-        /* Ambient Glow Effects */
-        .ambient-glow {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(120px);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .glow-1 {
-            width: 350px;
-            height: 350px;
-            background: rgba(99, 102, 241, 0.25);
-            top: 10%;
-            left: 15%;
-        }
-
-        .glow-2 {
-            width: 400px;
-            height: 400px;
-            background: rgba(168, 85, 247, 0.2);
-            bottom: 10%;
-            right: 15%;
-        }
-
-        .login-wrapper {
+        .login-container {
             width: 100%;
-            max-width: 440px;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Left Showcase Panel */
+        .showcase-panel {
+            flex: 1.1;
+            background: radial-gradient(circle at top left, #1e1b4b 0%, #0f172a 60%, #020617 100%);
             position: relative;
-            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 4rem;
+            overflow: hidden;
+            border-right: 1px solid var(--border-color);
         }
 
-        .login-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border);
-            border-radius: 24px;
-            padding: 2.5rem 2rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
-                        0 0 0 1px rgba(255, 255, 255, 0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        .showcase-bg-grid {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+            background-size: 32px 32px;
+            mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+            pointer-events: none;
         }
 
-        .brand-header {
-            text-align: center;
-            margin-bottom: 2rem;
+        .showcase-glow {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.2) 0%, rgba(147, 51, 234, 0.1) 50%, transparent 70%);
+            filter: blur(60px);
+            top: -10%;
+            left: -10%;
+            pointer-events: none;
         }
 
-        .brand-logo {
-            width: 64px;
-            height: 64px;
-            background: linear-gradient(135deg, #6366f1, #a855f7);
-            border-radius: 18px;
-            display: inline-flex;
+        .brand-logo-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .brand-icon-box {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 14px;
+            display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
+            font-size: 1.5rem;
             color: #ffffff;
-            box-shadow: 0 10px 25px var(--accent-glow);
-            margin-bottom: 1.25rem;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35);
         }
 
-        .brand-title {
-            font-size: 1.6rem;
+        .brand-name {
             font-weight: 700;
+            font-size: 1.35rem;
             letter-spacing: -0.02em;
-            margin-bottom: 0.35rem;
             background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .brand-subtitle {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            font-weight: 400;
+        .showcase-content {
+            position: relative;
+            z-index: 2;
+            max-width: 520px;
+            margin: auto 0;
         }
 
-        .form-group {
+        .badge-enterprise {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.9rem;
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 999px;
+            font-size: 0.825rem;
+            font-weight: 600;
+            color: #60a5fa;
+            margin-bottom: 1.5rem;
+        }
+
+        .showcase-headline {
+            font-size: 2.75rem;
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.03em;
             margin-bottom: 1.25rem;
+            background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .showcase-desc {
+            font-size: 1.05rem;
+            color: var(--text-body);
+            line-height: 1.6;
+            margin-bottom: 2.5rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 1.25rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .feature-icon {
+            font-size: 1.25rem;
+            color: #60a5fa;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-title {
+            font-size: 0.925rem;
+            font-weight: 600;
+            color: var(--text-heading);
+            margin-bottom: 0.2rem;
+        }
+
+        .feature-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .showcase-footer {
+            position: relative;
+            z-index: 2;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Right Form Panel */
+        .form-panel {
+            flex: 0.9;
+            background: var(--bg-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 2rem;
             position: relative;
         }
 
-        .form-label {
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--text-muted);
-            margin-bottom: 0.5rem;
-            display: block;
+        .form-card {
+            width: 100%;
+            max-width: 420px;
         }
 
-        .input-group-custom {
+        .form-header {
+            margin-bottom: 2.25rem;
+        }
+
+        .form-title {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            color: var(--text-heading);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-body);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-body);
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .input-wrapper {
             position: relative;
             display: flex;
             align-items: center;
         }
 
-        .input-icon {
+        .input-icon-left {
             position: absolute;
-            left: 1rem;
+            left: 1.1rem;
             color: var(--text-muted);
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             transition: color 0.2s ease;
             pointer-events: none;
             z-index: 2;
         }
 
-        .form-control-custom {
+        .form-input {
             width: 100%;
             background: var(--input-bg);
             border: 1px solid var(--input-border);
             border-radius: 12px;
-            padding: 0.85rem 1rem 0.85rem 2.8rem;
+            padding: 0.9rem 1.1rem 0.9rem 2.9rem;
             font-size: 0.95rem;
-            color: var(--text-main);
-            outline: none;
-            transition: all 0.25s ease;
+            color: var(--text-heading);
             font-family: inherit;
+            outline: none;
+            transition: all 0.2s ease;
         }
 
-        .form-control-custom:focus {
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 4px var(--accent-glow);
-            background: rgba(15, 23, 42, 0.85);
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-glow);
+            background: rgba(15, 23, 42, 0.9);
         }
 
-        .form-control-custom:focus + .input-icon,
-        .form-control-custom:focus ~ .input-icon {
-            color: var(--accent-color);
+        .form-input:focus ~ .input-icon-left {
+            color: var(--primary);
         }
 
-        .password-toggle {
+        .btn-toggle-password {
             position: absolute;
             right: 1rem;
             background: none;
@@ -189,7 +295,7 @@
             color: var(--text-muted);
             cursor: pointer;
             font-size: 1.1rem;
-            padding: 0;
+            padding: 0.25rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -197,151 +303,206 @@
             z-index: 2;
         }
 
-        .password-toggle:hover {
-            color: var(--text-main);
+        .btn-toggle-password:hover {
+            color: var(--text-heading);
         }
 
-        .remember-forgot {
+        .form-options {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 1.5rem;
-            font-size: 0.85rem;
+            margin-bottom: 1.75rem;
         }
 
-        .custom-checkbox {
-            display: flex;
+        .checkbox-container {
+            display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.6rem;
             cursor: pointer;
-            color: var(--text-muted);
+            font-size: 0.875rem;
+            color: var(--text-body);
             user-select: none;
         }
 
-        .custom-checkbox input {
-            accent-color: var(--accent-color);
-            width: 16px;
-            height: 16px;
+        .checkbox-container input {
+            accent-color: var(--primary);
+            width: 17px;
+            height: 17px;
             border-radius: 4px;
             cursor: pointer;
         }
 
-        .btn-submit {
+        .btn-login {
             width: 100%;
-            padding: 0.9rem;
+            padding: 0.95rem;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: #ffffff;
             border: none;
             border-radius: 12px;
-            background: linear-gradient(135deg, var(--accent-color), #818cf8);
-            color: #ffffff;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.25s ease;
-            box-shadow: 0 4px 15px var(--accent-glow);
+            box-shadow: 0 4px 14px var(--primary-glow);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .btn-submit:hover {
-            background: linear-gradient(135deg, var(--accent-hover), #6366f1);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px var(--accent-glow);
-        }
-
-        .btn-submit:active {
-            transform: translateY(0);
-        }
-
-        .alert-custom {
-            background: rgba(239, 68, 68, 0.15);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 12px;
-            color: #fca5a5;
-            padding: 0.85rem 1rem;
-            font-size: 0.875rem;
-            margin-bottom: 1.25rem;
-            display: flex;
-            align-items: center;
             gap: 0.6rem;
         }
 
-        .footer-credits {
+        .btn-login:hover {
+            background: linear-gradient(135deg, var(--primary-hover), var(--primary));
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px var(--primary-glow);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 12px;
+            color: #fca5a5;
+            padding: 0.9rem 1.1rem;
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .security-badge {
+            margin-top: 2.5rem;
             text-align: center;
-            margin-top: 1.5rem;
             font-size: 0.8rem;
             color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        @@media (max-width: 992px) {
+            .showcase-panel {
+                display: none;
+            }
+            .form-panel {
+                flex: 1;
+                padding: 2rem 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="ambient-glow glow-1"></div>
-    <div class="ambient-glow glow-2"></div>
+    <div class="login-container">
+        <!-- Left Showcase Panel -->
+        <div class="showcase-panel">
+            <div class="showcase-bg-grid"></div>
+            <div class="showcase-glow"></div>
 
-    <div class="login-wrapper">
-        <div class="login-card">
-            <div class="brand-header">
-                <div class="brand-logo">
-                    <i class="bi bi-shield-lock-fill"></i>
+            <div class="brand-logo-group">
+                <div class="brand-icon-box">
+                    <i class="bi bi-shield-check"></i>
                 </div>
-                <h1 class="brand-title">Ahmed Rawdi Platform</h1>
-                <p class="brand-subtitle">Enter your credentials to access your account</p>
+                <span class="brand-name">Ahmed Rawdi Platform</span>
             </div>
 
-            @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
-            {
-                <div class="alert-custom" role="alert">
-                    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-                    <div>
-                        @foreach (var error in ViewData.ModelState[string.Empty]!.Errors)
-                        {
-                            <div>@error.ErrorMessage</div>
-                        }
+            <div class="showcase-content">
+                <div class="badge-enterprise">
+                    <i class="bi bi-patch-check-fill"></i>
+                    <span>Enterprise ERP & Business Intelligence</span>
+                </div>
+
+                <h2 class="showcase-headline">Empowering Business with Precision & Insight</h2>
+                <p class="showcase-desc">
+                    Streamlined workflow management, real-time analytics, and secure centralized access tailored for modern business execution.
+                </p>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <i class="bi bi-shield-lock feature-icon"></i>
+                        <div class="feature-title">Secure Access</div>
+                        <div class="feature-sub">Role-based SQL procedure auth</div>
+                    </div>
+                    <div class="feature-card">
+                        <i class="bi bi-graph-up-arrow feature-icon"></i>
+                        <div class="feature-title">Real-Time Data</div>
+                        <div class="feature-sub">High performance analytics</div>
                     </div>
                 </div>
-            }
+            </div>
 
-            <form asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" id="loginForm">
-                @Html.AntiForgeryToken()
-
-                <div class="form-group">
-                    <label asp-for="UserCode" class="form-label">User Code</label>
-                    <div class="input-group-custom">
-                        <i class="bi bi-person input-icon"></i>
-                        <input asp-for="UserCode" class="form-control-custom" placeholder="e.g. Admin" id="UserCodeInput" autocomplete="username" autofocus />
-                    </div>
-                    <span asp-validation-for="UserCode" class="text-danger small mt-1 d-block"></span>
-                </div>
-
-                <div class="form-group">
-                    <label asp-for="Password" class="form-label">Password</label>
-                    <div class="input-group-custom">
-                        <i class="bi bi-key input-icon"></i>
-                        <input asp-for="Password" class="form-control-custom" type="password" placeholder="••••••••" id="PasswordInput" autocomplete="current-password" />
-                        <button type="button" class="password-toggle" id="togglePasswordBtn" title="Toggle password visibility">
-                            <i class="bi bi-eye" id="togglePasswordIcon"></i>
-                        </button>
-                    </div>
-                    <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
-                </div>
-
-                <div class="remember-forgot">
-                    <label class="custom-checkbox">
-                        <input asp-for="RememberMe" type="checkbox" />
-                        <span>Remember Me</span>
-                    </label>
-                </div>
-
-                <button type="submit" class="btn-submit" id="btnSubmit">
-                    <span>Sign In</span>
-                    <i class="bi bi-arrow-right"></i>
-                </button>
-            </form>
+            <div class="showcase-footer">
+                <span>&copy; @DateTime.Now.Year Ahmed Rawdi Business Platform</span>
+                <span>v1.0.0</span>
+            </div>
         </div>
 
-        <div class="footer-credits">
-            &copy; @DateTime.Now.Year Ahmed Rawdi Business Platform. All rights reserved.
+        <!-- Right Login Panel -->
+        <div class="form-panel">
+            <div class="form-card">
+                <div class="form-header">
+                    <h1 class="form-title">Welcome back</h1>
+                    <p class="form-subtitle">Please enter your credentials to sign in</p>
+                </div>
+
+                @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+                {
+                    <div class="alert-error" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill fs-5 flex-shrink-0 mt-1"></i>
+                        <div>
+                            @foreach (var error in ViewData.ModelState[string.Empty]!.Errors)
+                            {
+                                <div>@error.ErrorMessage</div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <form asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" id="loginForm">
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-group">
+                        <label asp-for="UserCode" class="form-label">User Code</label>
+                        <div class="input-wrapper">
+                            <input asp-for="UserCode" class="form-input" placeholder="e.g. Admin" id="UserCodeInput" autocomplete="username" autofocus />
+                            <i class="bi bi-person-badge input-icon-left"></i>
+                        </div>
+                        <span asp-validation-for="UserCode" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Password" class="form-label">Password</label>
+                        <div class="input-wrapper">
+                            <input asp-for="Password" class="form-input" type="password" placeholder="••••••••" id="PasswordInput" autocomplete="current-password" />
+                            <i class="bi bi-lock input-icon-left"></i>
+                            <button type="button" class="btn-toggle-password" id="togglePasswordBtn" title="Toggle password visibility">
+                                <i class="bi bi-eye" id="togglePasswordIcon"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="checkbox-container">
+                            <input asp-for="RememberMe" type="checkbox" />
+                            <span>Keep me signed in</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-login" id="btnLogin">
+                        <span>Sign In</span>
+                        <i class="bi bi-arrow-right-short fs-4"></i>
+                    </button>
+                </form>
+
+                <div class="security-badge">
+                    <i class="bi bi-lock-fill"></i>
+                    <span>256-Bit Encrypted • Enterprise Authentication</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -353,15 +514,13 @@
 
             if (togglePasswordBtn && passwordInput && togglePasswordIcon) {
                 togglePasswordBtn.addEventListener('click', function () {
-                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                    passwordInput.setAttribute('type', type);
+                    const isPassword = passwordInput.getAttribute('type') === 'password';
+                    passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
                     
-                    if (type === 'text') {
-                        togglePasswordIcon.classList.remove('bi-eye');
-                        togglePasswordIcon.classList.add('bi-eye-slash');
+                    if (isPassword) {
+                        togglePasswordIcon.classList.replace('bi-eye', 'bi-eye-slash');
                     } else {
-                        togglePasswordIcon.classList.remove('bi-eye-slash');
-                        togglePasswordIcon.classList.add('bi-eye-accent', 'bi-eye');
+                        togglePasswordIcon.classList.replace('bi-eye-slash', 'bi-eye');
                     }
                 });
             }
