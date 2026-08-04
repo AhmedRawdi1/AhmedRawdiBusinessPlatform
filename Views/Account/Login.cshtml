@@ -1,20 +1,29 @@
 @model AhmedRawdiBusinessPlatform.Models.LoginViewModel
+@inject AhmedRawdiBusinessPlatform.Services.ILanguageService Lang
 
 @{
     Layout = null;
-    ViewData["Title"] = "Sign In - Ahmed Rawdi Business Platform";
+    ViewData["Title"] = Lang.Get("SignIn") + " - " + Lang.Get("BrandTitle");
 }
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="@(Lang.IsRightToLeft ? "ar" : "en")" dir="@(Lang.IsRightToLeft ? "rtl" : "ltr")">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    @if (Lang.IsRightToLeft)
+    {
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.rtl.min.css" />
+    }
+    else
+    {
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    }
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
@@ -41,7 +50,7 @@
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: @(Lang.IsRightToLeft ? "'Cairo', 'Plus Jakarta Sans', sans-serif" : "'Plus Jakarta Sans', sans-serif");
             background: linear-gradient(135deg, rgba(15, 23, 42, 0.90) 0%, rgba(2, 6, 23, 0.95) 100%),
                         url('/images/login-bg-vibrant.png') no-repeat center center / cover;
             color: var(--text-heading);
@@ -86,7 +95,7 @@
             width: 500px;
             height: 500px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(37, 99, 235, 0.2) 0%, rgba(147, 51, 234, 0.1) 50%, transparent 70%);
+            background: radial-gradient(circle, rgba(0, 97, 242, 0.25) 0%, rgba(105, 0, 199, 0.15) 50%, transparent 70%);
             filter: blur(60px);
             top: -10%;
             left: -10%;
@@ -104,14 +113,14 @@
         .brand-icon-box {
             width: 48px;
             height: 48px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.5rem;
             color: #ffffff;
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35);
+            box-shadow: 0 8px 20px var(--primary-glow);
         }
 
         .brand-name {
@@ -135,8 +144,8 @@
             align-items: center;
             gap: 0.5rem;
             padding: 0.4rem 0.9rem;
-            background: rgba(59, 130, 246, 0.12);
-            border: 1px solid rgba(59, 130, 246, 0.3);
+            background: rgba(0, 97, 242, 0.15);
+            border: 1px solid rgba(0, 97, 242, 0.35);
             border-radius: 999px;
             font-size: 0.825rem;
             font-weight: 600;
@@ -145,9 +154,9 @@
         }
 
         .showcase-headline {
-            font-size: 2.75rem;
+            font-size: 2.5rem;
             font-weight: 800;
-            line-height: 1.2;
+            line-height: 1.25;
             letter-spacing: -0.03em;
             margin-bottom: 1.25rem;
             background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
@@ -159,7 +168,7 @@
             font-size: 1.05rem;
             color: var(--text-body);
             line-height: 1.6;
-            margin-bottom: 2.5rem;
+            margin-bottom: 1.5rem;
         }
 
         .feature-grid {
@@ -259,7 +268,7 @@
 
         .input-icon-left {
             position: absolute;
-            left: 1.1rem;
+            @(Lang.IsRightToLeft ? "right: 1.1rem;" : "left: 1.1rem;")
             color: var(--text-muted);
             font-size: 1.15rem;
             transition: color 0.2s ease;
@@ -272,7 +281,7 @@
             background: var(--input-bg);
             border: 1px solid var(--input-border);
             border-radius: 12px;
-            padding: 0.9rem 1.1rem 0.9rem 2.9rem;
+            padding: @(Lang.IsRightToLeft ? "0.9rem 2.9rem 0.9rem 1.1rem;" : "0.9rem 1.1rem 0.9rem 2.9rem;");
             font-size: 0.95rem;
             color: var(--text-heading);
             font-family: inherit;
@@ -292,7 +301,7 @@
 
         .btn-toggle-password {
             position: absolute;
-            right: 1rem;
+            @(Lang.IsRightToLeft ? "left: 1rem;" : "right: 1rem;")
             background: none;
             border: none;
             color: var(--text-muted);
@@ -387,6 +396,13 @@
             gap: 0.4rem;
         }
 
+        .lang-switcher-top {
+            position: absolute;
+            top: 1.5rem;
+            @(Lang.IsRightToLeft ? "left: 1.5rem;" : "right: 1.5rem;")
+            z-index: 10;
+        }
+
         @@media (max-width: 992px) {
             .showcase-panel {
                 display: none;
@@ -400,6 +416,14 @@
 </head>
 <body>
     <div class="login-container">
+        <!-- Top Language Switcher -->
+        <div class="lang-switcher-top">
+            <a href="/Language/SetLanguage?culture=@Lang.Get("SwitchLangCulture")&returnUrl=@(Context.Request.Path + Context.Request.QueryString)" 
+               class="btn btn-outline-light btn-sm rounded-pill px-3 shadow-sm" style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.1);">
+                <i class="bi bi-globe me-1 ms-1"></i> @Lang.Get("SwitchLang")
+            </a>
+        </div>
+
         <!-- Left Showcase Panel -->
         <div class="showcase-panel">
             <div class="showcase-bg-grid"></div>
@@ -409,40 +433,40 @@
                 <div class="brand-icon-box">
                     <i class="bi bi-shield-check"></i>
                 </div>
-                <span class="brand-name">Ahmed Rawdi Platform</span>
+                <span class="brand-name">@Lang.Get("BrandTitle")</span>
             </div>
 
             <div class="showcase-content">
                 <div class="badge-enterprise">
                     <i class="bi bi-patch-check-fill"></i>
-                    <span>Enterprise ERP & Business Intelligence</span>
+                    <span>@Lang.Get("EnterpriseBadge")</span>
                 </div>
 
-                <h2 class="showcase-headline">Empowering Business with Precision & Insight</h2>
+                <h2 class="showcase-headline">@Lang.Get("EmpoweringHeadline")</h2>
                 <p class="showcase-desc">
-                    Streamlined workflow management, real-time analytics, and secure centralized access tailored for modern business execution.
+                    @Lang.Get("EmpoweringDesc")
                 </p>
 
                 <div class="showcase-hero-box my-3">
-                    <img src="~/images/login-bg-vibrant.png" alt="Ahmed Rawdi Business Platform" class="img-fluid rounded-4 shadow-lg border border-secondary" style="max-height: 200px; width: 100%; object-fit: cover; border-color: rgba(255,255,255,0.2) !important;" />
+                    <img src="~/images/login-bg-vibrant.png" alt="@Lang.Get("BrandTitle")" class="img-fluid rounded-4 shadow-lg border border-secondary" style="max-height: 200px; width: 100%; object-fit: cover; border-color: rgba(255,255,255,0.2) !important;" />
                 </div>
 
                 <div class="feature-grid">
                     <div class="feature-card">
                         <i class="bi bi-shield-lock feature-icon"></i>
-                        <div class="feature-title">Secure Access</div>
-                        <div class="feature-sub">Role-based SQL procedure auth</div>
+                        <div class="feature-title">@Lang.Get("SecureAccess")</div>
+                        <div class="feature-sub">@Lang.Get("RoleBasedAuth")</div>
                     </div>
                     <div class="feature-card">
                         <i class="bi bi-graph-up-arrow feature-icon"></i>
-                        <div class="feature-title">Real-Time Data</div>
-                        <div class="feature-sub">High performance analytics</div>
+                        <div class="feature-title">@Lang.Get("RealTimeData")</div>
+                        <div class="feature-sub">@Lang.Get("HighPerformanceAnalytics")</div>
                     </div>
                 </div>
             </div>
 
             <div class="showcase-footer">
-                <span>&copy; @DateTime.Now.Year Ahmed Rawdi Business Platform</span>
+                <span>&copy; @DateTime.Now.Year @Lang.Get("BrandTitle")</span>
                 <span>v1.0.0</span>
             </div>
         </div>
@@ -451,8 +475,8 @@
         <div class="form-panel">
             <div class="form-card">
                 <div class="form-header">
-                    <h1 class="form-title">Welcome back</h1>
-                    <p class="form-subtitle">Please enter your credentials to sign in</p>
+                    <h1 class="form-title">@Lang.Get("SignIn")</h1>
+                    <p class="form-subtitle">@Lang.Get("EmpoweringDesc")</p>
                 </div>
 
                 @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
@@ -472,7 +496,7 @@
                     @Html.AntiForgeryToken()
 
                     <div class="form-group">
-                        <label asp-for="UserCode" class="form-label">User Code</label>
+                        <label asp-for="UserCode" class="form-label">@Lang.Get("UserCode")</label>
                         <div class="input-wrapper">
                             <input asp-for="UserCode" class="form-input" placeholder="e.g. Admin" id="UserCodeInput" autocomplete="username" autofocus />
                             <i class="bi bi-person-badge input-icon-left"></i>
@@ -481,7 +505,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label asp-for="Password" class="form-label">Password</label>
+                        <label asp-for="Password" class="form-label">@Lang.Get("Password")</label>
                         <div class="input-wrapper">
                             <input asp-for="Password" class="form-input" type="password" placeholder="••••••••" id="PasswordInput" autocomplete="current-password" />
                             <i class="bi bi-lock input-icon-left"></i>
@@ -495,19 +519,19 @@
                     <div class="form-options">
                         <label class="checkbox-container">
                             <input asp-for="RememberMe" type="checkbox" />
-                            <span>Keep me signed in</span>
+                            <span>@Lang.Get("RememberMe")</span>
                         </label>
                     </div>
 
                     <button type="submit" class="btn-login" id="btnLogin">
-                        <span>Sign In</span>
-                        <i class="bi bi-arrow-right-short fs-4"></i>
+                        <span>@Lang.Get("SignIn")</span>
+                        <i class="bi @(Lang.IsRightToLeft ? "bi-arrow-left-short" : "bi-arrow-right-short") fs-4"></i>
                     </button>
                 </form>
 
                 <div class="security-badge">
                     <i class="bi bi-lock-fill"></i>
-                    <span>256-Bit Encrypted • Enterprise Authentication</span>
+                    <span>@Lang.Get("EncryptedBadge")</span>
                 </div>
             </div>
         </div>
