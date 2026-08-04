@@ -416,10 +416,13 @@
 </head>
 <body>
     <div class="login-container">
-        <!-- Top Language Switcher -->
-        <div class="lang-switcher-top">
+        <!-- Top Language & Theme Switcher -->
+        <div class="lang-switcher-top d-flex align-items-center gap-2">
+            <button class="btn btn-outline-light btn-sm rounded-circle p-2 shadow-sm" id="themeToggle" title="Toggle Light / Dark Mode" style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.2);">
+                <i class="bi bi-sun-fill text-warning fs-6" id="themeToggleIcon"></i>
+            </button>
             <a href="/Language/SetLanguage?culture=@Lang.Get("SwitchLangCulture")&returnUrl=@(Context.Request.Path + Context.Request.QueryString)" 
-               class="btn btn-outline-light btn-sm rounded-pill px-3 shadow-sm" style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.1);">
+               class="btn btn-outline-light btn-sm rounded-pill px-3 shadow-sm" style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
                 <i class="bi bi-globe me-1 ms-1"></i> @Lang.Get("SwitchLang")
             </a>
         </div>
@@ -557,5 +560,6 @@
             }
         });
     </script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
 </body>
 </html>

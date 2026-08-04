@@ -1,11 +1,19 @@
 @inject AhmedRawdiBusinessPlatform.Services.ILanguageService Lang
 
 <!DOCTYPE html>
-<html lang="@(Lang.IsRightToLeft ? "ar" : "en")" dir="@(Lang.IsRightToLeft ? "rtl" : "ltr")">
+<html lang="@(Lang.IsRightToLeft ? "ar" : "en")" dir="@(Lang.IsRightToLeft ? "rtl" : "ltr")" data-theme="light" data-bs-theme="light">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - @Lang.Get("BrandShort")</title>
+
+    <script>
+        (function() {
+            var theme = localStorage.getItem('sb|theme-mode') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.setAttribute('data-bs-theme', theme);
+        })();
+    </script>
     
     <!-- Google Fonts & Bootstrap Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -46,7 +54,7 @@
     <!-- Top Navigation Bar -->
     <nav class="topnav navbar navbar-expand shadow-sm justify-content-between justify-content-sm-start" id="sidenavAccordion">
         <!-- Sidebar Toggle Button -->
-        <button class="btn btn-icon me-2" id="sidebarToggle" title="Toggle Navigation">
+        <button class="btn btn-icon me-2 ms-2" id="sidebarToggle" title="Toggle Navigation">
             <i class="bi bi-list fs-4"></i>
         </button>
 
@@ -59,7 +67,7 @@
         </a>
 
         <!-- Header Search Bar -->
-        <form class="form-inline me-auto d-none d-lg-block me-3">
+        <form class="form-inline me-auto d-none d-lg-block me-3 ms-3">
             <div class="input-group input-group-joined input-group-solid" style="width: 280px;">
                 <input class="form-control pe-0 bg-light border-0" type="search" placeholder="@Lang.Get("SearchPlaceholder")" aria-label="Search">
                 <span class="input-group-text bg-light border-0">
@@ -68,8 +76,15 @@
             </div>
         </form>
 
-        <!-- User & Language Items Navbar -->
-        <ul class="navbar-nav align-items-center ms-auto">
+        <!-- User & Theme & Language Items Navbar -->
+        <ul class="navbar-nav align-items-center ms-auto me-2">
+            <!-- Theme Toggle Button -->
+            <li class="nav-item me-2">
+                <button class="btn btn-icon me-1" id="themeToggle" title="Toggle Light / Dark Mode">
+                    <i class="bi bi-sun-fill fs-5 text-warning" id="themeToggleIcon"></i>
+                </button>
+            </li>
+
             <!-- Language Switcher Button -->
             <li class="nav-item me-2">
                 <a class="btn btn-outline-primary btn-sm px-2 py-1" 
@@ -95,7 +110,7 @@
                     <div class="dropdown-menu dropdown-menu-end border-0 shadow animated--fade-in-up" aria-labelledby="navbarDropdownUserImage" style="min-width: 240px;">
                         <div class="dropdown-user-details">
                             <div class="d-flex align-items-center">
-                                <div class="avatar me-3">@initial</div>
+                                <div class="avatar me-3 ms-3">@initial</div>
                                 <div>
                                     <div class="dropdown-user-details-name">@userDisplayName</div>
                                     <div class="dropdown-user-details-email">@userEmail</div>
@@ -104,19 +119,28 @@
                             </div>
                         </div>
                         <div class="dropdown-divider my-0"></div>
-                        <a class="dropdown-item py-2 mt-1" href="javascript:void(0);">
-                            <i class="bi bi-person me-2 text-primary"></i>
+                        <a class="dropdown-item py-2 mt-1" href="javascript:void(0);" data-set-theme="light">
+                            <i class="bi bi-sun me-2 ms-2 text-warning"></i>
+                            <span>Light Mode</span>
+                        </a>
+                        <a class="dropdown-item py-2" href="javascript:void(0);" data-set-theme="dark">
+                            <i class="bi bi-moon-stars me-2 ms-2 text-primary"></i>
+                            <span>Dark Mode</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item py-2" href="javascript:void(0);">
+                            <i class="bi bi-person me-2 ms-2 text-primary"></i>
                             <span>@Lang.Get("MyProfile")</span>
                         </a>
                         <a class="dropdown-item py-2" href="javascript:void(0);">
-                            <i class="bi bi-gear me-2 text-secondary"></i>
+                            <i class="bi bi-gear me-2 ms-2 text-secondary"></i>
                             <span>@Lang.Get("AccountSettings")</span>
                         </a>
                         <div class="dropdown-divider"></div>
                         <form asp-controller="Account" asp-action="Logout" method="post">
                             @Html.AntiForgeryToken()
                             <button type="submit" class="dropdown-item py-2 text-danger">
-                                <i class="bi bi-box-arrow-right me-2"></i>
+                                <i class="bi bi-box-arrow-right me-2 ms-2"></i>
                                 <span>@Lang.Get("SignOut")</span>
                             </button>
                         </form>
@@ -127,7 +151,7 @@
             {
                 <li class="nav-item me-3">
                     <a class="btn btn-primary btn-sm px-3" asp-controller="Account" asp-action="Login">
-                        <i class="bi bi-box-arrow-in-right me-1"></i> @Lang.Get("SignIn")
+                        <i class="bi bi-box-arrow-in-right me-1 ms-1"></i> @Lang.Get("SignIn")
                     </a>
                 </li>
             }
@@ -205,7 +229,7 @@
                             @Lang.Get("Copyright") &copy; @DateTime.Now.Year @Lang.Get("BrandTitle").
                         </div>
                         <div class="col-md-6 text-md-end">
-                            <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-muted me-3">@Lang.Get("PrivacyPolicy")</a>
+                            <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-muted me-3 ms-3">@Lang.Get("PrivacyPolicy")</a>
                             <a href="javascript:void(0);" class="text-decoration-none text-muted">@Lang.Get("TermsAndConditions")</a>
                         </div>
                     </div>
