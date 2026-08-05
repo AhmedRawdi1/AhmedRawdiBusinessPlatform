@@ -1,4 +1,4 @@
-CREATE OR ALTER PROCEDURE dbo.usp_GetGroupPermissions
+CREATE OR ALTER PROCEDURE dbo.usp_Get_GroupPermissions
     @GroupID BIGINT
 AS
 BEGIN

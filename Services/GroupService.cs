@@ -16,7 +16,7 @@ namespace AhmedRawdiBusinessPlatform.Services
         public async Task<IReadOnlyList<GroupListItemDto>> GetAllGroupsAsync()
         {
             return await _context.Database
-                .SqlQueryRaw<GroupListItemDto>("EXEC dbo.usp_GetAllGroups")
+                .SqlQueryRaw<GroupListItemDto>("EXEC dbo.usp_Get_AllGroups")
                 .ToListAsync();
         }
     }

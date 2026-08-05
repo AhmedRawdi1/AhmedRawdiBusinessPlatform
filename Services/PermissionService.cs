@@ -41,7 +41,7 @@ namespace AhmedRawdiBusinessPlatform.Services
             try
             {
                 var result = await _context.Database
-                    .SqlQueryRaw<UserPermissionDto>("EXEC dbo.usp_GetUserPermissions @GroupID = @GroupID, @UserID = @UserID", groupParam, userParam)
+                    .SqlQueryRaw<UserPermissionDto>("EXEC dbo.usp_Get_UserPermissions @GroupID = @GroupID, @UserID = @UserID", groupParam, userParam)
                     .ToListAsync();
 
                 return result ?? new List<UserPermissionDto>();
