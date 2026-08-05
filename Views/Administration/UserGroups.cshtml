@@ -32,6 +32,7 @@
             <span class="record-state"><span></span>@Lang.Get("NewRecord")</span>
         </div>
         <form id="groupEditorForm" autocomplete="off">
+            @Html.AntiForgeryToken()
             <input id="groupId" name="GroupID" type="hidden" />
             <div class="management-field">
                 <label for="groupCode">@Lang.Get("GroupCode") <span aria-hidden="true">*</span></label>
@@ -85,6 +86,29 @@
     </div>
 </div>
 
+<div class="modal fade management-action-modal" id="groupActionModal" tabindex="-1" aria-labelledby="groupActionModalTitle" aria-hidden="true"
+     data-no-selection-title="@Lang.Get("DeleteGroupNoSelectionTitle")"
+     data-no-selection-message="@Lang.Get("DeleteGroupNoSelectionMessage")"
+     data-confirm-title="@Lang.Get("DeleteGroupConfirmTitle")"
+     data-confirm-message="@Lang.Get("DeleteGroupConfirmMessage")"
+     data-not-found-message="@Lang.Get("DeleteGroupNotFoundMessage")"
+     data-failed-message="@Lang.Get("DeleteGroupFailedMessage")">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <span class="action-modal-icon" id="groupActionModalIcon"><i class="bi bi-exclamation-triangle"></i></span>
+                <h2 class="modal-title" id="groupActionModalTitle"></h2>
+                <p id="groupActionModalMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="toolbar-button" id="groupActionCancelButton" data-bs-dismiss="modal">@Lang.Get("Cancel")</button>
+                <button type="button" class="toolbar-button toolbar-button-danger" id="groupActionConfirmButton">@Lang.Get("Delete")</button>
+                <button type="button" class="toolbar-button toolbar-button-primary d-none" id="groupActionOkButton" data-bs-dismiss="modal">@Lang.Get("OK")</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         (() => {
@@ -99,9 +123,78 @@
             const loadingState = document.getElementById('groupDirectoryLoading');
             const errorState = document.getElementById('groupDirectoryError');
             const resultCount = directoryElement?.querySelector('.result-count');
+            const actionElement = document.getElementById('groupActionModal');
+            const actionModal = actionElement ? new bootstrap.Modal(actionElement) : null;
+            const actionTitle = document.getElementById('groupActionModalTitle');
+            const actionMessage = document.getElementById('groupActionModalMessage');
+            const actionIcon = document.getElementById('groupActionModalIcon');
+            const actionCancel = document.getElementById('groupActionCancelButton');
+            const actionConfirm = document.getElementById('groupActionConfirmButton');
+            const actionOk = document.getElementById('groupActionOkButton');
+            const deleteButton = document.getElementById('deleteGroupButton');
             let groups = [];
 
             const resetEditor = () => { form?.reset(); document.getElementById('groupId').value = ''; document.getElementById('groupActive').checked = true; groupCode?.focus(); };
+            const showActionModal = (title, message, confirmation = false) => {
+                actionTitle.textContent = title;
+                actionMessage.textContent = message;
+                actionIcon.classList.toggle('confirmation', confirmation);
+                actionIcon.innerHTML = confirmation ? '<i class="bi bi-trash3"></i>' : '<i class="bi bi-exclamation-triangle"></i>';
+                actionCancel.classList.toggle('d-none', !confirmation);
+                actionConfirm.classList.toggle('d-none', !confirmation);
+                actionOk.classList.toggle('d-none', confirmation);
+                actionModal?.show();
+            };
+            const deleteSelectedGroup = async () => {
+                const groupId = document.getElementById('groupId').value;
+                if (groupId === '') {
+                    showActionModal(actionElement.dataset.noSelectionTitle, actionElement.dataset.noSelectionMessage);
+                    return;
+                }
+
+                showActionModal(actionElement.dataset.confirmTitle, actionElement.dataset.confirmMessage, true);
+            };
+            const confirmGroupDeletion = async () => {
+                const groupId = document.getElementById('groupId').value;
+                if (groupId === '') {
+                    actionModal?.hide();
+                    showActionModal(actionElement.dataset.noSelectionTitle, actionElement.dataset.noSelectionMessage);
+                    return;
+                }
+
+                actionConfirm.disabled = true;
+                deleteButton.disabled = true;
+                try {
+                    const token = form.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                    const body = new URLSearchParams({ groupId });
+                    const response = await fetch('@Url.Action("DeleteGroup", "Administration")', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                            'RequestVerificationToken': token || ''
+                        },
+                        body
+                    });
+                    const result = await response.json().catch(() => ({ code: 'DeleteFailed' }));
+                    if (!response.ok || !result.success) {
+                        throw new Error(result.code || 'DeleteFailed');
+                    }
+
+                    actionModal?.hide();
+                    resetEditor();
+                    groups = groups.map(group => String(group.groupID) === String(groupId) ? { ...group, isActive: false } : group);
+                    renderGroups();
+                } catch (error) {
+                    const message = error.message === 'GroupNotFound'
+                        ? actionElement.dataset.notFoundMessage
+                        : actionElement.dataset.failedMessage;
+                    showActionModal(actionElement.dataset.noSelectionTitle, message);
+                } finally {
+                    actionConfirm.disabled = false;
+                    deleteButton.disabled = false;
+                }
+            };
             const displayName = group => document.documentElement.dir === 'rtl' ? (group.groupArabicName || group.groupEnglishName) : (group.groupEnglishName || group.groupArabicName);
             const renderGroups = () => {
                 const term = (searchInput?.value || '').trim().toLocaleLowerCase();
@@ -150,6 +243,8 @@
             };
 
             document.getElementById('newGroupButton')?.addEventListener('click', resetEditor);
+            deleteButton?.addEventListener('click', deleteSelectedGroup);
+            actionConfirm?.addEventListener('click', confirmGroupDeletion);
             document.querySelector('[data-focus-new]')?.addEventListener('click', () => { directoryModal?.hide(); directoryElement?.addEventListener('hidden.bs.modal', () => groupCode?.focus(), { once: true }); });
             document.getElementById('searchGroupButton')?.addEventListener('click', () => directoryModal?.show());
             directoryElement?.addEventListener('shown.bs.modal', () => { searchInput?.focus(); loadGroups(); });

@@ -1,5 +1,6 @@
 using AhmedRawdiBusinessPlatform.Data;
 using AhmedRawdiBusinessPlatform.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace AhmedRawdiBusinessPlatform.Services
@@ -18,6 +19,14 @@ namespace AhmedRawdiBusinessPlatform.Services
             return await _context.Database
                 .SqlQueryRaw<GroupListItemDto>("EXEC dbo.usp_Get_AllGroups")
                 .ToListAsync();
+        }
+
+        public async Task DeleteGroupAsync(long groupId)
+        {
+            var groupIdParameter = new SqlParameter("@GroupID", groupId);
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC dbo.usp_Delete_Group @GroupID = @GroupID",
+                groupIdParameter);
         }
     }
 }
