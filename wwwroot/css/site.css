@@ -408,3 +408,33 @@
 /* User groups directory modal */
 .management-layout-single{grid-template-columns:minmax(0,820px);justify-content:center}.management-directory-modal .modal-dialog{max-width:760px}.management-directory-modal .modal-content{overflow:hidden;border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--text);box-shadow:0 28px 70px rgba(16,35,55,.2)}.management-directory-modal .modal-header{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 20px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,var(--surface),var(--surface-2))}.modal-title-group,.modal-header-actions{display:flex;align-items:center;gap:12px}.modal-icon{width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;border-radius:12px;background:#eaf3f7;color:#285a8e;font-size:18px}.management-directory-modal .modal-title{margin:3px 0 0;font-size:16px;font-weight:800;letter-spacing:-.02em}.management-directory-modal .modal-body{min-height:430px;padding:20px}.management-directory-modal .management-empty-state{min-height:330px}.management-directory-modal .btn-close{margin:0;padding:8px;border-radius:8px;font-size:10px;box-shadow:none}[data-theme=dark] .management-directory-modal .modal-icon{background:#1d384a;color:#70b7c4}[data-theme=dark] .management-directory-modal .btn-close{filter:invert(1) grayscale(100%) brightness(180%)}.modal-backdrop.show{opacity:.42;backdrop-filter:blur(2px)}
 @media(max-width:600px){.management-directory-modal .modal-dialog{margin:12px}.management-directory-modal .modal-header{align-items:flex-start}.modal-header-actions .result-count{display:none}.management-directory-modal .modal-body{min-height:360px;padding:14px}.management-directory-modal .management-empty-state{min-height:280px}}
+
+/* Group action modal */
+.management-action-modal .modal-content{overflow:hidden;border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--text);box-shadow:0 28px 70px rgba(16,35,55,.24)}.management-action-modal .modal-body{padding:28px 24px 20px;text-align:center}.management-action-modal .action-modal-icon{width:52px;height:52px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:15px;border-radius:15px;background:#fef3f2;color:#d92d20;font-size:22px}.management-action-modal .action-modal-icon.confirmation{background:#fff4e5;color:#b54708}.management-action-modal .modal-title{margin:0 0 8px;font-size:17px;font-weight:800}.management-action-modal .modal-body p{margin:0;color:var(--muted);font-size:11px;line-height:1.7}.management-action-modal .modal-footer{justify-content:center;gap:8px;padding:14px 20px;border-top:1px solid var(--line);background:var(--surface-2)}.management-action-modal .modal-footer>*{margin:0}.management-action-modal .toolbar-button:disabled,.management-toolbar .toolbar-button:disabled{cursor:wait;opacity:.55;transform:none}
+
+/* Database-backed groups directory */
+.directory-loading{min-height:300px;display:flex;align-items:center;justify-content:center;gap:9px;color:var(--muted);font-size:10px;font-weight:700}.directory-loading .spinner-border{color:var(--primary)}.directory-error{min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px;text-align:center;color:var(--danger);font-size:11px}.directory-error>i{font-size:28px}.directory-error button{padding:7px 12px;border:1px solid #fecdca;border-radius:8px;background:#fef3f2;color:#b42318;font:inherit;font-weight:800}.directory-table-wrap{max-height:430px;overflow:auto;border:1px solid var(--line);border-radius:11px}.directory-table{width:100%;border-collapse:separate;border-spacing:0;font-size:10px}.directory-table th{position:sticky;top:0;z-index:1;padding:11px 12px;background:var(--surface-2);color:var(--muted);font-size:8px;font-weight:800;text-align:start;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--line)}.directory-table td{padding:11px 12px;border-bottom:1px solid var(--line);color:var(--text);vertical-align:middle}.directory-table tr:last-child td{border-bottom:0}.directory-table tbody tr{cursor:pointer;outline:0;transition:.15s}.directory-table tbody tr:hover,.directory-table tbody tr:focus-visible{background:color-mix(in srgb,var(--surface-2) 75%,#d8edf1 25%)}.directory-table td:first-child{font-weight:800;color:var(--primary)}.group-status{display:inline-flex;padding:4px 7px;border-radius:20px;font-size:8px;font-weight:800}.group-status.active{background:#ecfdf3;color:#067647}.group-status.inactive{background:#f2f4f7;color:#667085}[data-theme=dark] .group-status.active{background:rgba(25,133,103,.18);color:#75d6b5}[data-theme=dark] .group-status.inactive{background:#25364b;color:#9babc0}[data-theme=dark] .directory-error button{border-color:rgba(217,45,32,.3);background:rgba(217,45,32,.1);color:#f97066}
+@media(max-width:650px){.directory-table{min-width:650px}.directory-table-wrap{max-height:390px}}
+
+/* Sequential single-row management toolbar */
+.management-toolbar{justify-content:flex-start;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}.management-toolbar::-webkit-scrollbar{height:4px}.management-toolbar::-webkit-scrollbar-thumb{background:#c5d3dc;border-radius:10px}.toolbar-actions{display:flex;align-items:center;gap:7px;min-width:max-content}.toolbar-actions .toolbar-button{flex:0 0 auto}
+@media(max-width:1050px){.management-toolbar{align-items:center;flex-direction:row}.toolbar-actions{width:max-content;flex-wrap:nowrap}}
+@media(max-width:600px){.management-toolbar{display:flex;padding:10px}.toolbar-actions{display:flex;grid-template-columns:none}.toolbar-actions .toolbar-button{flex:0 0 auto;padding-inline:11px}.toolbar-actions .toolbar-button-primary{grid-column:auto}}
+
+/* Full-width responsive group editor */
+.management-layout.management-layout-single {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    justify-content: stretch;
+}
+
+.management-layout-single .group-editor {
+    width: 100%;
+    max-width: none;
+}
+
+@media (max-width: 700px) {
+    .management-layout-single .management-field-grid {
+        grid-template-columns: 1fr;
+    }
+}

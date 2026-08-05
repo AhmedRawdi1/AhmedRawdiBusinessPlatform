@@ -23,6 +23,14 @@ namespace AhmedRawdiBusinessPlatform.Services
             { "BusinessModules", "Business Modules" },
             { "SystemUsers", "System Users" },
             { "SystemGroups", "System Groups" },
+            { "DeleteGroupNoSelectionTitle", "Unable to delete group" },
+            { "DeleteGroupNoSelectionMessage", "Select a group from Search before using Delete." },
+            { "DeleteGroupConfirmTitle", "Delete selected group?" },
+            { "DeleteGroupConfirmMessage", "This group will be marked inactive. You can still find it in the group directory." },
+            { "DeleteGroupNotFoundMessage", "The selected group no longer exists. Refresh the group directory and try again." },
+            { "DeleteGroupFailedMessage", "The group could not be deleted. Please try again or contact your system administrator." },
+            { "Cancel", "Cancel" },
+            { "OK", "OK" },
             { "BusinessAnalytics", "Business Analytics" },
             { "SystemAndData", "System & Data" },
             { "SqlServer", "SQL Server (ARBP)" },
@@ -114,6 +122,14 @@ namespace AhmedRawdiBusinessPlatform.Services
             ,{ "NoGroupsLoaded", "No groups loaded" }
             ,{ "NoGroupsLoadedHint", "Use Search to load existing groups or create a new group." }
             ,{ "CreateFirstGroup", "Create new group" }
+            ,{ "LoadingGroups", "Loading user groups..." }
+            ,{ "GroupsLoadError", "Unable to load user groups from the database." }
+            ,{ "Retry", "Retry" }
+            ,{ "Status", "Status" }
+            ,{ "Registered", "Registered" }
+            ,{ "Inactive", "Inactive" }
+            ,{ "NoGroupsFound", "No groups found" }
+            ,{ "NoGroupsFoundHint", "Try another search term or create a new group." }
         };
 
         private static readonly Dictionary<string, string> ArDict = new(StringComparer.OrdinalIgnoreCase)
@@ -129,6 +145,14 @@ namespace AhmedRawdiBusinessPlatform.Services
             { "BusinessModules", "وحدات الأعمال" },
             { "SystemUsers", "مستخدمو النظام" },
             { "SystemGroups", "مجموعات النظام" },
+            { "DeleteGroupNoSelectionTitle", "تعذر حذف المجموعة" },
+            { "DeleteGroupNoSelectionMessage", "يرجى اختيار مجموعة من البحث قبل استخدام زر الحذف." },
+            { "DeleteGroupConfirmTitle", "هل تريد حذف المجموعة المحددة؟" },
+            { "DeleteGroupConfirmMessage", "سيتم تعيين المجموعة كغير نشطة، وستظل ظاهرة في دليل المجموعات." },
+            { "DeleteGroupNotFoundMessage", "المجموعة المحددة لم تعد موجودة. حدّث دليل المجموعات ثم حاول مرة أخرى." },
+            { "DeleteGroupFailedMessage", "تعذر حذف المجموعة. حاول مرة أخرى أو تواصل مع مسؤول النظام." },
+            { "Cancel", "إلغاء" },
+            { "OK", "حسنًا" },
             { "BusinessAnalytics", "تحليلات الأعمال" },
             { "SystemAndData", "النظام والبيانات" },
             { "SqlServer", "خادم البيانات (ARBP)" },
@@ -220,6 +244,14 @@ namespace AhmedRawdiBusinessPlatform.Services
             ,{ "NoGroupsLoaded", "لم يتم تحميل مجموعات" }
             ,{ "NoGroupsLoadedHint", "استخدم البحث لتحميل المجموعات الحالية أو أنشئ مجموعة جديدة." }
             ,{ "CreateFirstGroup", "إنشاء مجموعة جديدة" }
+            ,{ "LoadingGroups", "جارٍ تحميل مجموعات المستخدمين..." }
+            ,{ "GroupsLoadError", "تعذر تحميل مجموعات المستخدمين من قاعدة البيانات." }
+            ,{ "Retry", "إعادة المحاولة" }
+            ,{ "Status", "الحالة" }
+            ,{ "Registered", "تاريخ التسجيل" }
+            ,{ "Inactive", "غير نشط" }
+            ,{ "NoGroupsFound", "لم يتم العثور على مجموعات" }
+            ,{ "NoGroupsFoundHint", "جرّب مصطلح بحث آخر أو أنشئ مجموعة جديدة." }
         };
 
         public LanguageService(IHttpContextAccessor httpContextAccessor)
