@@ -117,7 +117,7 @@ namespace AhmedRawdiBusinessPlatform.Services
                             EnglishName = form.FormEnglishName,
                             ArabicName = form.FormArabicName,
                             IconClass = GetFormIcon(form.FormCode),
-                            Url = $"javascript:void(0);",
+                            Url = GetFormUrl(form.FormCode),
                             CanSave = form.CanSave,
                             CanUpdate = form.CanUpdate,
                             CanDelete = form.CanDelete,
@@ -172,6 +172,7 @@ namespace AhmedRawdiBusinessPlatform.Services
         {
             return formCode switch
             {
+                var f when f.Equals("UserGroupsManagement", StringComparison.OrdinalIgnoreCase) => "bi-people-fill",
                 var f when f.Contains("Patient", StringComparison.OrdinalIgnoreCase) => "bi-person-fill",
                 var f when f.Contains("Lab", StringComparison.OrdinalIgnoreCase) => "bi-eyedropper",
                 var f when f.Contains("RIS", StringComparison.OrdinalIgnoreCase) => "bi-cpu-fill",
@@ -180,6 +181,16 @@ namespace AhmedRawdiBusinessPlatform.Services
                 var f when f.Contains("Appointment", StringComparison.OrdinalIgnoreCase) => "bi-clock-history",
                 var f when f.Contains("Invoice", StringComparison.OrdinalIgnoreCase) => "bi-file-earmark-spreadsheet-fill",
                 _ => "bi-file-earmark-text"
+            };
+        }
+
+        private static string GetFormUrl(string formCode)
+        {
+            return formCode?.Trim() switch
+            {
+                var code when string.Equals(code, "UserGroupsManagement", StringComparison.OrdinalIgnoreCase)
+                    => "/Administration/UserGroups",
+                _ => "javascript:void(0);"
             };
         }
     }
