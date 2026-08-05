@@ -114,6 +114,14 @@ namespace AhmedRawdiBusinessPlatform.Services
             ,{ "NoGroupsLoaded", "No groups loaded" }
             ,{ "NoGroupsLoadedHint", "Use Search to load existing groups or create a new group." }
             ,{ "CreateFirstGroup", "Create new group" }
+            ,{ "LoadingGroups", "Loading user groups..." }
+            ,{ "GroupsLoadError", "Unable to load user groups from the database." }
+            ,{ "Retry", "Retry" }
+            ,{ "Status", "Status" }
+            ,{ "Registered", "Registered" }
+            ,{ "Inactive", "Inactive" }
+            ,{ "NoGroupsFound", "No groups found" }
+            ,{ "NoGroupsFoundHint", "Try another search term or create a new group." }
         };
 
         private static readonly Dictionary<string, string> ArDict = new(StringComparer.OrdinalIgnoreCase)
@@ -220,6 +228,14 @@ namespace AhmedRawdiBusinessPlatform.Services
             ,{ "NoGroupsLoaded", "لم يتم تحميل مجموعات" }
             ,{ "NoGroupsLoadedHint", "استخدم البحث لتحميل المجموعات الحالية أو أنشئ مجموعة جديدة." }
             ,{ "CreateFirstGroup", "إنشاء مجموعة جديدة" }
+            ,{ "LoadingGroups", "جارٍ تحميل مجموعات المستخدمين..." }
+            ,{ "GroupsLoadError", "تعذر تحميل مجموعات المستخدمين من قاعدة البيانات." }
+            ,{ "Retry", "إعادة المحاولة" }
+            ,{ "Status", "الحالة" }
+            ,{ "Registered", "تاريخ التسجيل" }
+            ,{ "Inactive", "غير نشط" }
+            ,{ "NoGroupsFound", "لم يتم العثور على مجموعات" }
+            ,{ "NoGroupsFoundHint", "جرّب مصطلح بحث آخر أو أنشئ مجموعة جديدة." }
         };
 
         public LanguageService(IHttpContextAccessor httpContextAccessor)

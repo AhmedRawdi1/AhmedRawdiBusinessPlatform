@@ -35,6 +35,7 @@
             <span class="record-state"><span></span>@Lang.Get("NewRecord")</span>
         </div>
         <form id="groupEditorForm" autocomplete="off">
+            <input id="groupId" name="GroupID" type="hidden" />
             <div class="management-field">
                 <label for="groupCode">@Lang.Get("GroupCode") <span aria-hidden="true">*</span></label>
                 <input id="groupCode" name="GroupCode" type="text" maxlength="30" placeholder="@Lang.Get("GroupCodePlaceholder")" required />
@@ -68,10 +69,18 @@
             </div>
             <div class="modal-body">
                 <div class="management-search"><i class="bi bi-search"></i><input id="groupSearchInput" type="search" placeholder="@Lang.Get("SearchGroupsPlaceholder")" /><kbd>Enter</kbd></div>
-                <div class="management-empty-state">
+                <div class="directory-loading" id="groupDirectoryLoading"><span class="spinner-border spinner-border-sm" aria-hidden="true"></span><span>@Lang.Get("LoadingGroups")</span></div>
+                <div class="directory-error d-none" id="groupDirectoryError"><i class="bi bi-exclamation-triangle"></i><span>@Lang.Get("GroupsLoadError")</span><button type="button" id="retryGroupsButton">@Lang.Get("Retry")</button></div>
+                <div class="directory-table-wrap d-none" id="groupDirectoryTableWrap">
+                    <table class="directory-table">
+                        <thead><tr><th>@Lang.Get("GroupCode")</th><th>@Lang.Get("EnglishName")</th><th>@Lang.Get("ArabicName")</th><th>@Lang.Get("Status")</th><th>@Lang.Get("Registered")</th></tr></thead>
+                        <tbody id="groupDirectoryRows"></tbody>
+                    </table>
+                </div>
+                <div class="management-empty-state d-none" id="groupDirectoryEmpty">
                     <span><i class="bi bi-people"></i></span>
-                    <h3>@Lang.Get("NoGroupsLoaded")</h3>
-                    <p>@Lang.Get("NoGroupsLoadedHint")</p>
+                    <h3>@Lang.Get("NoGroupsFound")</h3>
+                    <p>@Lang.Get("NoGroupsFoundHint")</p>
                     <button class="toolbar-button toolbar-button-primary" type="button" data-focus-new><i class="bi bi-plus-lg"></i>@Lang.Get("CreateFirstGroup")</button>
                 </div>
             </div>
@@ -86,10 +95,69 @@
             const groupCode = document.getElementById('groupCode');
             const directoryElement = document.getElementById('groupDirectoryModal');
             const directoryModal = directoryElement ? new bootstrap.Modal(directoryElement) : null;
-            document.getElementById('newGroupButton')?.addEventListener('click', () => { form?.reset(); document.getElementById('groupActive').checked = true; groupCode?.focus(); });
+            const searchInput = document.getElementById('groupSearchInput');
+            const rowsElement = document.getElementById('groupDirectoryRows');
+            const tableWrap = document.getElementById('groupDirectoryTableWrap');
+            const emptyState = document.getElementById('groupDirectoryEmpty');
+            const loadingState = document.getElementById('groupDirectoryLoading');
+            const errorState = document.getElementById('groupDirectoryError');
+            const resultCount = directoryElement?.querySelector('.result-count');
+            let groups = [];
+
+            const resetEditor = () => { form?.reset(); document.getElementById('groupId').value = ''; document.getElementById('groupActive').checked = true; groupCode?.focus(); };
+            const displayName = group => document.documentElement.dir === 'rtl' ? (group.groupArabicName || group.groupEnglishName) : (group.groupEnglishName || group.groupArabicName);
+            const renderGroups = () => {
+                const term = (searchInput?.value || '').trim().toLocaleLowerCase();
+                const filtered = groups.filter(group => [group.groupCode, group.groupEnglishName, group.groupArabicName].some(value => (value || '').toLocaleLowerCase().includes(term)));
+                rowsElement.replaceChildren();
+                filtered.forEach(group => {
+                    const row = document.createElement('tr');
+                    row.tabIndex = 0;
+                    row.setAttribute('role', 'button');
+                    row.setAttribute('aria-label', displayName(group));
+                    const values = [group.groupCode, group.groupEnglishName, group.groupArabicName];
+                    values.forEach(value => { const cell = document.createElement('td'); cell.textContent = value || '—'; row.appendChild(cell); });
+                    const status = document.createElement('td');
+                    status.innerHTML = group.isActive ? '<span class="group-status active">@Lang.Get("Active")</span>' : '<span class="group-status inactive">@Lang.Get("Inactive")</span>';
+                    row.appendChild(status);
+                    const registered = document.createElement('td');
+                    registered.textContent = group.regDate ? new Intl.DateTimeFormat(document.documentElement.lang).format(new Date(group.regDate)) : '—';
+                    row.appendChild(registered);
+                    const selectGroup = () => {
+                        document.getElementById('groupId').value = group.groupID;
+                        groupCode.value = group.groupCode || '';
+                        document.getElementById('groupEnglishName').value = group.groupEnglishName || '';
+                        document.getElementById('groupArabicName').value = group.groupArabicName || '';
+                        document.getElementById('groupActive').checked = group.isActive;
+                        directoryModal?.hide();
+                    };
+                    row.addEventListener('click', selectGroup);
+                    row.addEventListener('keydown', event => { if (event.key === 'Enter') selectGroup(); });
+                    rowsElement.appendChild(row);
+                });
+                resultCount.textContent = `${filtered.length} @Lang.Get("Records")`;
+                tableWrap.classList.toggle('d-none', filtered.length === 0);
+                emptyState.classList.toggle('d-none', filtered.length !== 0);
+            };
+            const loadGroups = async () => {
+                loadingState.classList.remove('d-none'); errorState.classList.add('d-none'); tableWrap.classList.add('d-none'); emptyState.classList.add('d-none');
+                try {
+                    const response = await fetch('@Url.Action("GetAllGroups", "Administration")', { headers: { 'Accept': 'application/json' } });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    groups = await response.json();
+                    renderGroups();
+                } catch (error) {
+                    console.error('Unable to load user groups.', error);
+                    errorState.classList.remove('d-none');
+                } finally { loadingState.classList.add('d-none'); }
+            };
+
+            document.getElementById('newGroupButton')?.addEventListener('click', resetEditor);
             document.querySelector('[data-focus-new]')?.addEventListener('click', () => { directoryModal?.hide(); directoryElement?.addEventListener('hidden.bs.modal', () => groupCode?.focus(), { once: true }); });
             document.getElementById('searchGroupButton')?.addEventListener('click', () => directoryModal?.show());
-            directoryElement?.addEventListener('shown.bs.modal', () => document.getElementById('groupSearchInput')?.focus());
+            directoryElement?.addEventListener('shown.bs.modal', () => { searchInput?.focus(); loadGroups(); });
+            searchInput?.addEventListener('input', renderGroups);
+            document.getElementById('retryGroupsButton')?.addEventListener('click', loadGroups);
             document.getElementById('importGroupButton')?.addEventListener('click', () => document.getElementById('groupImportFile')?.click());
             document.getElementById('printGroupButton')?.addEventListener('click', () => window.print());
         })();
