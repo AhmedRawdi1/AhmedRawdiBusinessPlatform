@@ -84,6 +84,36 @@ namespace AhmedRawdiBusinessPlatform.Services
             { "Copyright", "Copyright" },
             { "PrivacyPolicy", "Privacy Policy" },
             { "TermsAndConditions", "Terms & Conditions" }
+            ,{ "UsersGroupsManagement", "Users Groups Management" }
+            ,{ "UsersGroupsSubtitle", "Create, organize, and maintain user access groups from one secure workspace." }
+            ,{ "Administration", "Administration" }
+            ,{ "AccessControl", "Access Control" }
+            ,{ "PageActions", "Page actions" }
+            ,{ "New", "New" }
+            ,{ "Save", "Save" }
+            ,{ "Delete", "Delete" }
+            ,{ "Search", "Search" }
+            ,{ "Export", "Export" }
+            ,{ "Import", "Import" }
+            ,{ "Print", "Print" }
+            ,{ "GroupRecord", "Group record" }
+            ,{ "GroupDetails", "Group details" }
+            ,{ "NewRecord", "New record" }
+            ,{ "GroupCode", "Group code" }
+            ,{ "GroupCodePlaceholder", "e.g. FINANCE_ADMIN" }
+            ,{ "EnglishName", "English name" }
+            ,{ "ArabicName", "Arabic name" }
+            ,{ "Description", "Description" }
+            ,{ "DescriptionPlaceholder", "Describe this group's responsibilities and access scope..." }
+            ,{ "ActiveGroup", "Active group" }
+            ,{ "ActiveGroupHint", "Members can use permissions assigned to this group." }
+            ,{ "Directory", "Directory" }
+            ,{ "UserGroups", "User groups" }
+            ,{ "Records", "records" }
+            ,{ "SearchGroupsPlaceholder", "Search by group code or name..." }
+            ,{ "NoGroupsLoaded", "No groups loaded" }
+            ,{ "NoGroupsLoadedHint", "Use Search to load existing groups or create a new group." }
+            ,{ "CreateFirstGroup", "Create new group" }
         };
 
         private static readonly Dictionary<string, string> ArDict = new(StringComparer.OrdinalIgnoreCase)
@@ -160,6 +190,36 @@ namespace AhmedRawdiBusinessPlatform.Services
             { "Copyright", "جميع الحقوق محفوظة" },
             { "PrivacyPolicy", "سياسة الخصوصية" },
             { "TermsAndConditions", "الشروط والأحكام" }
+            ,{ "UsersGroupsManagement", "إدارة مجموعات المستخدمين" }
+            ,{ "UsersGroupsSubtitle", "إنشاء مجموعات صلاحيات المستخدمين وتنظيمها وإدارتها من مساحة عمل آمنة." }
+            ,{ "Administration", "إدارة النظام" }
+            ,{ "AccessControl", "التحكم في الوصول" }
+            ,{ "PageActions", "إجراءات الصفحة" }
+            ,{ "New", "جديد" }
+            ,{ "Save", "حفظ" }
+            ,{ "Delete", "حذف" }
+            ,{ "Search", "بحث" }
+            ,{ "Export", "تصدير" }
+            ,{ "Import", "استيراد" }
+            ,{ "Print", "طباعة" }
+            ,{ "GroupRecord", "سجل المجموعة" }
+            ,{ "GroupDetails", "تفاصيل المجموعة" }
+            ,{ "NewRecord", "سجل جديد" }
+            ,{ "GroupCode", "كود المجموعة" }
+            ,{ "GroupCodePlaceholder", "مثال: FINANCE_ADMIN" }
+            ,{ "EnglishName", "الاسم بالإنجليزية" }
+            ,{ "ArabicName", "الاسم بالعربية" }
+            ,{ "Description", "الوصف" }
+            ,{ "DescriptionPlaceholder", "صف مسؤوليات المجموعة ونطاق صلاحياتها..." }
+            ,{ "ActiveGroup", "مجموعة نشطة" }
+            ,{ "ActiveGroupHint", "يمكن للأعضاء استخدام الصلاحيات المعينة لهذه المجموعة." }
+            ,{ "Directory", "الدليل" }
+            ,{ "UserGroups", "مجموعات المستخدمين" }
+            ,{ "Records", "سجلات" }
+            ,{ "SearchGroupsPlaceholder", "البحث بكود المجموعة أو اسمها..." }
+            ,{ "NoGroupsLoaded", "لم يتم تحميل مجموعات" }
+            ,{ "NoGroupsLoadedHint", "استخدم البحث لتحميل المجموعات الحالية أو أنشئ مجموعة جديدة." }
+            ,{ "CreateFirstGroup", "إنشاء مجموعة جديدة" }
         };
 
         public LanguageService(IHttpContextAccessor httpContextAccessor)

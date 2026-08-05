@@ -27,7 +27,7 @@
     {
         <div class="nav-section-label">@Lang.Get("BusinessModules")</div>
         <a class="sidebar-link" href="javascript:void(0)"><i class="bi bi-people"></i><span>@Lang.Get("SystemUsers")</span></a>
-        <a class="sidebar-link" href="javascript:void(0)"><i class="bi bi-shield-check"></i><span>@Lang.Get("SystemGroups")</span></a>
+        <a class="sidebar-link" asp-controller="Administration" asp-action="UserGroups"><i class="bi bi-shield-check"></i><span>@Lang.Get("SystemGroups")</span></a>
         <a class="sidebar-link" href="javascript:void(0)"><i class="bi bi-bar-chart"></i><span>@Lang.Get("BusinessAnalytics")</span></a>
     }
     <div class="nav-section-label">@Lang.Get("SystemAndData")</div>
