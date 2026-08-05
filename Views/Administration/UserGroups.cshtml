@@ -50,6 +50,43 @@
         </form>
     </section>
 
+    <section class="group-access-workspace" aria-labelledby="groupAccessWorkspaceTitle">
+        <div class="group-access-heading">
+            <div>
+                <span class="eyebrow-text">@Lang.Get("AccessConfiguration")</span>
+                <h2 id="groupAccessWorkspaceTitle">@Lang.Get("GroupAccessWorkspace")</h2>
+            </div>
+            <span class="group-access-context"><i class="bi bi-shield-check"></i>@Lang.Get("GroupScopedSettings")</span>
+        </div>
+        <div class="group-tabs-scroll">
+            <nav class="group-tabs-nav" role="tablist" aria-label="@Lang.Get("GroupAccessWorkspace")">
+                <button class="group-tab-button active" id="formsPermissionsTab" type="button" role="tab" aria-selected="true" aria-controls="formsPermissionsPanel" data-bs-toggle="tab" data-bs-target="#formsPermissionsPanel">
+                    <span class="group-tab-icon"><i class="bi bi-window-stack"></i></span>
+                    <span>@Lang.Get("FormsPermissions")</span>
+                </button>
+                <button class="group-tab-button" id="reportsPermissionsTab" type="button" role="tab" aria-selected="false" aria-controls="reportsPermissionsPanel" data-bs-toggle="tab" data-bs-target="#reportsPermissionsPanel">
+                    <span class="group-tab-icon"><i class="bi bi-file-earmark-bar-graph"></i></span>
+                    <span>@Lang.Get("ReportsPermissions")</span>
+                </button>
+                <button class="group-tab-button" id="groupMembersTab" type="button" role="tab" aria-selected="false" aria-controls="groupMembersPanel" data-bs-toggle="tab" data-bs-target="#groupMembersPanel">
+                    <span class="group-tab-icon"><i class="bi bi-people"></i></span>
+                    <span>@Lang.Get("GroupMembers")</span>
+                </button>
+            </nav>
+        </div>
+        <div class="tab-content group-tabs-content">
+            <div class="tab-pane fade show active" id="formsPermissionsPanel" role="tabpanel" aria-labelledby="formsPermissionsTab" tabindex="0">
+                <div class="group-tab-empty-state"><span><i class="bi bi-window-stack"></i></span><div><h3>@Lang.Get("SelectGroupToManageAccess")</h3><p>@Lang.Get("FormsPermissionsHint")</p></div></div>
+            </div>
+            <div class="tab-pane fade" id="reportsPermissionsPanel" role="tabpanel" aria-labelledby="reportsPermissionsTab" tabindex="0">
+                <div class="group-tab-empty-state"><span><i class="bi bi-file-earmark-bar-graph"></i></span><div><h3>@Lang.Get("SelectGroupToManageAccess")</h3><p>@Lang.Get("ReportsPermissionsHint")</p></div></div>
+            </div>
+            <div class="tab-pane fade" id="groupMembersPanel" role="tabpanel" aria-labelledby="groupMembersTab" tabindex="0">
+                <div class="group-tab-empty-state"><span><i class="bi bi-people"></i></span><div><h3>@Lang.Get("SelectGroupToManageAccess")</h3><p>@Lang.Get("GroupMembersHint")</p></div></div>
+            </div>
+        </div>
+    </section>
+
 </div>
 
 <div class="modal fade management-directory-modal" id="groupDirectoryModal" tabindex="-1" aria-labelledby="groupDirectoryModalTitle" aria-hidden="true">
