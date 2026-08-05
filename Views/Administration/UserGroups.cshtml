@@ -14,7 +14,7 @@
 
 <section class="management-toolbar" aria-label="@Lang.Get("PageActions")">
     <div class="toolbar-actions">
-        <button class="toolbar-button toolbar-button-primary" type="button" id="newGroupButton"><i class="bi bi-plus-lg"></i><span>@Lang.Get("New")</span></button>
+        <button class="toolbar-button" type="button" id="newGroupButton" style="background: var(--surface) !important; color: var(--text) !important; border-color: var(--line) !important; box-shadow: none !important;"><i class="bi bi-plus-lg"></i><span>@Lang.Get("New")</span></button>
         <button class="toolbar-button" type="button" id="saveGroupButton"><i class="bi bi-check2-circle"></i><span>@Lang.Get("Save")</span></button>
         <button class="toolbar-button toolbar-button-danger" type="button" id="deleteGroupButton"><i class="bi bi-trash3"></i><span>@Lang.Get("Delete")</span></button>
         <button class="toolbar-button" type="button" id="searchGroupButton"><i class="bi bi-search"></i><span>@Lang.Get("Search")</span></button>
@@ -202,6 +202,8 @@
             const actionCancel = document.getElementById('groupActionCancelButton');
             const actionConfirm = document.getElementById('groupActionConfirmButton');
             const actionOk = document.getElementById('groupActionOkButton');
+            const saveButton = document.getElementById('saveGroupButton');
+            const recordState = document.querySelector('.record-state');
             const deleteButton = document.getElementById('deleteGroupButton');
             const permissionPanel = document.getElementById('formsPermissionsPanel');
             const permissionLoading = document.getElementById('permissionLoading');
@@ -219,16 +221,114 @@
             let permissionRequestController = null;
             let permissionLoadContext = { mode: 'new', groupId: null };
 
-            const resetEditor = () => { form?.reset(); document.getElementById('groupId').value = ''; document.getElementById('groupActive').checked = true; loadFormPermissions('new'); groupCode?.focus(); };
-            const showActionModal = (title, message, confirmation = false) => {
+            const resetEditor = () => {
+                form?.reset();
+                document.getElementById('groupId').value = '';
+                document.getElementById('groupActive').checked = true;
+                if (recordState) recordState.innerHTML = '<span></span>@Lang.Get("NewRecord")';
+                loadFormPermissions('new');
+                groupCode?.focus();
+            };
+            const showActionModal = (title, message, confirmation = false, iconType = 'warning') => {
                 actionTitle.textContent = title;
                 actionMessage.textContent = message;
-                actionIcon.classList.toggle('confirmation', confirmation);
-                actionIcon.innerHTML = confirmation ? '<i class="bi bi-trash3"></i>' : '<i class="bi bi-exclamation-triangle"></i>';
+                actionIcon.className = 'action-modal-icon';
+                if (iconType === 'success') {
+                    actionIcon.classList.add('success');
+                    actionIcon.innerHTML = '<i class="bi bi-check-circle"></i>';
+                } else if (confirmation) {
+                    actionIcon.classList.add('confirmation');
+                    actionIcon.innerHTML = '<i class="bi bi-trash3"></i>';
+                } else {
+                    actionIcon.innerHTML = '<i class="bi bi-exclamation-triangle"></i>';
+                }
                 actionCancel.classList.toggle('d-none', !confirmation);
                 actionConfirm.classList.toggle('d-none', !confirmation);
                 actionOk.classList.toggle('d-none', confirmation);
                 actionModal?.show();
+            };
+            const saveGroup = async () => {
+                const groupIdInput = document.getElementById('groupId');
+                const groupCodeInput = document.getElementById('groupCode');
+                const engNameInput = document.getElementById('groupEnglishName');
+                const arbNameInput = document.getElementById('groupArabicName');
+                const activeInput = document.getElementById('groupActive');
+                const descInput = document.getElementById('groupDescription');
+
+                const groupCodeVal = (groupCodeInput?.value || '').trim();
+                const engNameVal = (engNameInput?.value || '').trim();
+
+                if (!groupCodeVal || !engNameVal) {
+                    showActionModal('@Lang.Get("GroupSaveFailedTitle")', '@Lang.Get("GroupSaveValidationMessage")');
+                    if (!groupCodeVal) groupCodeInput?.focus();
+                    else if (!engNameVal) engNameInput?.focus();
+                    return;
+                }
+
+                const payload = {
+                    groupID: groupIdInput?.value ? parseInt(groupIdInput.value) : null,
+                    groupCode: groupCodeVal,
+                    englishName: engNameVal,
+                    arabicName: (arbNameInput?.value || '').trim() || null,
+                    description: (descInput?.value || '').trim() || null,
+                    isActive: activeInput ? activeInput.checked : true,
+                    permissions: formPermissions.map(item => ({
+                        formID: item.formID,
+                        canView: !!item.canView,
+                        canSave: !!item.canSave,
+                        canUpdate: !!item.canUpdate,
+                        canDelete: !!item.canDelete,
+                        canSearch: !!item.canSearch,
+                        canPrint: !!item.canPrint
+                    }))
+                };
+
+                if (saveButton) saveButton.disabled = true;
+                const originalSaveHtml = saveButton ? saveButton.innerHTML : '';
+                if (saveButton) saveButton.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> <span>@Lang.Get("Save")</span>';
+
+                try {
+                    const token = form.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                    const response = await fetch('@Url.Action("SaveGroup", "Administration")', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': token || ''
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json().catch(() => ({ success: false, message: '@Lang.Get("GroupSaveFailedTitle")' }));
+                    if (!response.ok || !result.success) {
+                        throw new Error(result.message || '@Lang.Get("GroupSaveFailedTitle")');
+                    }
+
+                    groupIdInput.value = result.groupId;
+                    if (recordState) {
+                        recordState.innerHTML = '<span></span>@Lang.Get("ExistingRecord")';
+                    }
+
+                    await loadFormPermissions('existing', result.groupId);
+
+                    if (groups.length > 0) {
+                        loadGroups();
+                    }
+
+                    showActionModal(
+                        '@Lang.Get("GroupSaveSuccessTitle")',
+                        '@Lang.Get("GroupSaveSuccessMessage")',
+                        false,
+                        'success'
+                    );
+                } catch (error) {
+                    showActionModal('@Lang.Get("GroupSaveFailedTitle")', error.message);
+                } finally {
+                    if (saveButton) {
+                        saveButton.disabled = false;
+                        saveButton.innerHTML = originalSaveHtml;
+                    }
+                }
             };
             const deleteSelectedGroup = async () => {
                 const groupId = document.getElementById('groupId').value;
@@ -404,6 +504,7 @@
                         document.getElementById('groupEnglishName').value = group.groupEnglishName || '';
                         document.getElementById('groupArabicName').value = group.groupArabicName || '';
                         document.getElementById('groupActive').checked = group.isActive;
+                        if (recordState) recordState.innerHTML = '<span></span>@Lang.Get("ExistingRecord")';
                         loadFormPermissions('existing', group.groupID);
                         directoryModal?.hide();
                     };
@@ -428,6 +529,8 @@
                 } finally { loadingState.classList.add('d-none'); }
             };
 
+            saveButton?.addEventListener('click', saveGroup);
+            form?.addEventListener('submit', event => { event.preventDefault(); saveGroup(); });
             document.getElementById('newGroupButton')?.addEventListener('click', resetEditor);
             deleteButton?.addEventListener('click', deleteSelectedGroup);
             actionConfirm?.addEventListener('click', confirmGroupDeletion);

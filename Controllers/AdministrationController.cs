@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AhmedRawdiBusinessPlatform.Services;
+using AhmedRawdiBusinessPlatform.Models;
 using Microsoft.Data.SqlClient;
 
 namespace AhmedRawdiBusinessPlatform.Controllers
@@ -50,6 +51,43 @@ namespace AhmedRawdiBusinessPlatform.Controllers
         public async Task<IActionResult> GetAllSystemForms()
         {
             return Json(await _groupService.GetAllSystemFormsAsync());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveGroup([FromBody] SaveGroupRequestDto request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.GroupCode) || string.IsNullOrWhiteSpace(request.EnglishName))
+            {
+                return BadRequest(new { success = false, message = "Group Code and English Name are required." });
+            }
+
+            try
+            {
+                var currentUserIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                long currentUserId = long.TryParse(currentUserIdString, out var parsedId) ? parsedId : 1;
+
+                var savedGroupId = await _groupService.SaveGroupWithPermissionsAsync(request, currentUserId);
+                return Json(new
+                {
+                    success = true,
+                    groupId = savedGroupId,
+                    isUpdate = request.GroupID.HasValue && request.GroupID.Value > 0
+                });
+            }
+            catch (SqlException ex) when (ex.Number == 50004)
+            {
+                return BadRequest(new { success = false, message = "A system group with the same code already exists." });
+            }
+            catch (SqlException ex) when (ex.Number == 50005)
+            {
+                return NotFound(new { success = false, message = "The system group to update was not found." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new { success = false, message = ex.Message });
+            }
         }
 
         [HttpPost]
