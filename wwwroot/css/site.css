@@ -417,3 +417,21 @@
 .management-toolbar{justify-content:flex-start;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}.management-toolbar::-webkit-scrollbar{height:4px}.management-toolbar::-webkit-scrollbar-thumb{background:#c5d3dc;border-radius:10px}.toolbar-actions{display:flex;align-items:center;gap:7px;min-width:max-content}.toolbar-actions .toolbar-button{flex:0 0 auto}
 @media(max-width:1050px){.management-toolbar{align-items:center;flex-direction:row}.toolbar-actions{width:max-content;flex-wrap:nowrap}}
 @media(max-width:600px){.management-toolbar{display:flex;padding:10px}.toolbar-actions{display:flex;grid-template-columns:none}.toolbar-actions .toolbar-button{flex:0 0 auto;padding-inline:11px}.toolbar-actions .toolbar-button-primary{grid-column:auto}}
+
+/* Full-width responsive group editor */
+.management-layout.management-layout-single {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    justify-content: stretch;
+}
+
+.management-layout-single .group-editor {
+    width: 100%;
+    max-width: none;
+}
+
+@media (max-width: 700px) {
+    .management-layout-single .management-field-grid {
+        grid-template-columns: 1fr;
+    }
+}
