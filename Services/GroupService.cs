@@ -38,6 +38,16 @@ namespace AhmedRawdiBusinessPlatform.Services
                 .ToListAsync();
         }
 
+        public async Task<IReadOnlyList<GroupMemberDto>> GetGroupMembersAsync(long groupId)
+        {
+            var groupIdParameter = new SqlParameter("@GroupID", groupId);
+            return await _context.Database
+                .SqlQueryRaw<GroupMemberDto>(
+                    "EXEC dbo.usp_Get_SystemGroupMembers @GroupID = @GroupID",
+                    groupIdParameter)
+                .ToListAsync();
+        }
+
         public async Task DeleteGroupAsync(long groupId)
         {
             var groupIdParameter = new SqlParameter("@GroupID", groupId);

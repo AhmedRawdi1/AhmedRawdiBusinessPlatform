@@ -168,6 +168,18 @@ namespace AhmedRawdiBusinessPlatform.Services
             ,{ "Inactive", "Inactive" }
             ,{ "NoGroupsFound", "No groups found" }
             ,{ "NoGroupsFoundHint", "Try another search term or create a new group." }
+            ,{ "LoadingGroupMembers", "Loading group members..." }
+            ,{ "GroupMembersLoadError", "Unable to load group members from the database." }
+            ,{ "NoGroupMembersFound", "No users assigned to this group." }
+            ,{ "FilterGroupMembers", "Filter members by code, name, email..." }
+            ,{ "MembersCount", "Members" }
+            ,{ "ActiveMembers", "Active Members" }
+            ,{ "MemberName", "Member Name" }
+            ,{ "Email", "Email" }
+            ,{ "MobileNum", "Mobile Number" }
+            ,{ "ExpirationDate", "Expiration Date" }
+            ,{ "SelectGroupToViewMembers", "Select a saved group to view its members" }
+            ,{ "SelectGroupMembersHint", "Select an existing group from search directory to see all assigned users." }
         };
 
         private static readonly Dictionary<string, string> ArDict = new(StringComparer.OrdinalIgnoreCase)
@@ -313,6 +325,18 @@ namespace AhmedRawdiBusinessPlatform.Services
             ,{ "Inactive", "غير نشط" }
             ,{ "NoGroupsFound", "لم يتم العثور على مجموعات" }
             ,{ "NoGroupsFoundHint", "جرّب مصطلح بحث آخر أو أنشئ مجموعة جديدة." }
+            ,{ "LoadingGroupMembers", "جارٍ تحميل أعضاء المجموعة..." }
+            ,{ "GroupMembersLoadError", "تعذر تحميل أعضاء المجموعة من قاعدة البيانات." }
+            ,{ "NoGroupMembersFound", "لا يوجد مستخدمون مسندون إلى هذه المجموعة." }
+            ,{ "FilterGroupMembers", "تصفية الأعضاء بالكود، الاسم، البريد..." }
+            ,{ "MembersCount", "أعضاء" }
+            ,{ "ActiveMembers", "أعضاء نشطون" }
+            ,{ "MemberName", "اسم العضو" }
+            ,{ "Email", "البريد الإلكتروني" }
+            ,{ "MobileNum", "رقم الجوال" }
+            ,{ "ExpirationDate", "تاريخ الانتهاء" }
+            ,{ "SelectGroupToViewMembers", "اختر مجموعة محفوظة لعرض أعضائها" }
+            ,{ "SelectGroupMembersHint", "اختر مجموعة حالية من دليل البحث لرؤية جميع المستخدمين المسندين إليها." }
         };
 
         public LanguageService(IHttpContextAccessor httpContextAccessor)

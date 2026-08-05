@@ -115,8 +115,56 @@
             <div class="tab-pane fade" id="reportsPermissionsPanel" role="tabpanel" aria-labelledby="reportsPermissionsTab" tabindex="0">
                 <div class="group-tab-empty-state"><span><i class="bi bi-file-earmark-bar-graph"></i></span><div><h3>@Lang.Get("SelectGroupToManageAccess")</h3><p>@Lang.Get("ReportsPermissionsHint")</p></div></div>
             </div>
-            <div class="tab-pane fade" id="groupMembersPanel" role="tabpanel" aria-labelledby="groupMembersTab" tabindex="0">
-                <div class="group-tab-empty-state"><span><i class="bi bi-people"></i></span><div><h3>@Lang.Get("SelectGroupToManageAccess")</h3><p>@Lang.Get("GroupMembersHint")</p></div></div>
+            <div class="tab-pane fade" id="groupMembersPanel" role="tabpanel" aria-labelledby="groupMembersTab" tabindex="0"
+                 data-members-label="@Lang.Get("MembersCount")"
+                 data-active-label="@Lang.Get("ActiveMembers")">
+                <div class="permission-matrix-toolbar">
+                    <div>
+                        <strong id="groupMembersMatrixTitle">@Lang.Get("SelectGroupToViewMembers")</strong>
+                        <small id="groupMembersMatrixSubtitle">@Lang.Get("SelectGroupMembersHint")</small>
+                    </div>
+                    <div class="permission-summary">
+                        <span class="permission-enabled-count" id="memberActiveCount"><i class="bi bi-person-check-fill"></i><span>0 @Lang.Get("ActiveMembers")</span></span>
+                        <span class="permission-record-count" id="memberTotalCount">0 @Lang.Get("MembersCount")</span>
+                    </div>
+                </div>
+                <div class="permission-tools">
+                    <label class="permission-filter" for="memberFilterInput">
+                        <i class="bi bi-search"></i>
+                        <input id="memberFilterInput" type="search" placeholder="@Lang.Get("FilterGroupMembers")" autocomplete="off" />
+                    </label>
+                </div>
+                <div class="permission-loading d-none" id="memberLoading">
+                    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                    <span>@Lang.Get("LoadingGroupMembers")</span>
+                </div>
+                <div class="permission-error d-none" id="memberError" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span>@Lang.Get("GroupMembersLoadError")</span>
+                    <button type="button" id="retryMembersButton">@Lang.Get("Retry")</button>
+                </div>
+                <div class="permission-table-wrap d-none" id="memberTableWrap">
+                    <table class="permission-table">
+                        <thead>
+                            <tr>
+                                <th>@Lang.Get("UserCode")</th>
+                                <th>@Lang.Get("MemberName")</th>
+                                <th>@Lang.Get("Email")</th>
+                                <th>@Lang.Get("MobileNum")</th>
+                                <th>@Lang.Get("Status")</th>
+                                <th>@Lang.Get("Registered")</th>
+                            </tr>
+                        </thead>
+                        <tbody id="memberRows"></tbody>
+                    </table>
+                </div>
+                <div class="group-tab-empty-state" id="memberEmptyState">
+                    <span><i class="bi bi-people"></i></span>
+                    <div>
+                        <h3 id="memberEmptyTitle">@Lang.Get("SelectGroupToViewMembers")</h3>
+                        <p id="memberEmptyHint">@Lang.Get("SelectGroupMembersHint")</p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -216,10 +264,24 @@
             const permissionMatrixSubtitle = document.getElementById('permissionMatrixSubtitle');
             const permissionEnabledCount = document.getElementById('permissionEnabledCount');
             const permissionFilterInput = document.getElementById('permissionFilterInput');
+            const membersPanel = document.getElementById('groupMembersPanel');
+            const memberLoading = document.getElementById('memberLoading');
+            const memberError = document.getElementById('memberError');
+            const memberTableWrap = document.getElementById('memberTableWrap');
+            const memberRows = document.getElementById('memberRows');
+            const memberEmptyState = document.getElementById('memberEmptyState');
+            const memberEmptyTitle = document.getElementById('memberEmptyTitle');
+            const memberEmptyHint = document.getElementById('memberEmptyHint');
+            const memberTotalCount = document.getElementById('memberTotalCount');
+            const memberActiveCount = document.getElementById('memberActiveCount');
+            const memberFilterInput = document.getElementById('memberFilterInput');
             let groups = [];
             let formPermissions = [];
+            let groupMembers = [];
             let permissionRequestController = null;
+            let memberRequestController = null;
             let permissionLoadContext = { mode: 'new', groupId: null };
+            let currentSelectedGroupId = null;
 
             const resetEditor = () => {
                 form?.reset();
@@ -227,6 +289,7 @@
                 document.getElementById('groupActive').checked = true;
                 if (recordState) recordState.innerHTML = '<span></span>@Lang.Get("NewRecord")';
                 loadFormPermissions('new');
+                loadGroupMembers(null);
                 groupCode?.focus();
             };
             const showActionModal = (title, message, confirmation = false, iconType = 'warning') => {
@@ -506,6 +569,7 @@
                         document.getElementById('groupActive').checked = group.isActive;
                         if (recordState) recordState.innerHTML = '<span></span>@Lang.Get("ExistingRecord")';
                         loadFormPermissions('existing', group.groupID);
+                        loadGroupMembers(group.groupID);
                         directoryModal?.hide();
                     };
                     row.addEventListener('click', selectGroup);
@@ -529,6 +593,101 @@
                 } finally { loadingState.classList.add('d-none'); }
             };
 
+            const renderGroupMembers = items => {
+                memberRows.replaceChildren();
+                items.forEach(member => {
+                    const row = document.createElement('tr');
+                    
+                    const codeCell = document.createElement('td');
+                    codeCell.innerHTML = `<strong>${member.userCode || '—'}</strong>`;
+                    row.appendChild(codeCell);
+
+                    const nameCell = document.createElement('td');
+                    nameCell.textContent = permissionName(member, 'userEnglishName', 'userArabicName') || '—';
+                    row.appendChild(nameCell);
+
+                    const emailCell = document.createElement('td');
+                    emailCell.textContent = member.email || '—';
+                    row.appendChild(emailCell);
+
+                    const mobileCell = document.createElement('td');
+                    mobileCell.textContent = member.mobileNum || '—';
+                    row.appendChild(mobileCell);
+
+                    const statusCell = document.createElement('td');
+                    statusCell.innerHTML = member.isActive
+                        ? '<span class="group-status active">@Lang.Get("Active")</span>'
+                        : '<span class="group-status inactive">@Lang.Get("Inactive")</span>';
+                    row.appendChild(statusCell);
+
+                    const regCell = document.createElement('td');
+                    regCell.textContent = member.regDate ? new Intl.DateTimeFormat(document.documentElement.lang).format(new Date(member.regDate)) : '—';
+                    row.appendChild(regCell);
+
+                    memberRows.appendChild(row);
+                });
+
+                const totalLabel = membersPanel?.dataset.membersLabel || '@Lang.Get("MembersCount")';
+                const activeLabel = membersPanel?.dataset.activeLabel || '@Lang.Get("ActiveMembers")';
+
+                memberTotalCount.textContent = `${items.length} ${totalLabel}`;
+                const activeCount = items.filter(m => m.isActive).length;
+                memberActiveCount.querySelector('span').textContent = `${activeCount} ${activeLabel}`;
+
+                memberTableWrap.classList.toggle('d-none', items.length === 0);
+                memberEmptyState.classList.toggle('d-none', items.length !== 0);
+                if (items.length === 0) {
+                    memberEmptyTitle.textContent = '@Lang.Get("NoGroupMembersFound")';
+                    memberEmptyHint.textContent = '';
+                }
+            };
+
+            const filterGroupMembers = () => {
+                const term = (memberFilterInput?.value || '').trim().toLocaleLowerCase();
+                const filtered = groupMembers.filter(m => [m.userCode, m.userEnglishName, m.userArabicName, m.email, m.mobileNum]
+                    .some(val => (val || '').toLocaleLowerCase().includes(term)));
+                renderGroupMembers(filtered);
+            };
+
+            const loadGroupMembers = async (groupId) => {
+                currentSelectedGroupId = groupId;
+                if (!groupId) {
+                    groupMembers = [];
+                    memberRows.replaceChildren();
+                    memberTableWrap.classList.add('d-none');
+                    memberEmptyState.classList.remove('d-none');
+                    memberEmptyTitle.textContent = '@Lang.Get("SelectGroupToViewMembers")';
+                    memberEmptyHint.textContent = '@Lang.Get("SelectGroupMembersHint")';
+                    memberTotalCount.textContent = `0 ${membersPanel?.dataset.membersLabel || '@Lang.Get("MembersCount")'}`;
+                    memberActiveCount.querySelector('span').textContent = `0 ${membersPanel?.dataset.activeLabel || '@Lang.Get("ActiveMembers")'}`;
+                    return;
+                }
+
+                memberRequestController?.abort();
+                const requestController = new AbortController();
+                memberRequestController = requestController;
+
+                memberLoading.classList.remove('d-none');
+                memberError.classList.add('d-none');
+                memberTableWrap.classList.add('d-none');
+                memberEmptyState.classList.add('d-none');
+
+                try {
+                    const endpoint = `@Url.Action("GetGroupMembers", "Administration")?groupId=${encodeURIComponent(groupId)}`;
+                    const response = await fetch(endpoint, { headers: { 'Accept': 'application/json' }, signal: requestController.signal });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    groupMembers = await response.json();
+                    if (memberFilterInput) memberFilterInput.value = '';
+                    renderGroupMembers(groupMembers);
+                } catch (error) {
+                    if (error.name === 'AbortError') return;
+                    console.error('Unable to load group members.', error);
+                    memberError.classList.remove('d-none');
+                } finally {
+                    if (memberRequestController === requestController) memberLoading.classList.add('d-none');
+                }
+            };
+
             saveButton?.addEventListener('click', saveGroup);
             form?.addEventListener('submit', event => { event.preventDefault(); saveGroup(); });
             document.getElementById('newGroupButton')?.addEventListener('click', resetEditor);
@@ -540,6 +699,14 @@
             searchInput?.addEventListener('input', renderGroups);
             document.getElementById('retryGroupsButton')?.addEventListener('click', loadGroups);
             document.getElementById('retryPermissionsButton')?.addEventListener('click', () => loadFormPermissions(permissionLoadContext.mode, permissionLoadContext.groupId));
+            document.getElementById('retryMembersButton')?.addEventListener('click', () => loadGroupMembers(currentSelectedGroupId));
+            memberFilterInput?.addEventListener('input', filterGroupMembers);
+            document.getElementById('groupMembersTab')?.addEventListener('click', () => {
+                const selectedGroupId = document.getElementById('groupId').value;
+                if (selectedGroupId && String(selectedGroupId) !== String(currentSelectedGroupId)) {
+                    loadGroupMembers(selectedGroupId);
+                }
+            });
             document.getElementById('importGroupButton')?.addEventListener('click', () => document.getElementById('groupImportFile')?.click());
             document.getElementById('printGroupButton')?.addEventListener('click', () => window.print());
             loadFormPermissions('new');

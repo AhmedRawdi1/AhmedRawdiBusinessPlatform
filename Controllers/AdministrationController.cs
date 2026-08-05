@@ -48,6 +48,24 @@ namespace AhmedRawdiBusinessPlatform.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> GetGroupMembers(long? groupId)
+        {
+            if (!groupId.HasValue)
+            {
+                return BadRequest(new { success = false, code = "InvalidSelection" });
+            }
+
+            try
+            {
+                return Json(await _groupService.GetGroupMembersAsync(groupId.Value));
+            }
+            catch (SqlException exception) when (exception.Number == 50002)
+            {
+                return NotFound(new { success = false, code = "GroupNotFound" });
+            }
+        }
+
+        [HttpGet]
         public async Task<IActionResult> GetAllSystemForms()
         {
             return Json(await _groupService.GetAllSystemFormsAsync());
