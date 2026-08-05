@@ -29,7 +29,12 @@ BEGIN
         f.IsActive AS FormIsActive,
         f.FormRank,
         f.CreatedOn AS FormCreatedOn,
-        f.CancelledOn AS FormCancelledOn
+        f.CancelledOn AS FormCancelledOn,
+        CAST(0 AS bit) AS CanView,
+        CAST(0 AS bit) AS CanSave,
+        CAST(0 AS bit) AS CanDelete,
+        CAST(0 AS bit) AS CanSearch,
+        CAST(0 AS bit) AS CanPrint
     FROM dbo.SystemForms AS f
     INNER JOIN dbo.SystemSubModules AS sm
         ON sm.SysSubModID = f.SubModID

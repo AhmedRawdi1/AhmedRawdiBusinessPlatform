@@ -75,8 +75,34 @@
             </nav>
         </div>
         <div class="tab-content group-tabs-content">
-            <div class="tab-pane fade show active" id="formsPermissionsPanel" role="tabpanel" aria-labelledby="formsPermissionsTab" tabindex="0">
-                <div class="group-tab-empty-state"><span><i class="bi bi-window-stack"></i></span><div><h3>@Lang.Get("SelectGroupToManageAccess")</h3><p>@Lang.Get("FormsPermissionsHint")</p></div></div>
+            <div class="tab-pane fade show active" id="formsPermissionsPanel" role="tabpanel" aria-labelledby="formsPermissionsTab" tabindex="0"
+                 data-new-title="@Lang.Get("NewGroupPermissions")"
+                 data-selected-title="@Lang.Get("SelectedGroupPermissions")"
+                 data-all-forms-hint="@Lang.Get("AllFormsDefaultHint")"
+                 data-existing-hint="@Lang.Get("ExistingPermissionsHint")"
+                 data-forms-label="@Lang.Get("Forms")">
+                <div class="permission-matrix-toolbar">
+                    <div><strong id="permissionMatrixTitle">@Lang.Get("NewGroupPermissions")</strong><small id="permissionMatrixSubtitle">@Lang.Get("AllFormsDefaultHint")</small></div>
+                    <span class="permission-record-count" id="permissionRecordCount">0 @Lang.Get("Forms")</span>
+                </div>
+                <div class="permission-loading" id="permissionLoading"><span class="spinner-border spinner-border-sm" aria-hidden="true"></span><span>@Lang.Get("LoadingFormsPermissions")</span></div>
+                <div class="permission-error d-none" id="permissionError" role="alert"><i class="bi bi-exclamation-triangle"></i><span>@Lang.Get("FormsPermissionsLoadError")</span><button type="button" id="retryPermissionsButton">@Lang.Get("Retry")</button></div>
+                <div class="permission-table-wrap d-none" id="permissionTableWrap">
+                    <table class="permission-table">
+                        <thead>
+                            <tr>
+                                <th class="permission-form-column">@Lang.Get("SystemForm")</th>
+                                <th>@Lang.Get("CanView")</th>
+                                <th>@Lang.Get("CanSave")</th>
+                                <th>@Lang.Get("CanDelete")</th>
+                                <th>@Lang.Get("CanSearch")</th>
+                                <th>@Lang.Get("CanPrint")</th>
+                            </tr>
+                        </thead>
+                        <tbody id="permissionRows"></tbody>
+                    </table>
+                </div>
+                <div class="group-tab-empty-state d-none" id="permissionEmptyState"><span><i class="bi bi-window-stack"></i></span><div><h3>@Lang.Get("NoSystemFormsFound")</h3><p>@Lang.Get("FormsPermissionsHint")</p></div></div>
             </div>
             <div class="tab-pane fade" id="reportsPermissionsPanel" role="tabpanel" aria-labelledby="reportsPermissionsTab" tabindex="0">
                 <div class="group-tab-empty-state"><span><i class="bi bi-file-earmark-bar-graph"></i></span><div><h3>@Lang.Get("SelectGroupToManageAccess")</h3><p>@Lang.Get("ReportsPermissionsHint")</p></div></div>
@@ -169,9 +195,20 @@
             const actionConfirm = document.getElementById('groupActionConfirmButton');
             const actionOk = document.getElementById('groupActionOkButton');
             const deleteButton = document.getElementById('deleteGroupButton');
+            const permissionPanel = document.getElementById('formsPermissionsPanel');
+            const permissionLoading = document.getElementById('permissionLoading');
+            const permissionError = document.getElementById('permissionError');
+            const permissionTableWrap = document.getElementById('permissionTableWrap');
+            const permissionRows = document.getElementById('permissionRows');
+            const permissionEmptyState = document.getElementById('permissionEmptyState');
+            const permissionRecordCount = document.getElementById('permissionRecordCount');
+            const permissionMatrixTitle = document.getElementById('permissionMatrixTitle');
+            const permissionMatrixSubtitle = document.getElementById('permissionMatrixSubtitle');
             let groups = [];
+            let permissionRequestController = null;
+            let permissionLoadContext = { mode: 'new', groupId: null };
 
-            const resetEditor = () => { form?.reset(); document.getElementById('groupId').value = ''; document.getElementById('groupActive').checked = true; groupCode?.focus(); };
+            const resetEditor = () => { form?.reset(); document.getElementById('groupId').value = ''; document.getElementById('groupActive').checked = true; loadFormPermissions('new'); groupCode?.focus(); };
             const showActionModal = (title, message, confirmation = false) => {
                 actionTitle.textContent = title;
                 actionMessage.textContent = message;
@@ -233,6 +270,78 @@
                 }
             };
             const displayName = group => document.documentElement.dir === 'rtl' ? (group.groupArabicName || group.groupEnglishName) : (group.groupEnglishName || group.groupArabicName);
+            const permissionName = (item, englishProperty, arabicProperty) => document.documentElement.dir === 'rtl'
+                ? (item[arabicProperty] || item[englishProperty])
+                : (item[englishProperty] || item[arabicProperty]);
+            const createPermissionCheckbox = (item, property, label) => {
+                const wrapper = document.createElement('label');
+                wrapper.className = 'permission-checkbox';
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.checked = item[property] === true;
+                input.dataset.formId = item.formID;
+                input.dataset.permission = property;
+                input.setAttribute('aria-label', `${label}: ${permissionName(item, 'formEnglishName', 'formArabicName')}`);
+                const visual = document.createElement('span');
+                visual.innerHTML = '<i class="bi bi-check"></i>';
+                wrapper.append(input, visual);
+                return wrapper;
+            };
+            const renderFormPermissions = items => {
+                permissionRows.replaceChildren();
+                const permissionLabels = ['@Lang.Get("CanView")', '@Lang.Get("CanSave")', '@Lang.Get("CanDelete")', '@Lang.Get("CanSearch")', '@Lang.Get("CanPrint")'];
+                const permissionProperties = ['canView', 'canSave', 'canDelete', 'canSearch', 'canPrint'];
+                items.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.dataset.formId = item.formID;
+                    const formCell = document.createElement('td');
+                    formCell.className = 'permission-form-cell';
+                    const formName = document.createElement('strong');
+                    formName.textContent = permissionName(item, 'formEnglishName', 'formArabicName');
+                    const hierarchy = document.createElement('small');
+                    const moduleName = permissionName(item, 'moduleEnglishName', 'moduleArabicName');
+                    const subModuleName = permissionName(item, 'subModuleEnglishName', 'subModuleArabicName');
+                    hierarchy.textContent = [moduleName, subModuleName, item.formCode].filter(Boolean).join(' · ');
+                    formCell.append(formName, hierarchy);
+                    row.appendChild(formCell);
+                    permissionProperties.forEach((property, index) => {
+                        const cell = document.createElement('td');
+                        cell.appendChild(createPermissionCheckbox(item, property, permissionLabels[index]));
+                        row.appendChild(cell);
+                    });
+                    permissionRows.appendChild(row);
+                });
+                permissionRecordCount.textContent = `${items.length} ${permissionPanel.dataset.formsLabel}`;
+                permissionTableWrap.classList.toggle('d-none', items.length === 0);
+                permissionEmptyState.classList.toggle('d-none', items.length !== 0);
+            };
+            const loadFormPermissions = async (mode, groupId = null) => {
+                permissionLoadContext = { mode, groupId };
+                permissionRequestController?.abort();
+                const requestController = new AbortController();
+                permissionRequestController = requestController;
+                permissionMatrixTitle.textContent = mode === 'existing' ? permissionPanel.dataset.selectedTitle : permissionPanel.dataset.newTitle;
+                permissionMatrixSubtitle.textContent = mode === 'existing' ? permissionPanel.dataset.existingHint : permissionPanel.dataset.allFormsHint;
+                permissionLoading.classList.remove('d-none');
+                permissionError.classList.add('d-none');
+                permissionTableWrap.classList.add('d-none');
+                permissionEmptyState.classList.add('d-none');
+                try {
+                    const endpoint = mode === 'existing'
+                        ? `@Url.Action("GetGroupPermissions", "Administration")?groupId=${encodeURIComponent(groupId)}`
+                        : '@Url.Action("GetAllSystemForms", "Administration")';
+                    const response = await fetch(endpoint, { headers: { 'Accept': 'application/json' }, signal: requestController.signal });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    renderFormPermissions(await response.json());
+                } catch (error) {
+                    if (error.name === 'AbortError') return;
+                    console.error('Unable to load form permissions.', error);
+                    permissionRecordCount.textContent = `0 ${permissionPanel.dataset.formsLabel}`;
+                    permissionError.classList.remove('d-none');
+                } finally {
+                    if (permissionRequestController === requestController) permissionLoading.classList.add('d-none');
+                }
+            };
             const renderGroups = () => {
                 const term = (searchInput?.value || '').trim().toLocaleLowerCase();
                 const filtered = groups.filter(group => [group.groupCode, group.groupEnglishName, group.groupArabicName].some(value => (value || '').toLocaleLowerCase().includes(term)));
@@ -256,6 +365,7 @@
                         document.getElementById('groupEnglishName').value = group.groupEnglishName || '';
                         document.getElementById('groupArabicName').value = group.groupArabicName || '';
                         document.getElementById('groupActive').checked = group.isActive;
+                        loadFormPermissions('existing', group.groupID);
                         directoryModal?.hide();
                     };
                     row.addEventListener('click', selectGroup);
@@ -282,13 +392,15 @@
             document.getElementById('newGroupButton')?.addEventListener('click', resetEditor);
             deleteButton?.addEventListener('click', deleteSelectedGroup);
             actionConfirm?.addEventListener('click', confirmGroupDeletion);
-            document.querySelector('[data-focus-new]')?.addEventListener('click', () => { directoryModal?.hide(); directoryElement?.addEventListener('hidden.bs.modal', () => groupCode?.focus(), { once: true }); });
+            document.querySelector('[data-focus-new]')?.addEventListener('click', () => { resetEditor(); directoryModal?.hide(); directoryElement?.addEventListener('hidden.bs.modal', () => groupCode?.focus(), { once: true }); });
             document.getElementById('searchGroupButton')?.addEventListener('click', () => directoryModal?.show());
             directoryElement?.addEventListener('shown.bs.modal', () => { searchInput?.focus(); loadGroups(); });
             searchInput?.addEventListener('input', renderGroups);
             document.getElementById('retryGroupsButton')?.addEventListener('click', loadGroups);
+            document.getElementById('retryPermissionsButton')?.addEventListener('click', () => loadFormPermissions(permissionLoadContext.mode, permissionLoadContext.groupId));
             document.getElementById('importGroupButton')?.addEventListener('click', () => document.getElementById('groupImportFile')?.click());
             document.getElementById('printGroupButton')?.addEventListener('click', () => window.print());
+            loadFormPermissions('new');
         })();
     </script>
 }
