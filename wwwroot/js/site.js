@@ -6,6 +6,11 @@
         localStorage.setItem('arbp-theme', theme);
         const icon = document.getElementById('themeToggleIcon');
         if (icon) icon.className = theme === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.setAttribute('aria-label', theme === 'dark' ? themeToggle.dataset.lightLabel : themeToggle.dataset.darkLabel);
+            themeToggle.setAttribute('aria-pressed', String(theme === 'dark'));
+        }
     };
     applyTheme(localStorage.getItem('arbp-theme') || 'light');
     document.addEventListener('DOMContentLoaded', () => {
@@ -25,6 +30,22 @@
             const icon = document.getElementById('togglePasswordIcon');
             if (icon) icon.className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
             passwordButton.setAttribute('aria-label', show ? passwordButton.dataset.hideLabel : passwordButton.dataset.showLabel);
+        });
+        const capsLockNotice = document.getElementById('capsLockNotice');
+        const updateCapsLock = event => capsLockNotice?.classList.toggle('is-visible', event.getModifierState?.('CapsLock') === true);
+        password?.addEventListener('keydown', updateCapsLock);
+        password?.addEventListener('keyup', updateCapsLock);
+        password?.addEventListener('blur', () => capsLockNotice?.classList.remove('is-visible'));
+
+        const loginForm = document.getElementById('loginForm');
+        const loginSubmitButton = document.getElementById('loginSubmitButton');
+        loginForm?.addEventListener('submit', () => {
+            if (!loginForm.checkValidity() || !loginSubmitButton) return;
+            const label = loginSubmitButton.querySelector('.login-submit-label');
+            if (label && loginSubmitButton.dataset.loadingLabel) label.textContent = loginSubmitButton.dataset.loadingLabel;
+            loginSubmitButton.classList.add('is-loading');
+            loginSubmitButton.disabled = true;
+            loginSubmitButton.setAttribute('aria-busy', 'true');
         });
 
         // Enter moves between form fields; Shift+Enter moves backwards.
