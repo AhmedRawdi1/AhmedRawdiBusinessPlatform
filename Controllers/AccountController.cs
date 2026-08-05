@@ -23,11 +23,6 @@ namespace AhmedRawdiBusinessPlatform.Controllers
         [AllowAnonymous]
         public IActionResult Login(string? returnUrl = null)
         {
-            if (User.Identity != null && User.Identity.IsAuthenticated)
-            {
-                return RedirectToLocal(returnUrl);
-            }
-
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
