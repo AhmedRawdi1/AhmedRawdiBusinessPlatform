@@ -21,6 +21,23 @@ namespace AhmedRawdiBusinessPlatform.Services
                 .ToListAsync();
         }
 
+        public async Task<IReadOnlyList<GroupFormPermissionDto>> GetGroupPermissionsAsync(long groupId)
+        {
+            var groupIdParameter = new SqlParameter("@GroupID", groupId);
+            return await _context.Database
+                .SqlQueryRaw<GroupFormPermissionDto>(
+                    "EXEC dbo.usp_Get_GroupPermissions @GroupID = @GroupID",
+                    groupIdParameter)
+                .ToListAsync();
+        }
+
+        public async Task<IReadOnlyList<GroupFormPermissionDto>> GetAllSystemFormsAsync()
+        {
+            return await _context.Database
+                .SqlQueryRaw<GroupFormPermissionDto>("EXEC dbo.usp_Get_AllSystemForms")
+                .ToListAsync();
+        }
+
         public async Task DeleteGroupAsync(long groupId)
         {
             var groupIdParameter = new SqlParameter("@GroupID", groupId);

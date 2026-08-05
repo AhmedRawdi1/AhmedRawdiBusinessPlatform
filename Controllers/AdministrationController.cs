@@ -28,6 +28,30 @@ namespace AhmedRawdiBusinessPlatform.Controllers
             return Json(groups);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetGroupPermissions(long? groupId)
+        {
+            if (!groupId.HasValue)
+            {
+                return BadRequest(new { success = false, code = "InvalidSelection" });
+            }
+
+            try
+            {
+                return Json(await _groupService.GetGroupPermissionsAsync(groupId.Value));
+            }
+            catch (SqlException exception) when (exception.Number == 50002)
+            {
+                return NotFound(new { success = false, code = "GroupNotFound" });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllSystemForms()
+        {
+            return Json(await _groupService.GetAllSystemFormsAsync());
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteGroup(long? groupId)
