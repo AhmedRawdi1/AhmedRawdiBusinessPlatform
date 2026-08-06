@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AhmedRawdiBusinessPlatform.Services;
+using AhmedRawdiBusinessPlatform.Models;
 using Microsoft.Data.SqlClient;
+using System.Security.Claims;
 
 namespace AhmedRawdiBusinessPlatform.Controllers
 {
@@ -9,10 +11,12 @@ namespace AhmedRawdiBusinessPlatform.Controllers
     public class AdministrationController : Controller
     {
         private readonly IGroupService _groupService;
+        private readonly IUserService _userService;
 
-        public AdministrationController(IGroupService groupService)
+        public AdministrationController(IGroupService groupService, IUserService userService)
         {
             _groupService = groupService;
+            _userService = userService;
         }
 
         [HttpGet]
@@ -22,10 +26,23 @@ namespace AhmedRawdiBusinessPlatform.Controllers
         }
 
         [HttpGet]
+        public IActionResult Users()
+        {
+            return View();
+        }
+
+        [HttpGet]
         public async Task<IActionResult> GetAllGroups()
         {
             var groups = await _groupService.GetAllGroupsAsync();
             return Json(groups);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var users = await _userService.GetAllUsersAsync();
+            return Json(users);
         }
 
         [HttpGet]
@@ -54,6 +71,42 @@ namespace AhmedRawdiBusinessPlatform.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveUser([FromForm] SaveUserDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { success = false, code = "InvalidData" });
+            }
+
+            try
+            {
+                long? regBy = null;
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (long.TryParse(userIdClaim, out var currentUserId))
+                {
+                    regBy = currentUserId;
+                }
+
+                var userId = await _userService.SaveUserAsync(model, regBy);
+                return Json(new { success = true, userId });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new { success = false, code = "SaveFailed", message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteGroup(long? groupId)
         {
             if (!groupId.HasValue)
@@ -76,5 +129,31 @@ namespace AhmedRawdiBusinessPlatform.Controllers
                     new { success = false, code = "DeleteFailed" });
             }
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteUser(long? userId)
+        {
+            if (!userId.HasValue)
+            {
+                return BadRequest(new { success = false, code = "InvalidSelection" });
+            }
+
+            try
+            {
+                await _userService.DeleteUserAsync(userId.Value);
+                return Json(new { success = true });
+            }
+            catch (SqlException exception) when (exception.Number == 50002)
+            {
+                return NotFound(new { success = false, code = "UserNotFound" });
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new { success = false, code = "DeleteFailed" });
+            }
+        }
     }
 }
+

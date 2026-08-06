@@ -1,0 +1,587 @@
+@inject AhmedRawdiBusinessPlatform.Services.ILanguageService Lang
+@{
+    ViewData["Title"] = Lang.Get("UsersManagement");
+}
+
+<section class="management-header">
+    <div>
+        <span class="eyebrow-text"><i class="bi bi-shield-lock"></i>@Lang.Get("Administration")</span>
+        <h1>@Lang.Get("UsersManagement")</h1>
+        <p>@Lang.Get("UsersSubtitle")</p>
+    </div>
+    <span class="management-context"><i class="bi bi-people"></i>@Lang.Get("AccessControl")</span>
+</section>
+
+<section class="management-toolbar" aria-label="@Lang.Get("PageActions")">
+    <div class="toolbar-actions">
+        <button class="toolbar-button toolbar-button-primary" type="button" id="newUserButton"><i class="bi bi-plus-lg"></i><span>@Lang.Get("New")</span></button>
+        <button class="toolbar-button" type="button" id="saveUserButton"><i class="bi bi-check2-circle"></i><span>@Lang.Get("Save")</span></button>
+        <button class="toolbar-button toolbar-button-danger" type="button" id="deleteUserButton"><i class="bi bi-trash3"></i><span>@Lang.Get("Delete")</span></button>
+        <button class="toolbar-button" type="button" id="searchUserButton"><i class="bi bi-search"></i><span>@Lang.Get("Search")</span></button>
+        <button class="toolbar-button" type="button" id="exportUserButton"><i class="bi bi-box-arrow-up"></i><span>@Lang.Get("Export")</span></button>
+        <button class="toolbar-button" type="button" id="importUserButton"><i class="bi bi-box-arrow-in-down"></i><span>@Lang.Get("Import")</span></button>
+        <button class="toolbar-button" type="button" id="printUserButton"><i class="bi bi-printer"></i><span>@Lang.Get("Print")</span></button>
+        <input type="file" id="userImportFile" class="visually-hidden" accept=".csv,.xlsx,.xls" />
+    </div>
+</section>
+
+<div class="management-layout management-layout-single">
+    <section class="management-panel group-editor" aria-labelledby="userEditorTitle">
+        <div class="management-panel-heading">
+            <div><span class="eyebrow-text">@Lang.Get("UserRecord")</span><h2 id="userEditorTitle">@Lang.Get("UserDetails")</h2></div>
+            <span class="record-state" id="userRecordBadge"><span></span><span id="userRecordBadgeText">@Lang.Get("NewRecord")</span></span>
+        </div>
+        <form id="userEditorForm" autocomplete="off">
+            @Html.AntiForgeryToken()
+            <input id="userId" name="UserID" type="hidden" />
+            <div class="management-field-grid">
+                <div class="management-field">
+                    <label for="userCode">@Lang.Get("UserCode") <span aria-hidden="true">*</span></label>
+                    <input id="userCode" name="Code" type="text" maxlength="50" placeholder="@Lang.Get("UserCodePlaceholder")" required />
+                </div>
+                <div class="management-field">
+                    <label for="userGroupId">@Lang.Get("AssignedGroup") <span aria-hidden="true">*</span></label>
+                    <select id="userGroupId" name="GroupID" required>
+                        <option value="">@Lang.Get("SelectGroup")</option>
+                    </select>
+                </div>
+            </div>
+            <div class="management-field-grid">
+                <div class="management-field">
+                    <label for="userEnglishName">@Lang.Get("EnglishName") <span aria-hidden="true">*</span></label>
+                    <input id="userEnglishName" name="EngName" type="text" maxlength="150" required />
+                </div>
+                <div class="management-field">
+                    <label for="userArabicName">@Lang.Get("ArabicName")</label>
+                    <input id="userArabicName" name="ArbName" type="text" maxlength="150" dir="rtl" />
+                </div>
+            </div>
+            <div class="management-field-grid">
+                <div class="management-field">
+                    <label for="userEmail">@Lang.Get("EmailAddress")</label>
+                    <input id="userEmail" name="Email" type="email" maxlength="200" placeholder="@Lang.Get("EmailPlaceholder")" />
+                </div>
+                <div class="management-field">
+                    <label for="userMobileNum">@Lang.Get("MobileNumber")</label>
+                    <input id="userMobileNum" name="MobileNum" type="tel" maxlength="50" placeholder="@Lang.Get("MobileNumPlaceholder")" />
+                </div>
+            </div>
+            <div class="management-field-grid">
+                <div class="management-field">
+                    <label for="userPreferredLanguage">@Lang.Get("PreferredLanguage")</label>
+                    <select id="userPreferredLanguage" name="PreferredLanguage">
+                        <option value="en-US">English (en-US)</option>
+                        <option value="ar-SA">العربية (ar-SA)</option>
+                    </select>
+                </div>
+                <div class="management-field">
+                    <label for="userExpiredDate">@Lang.Get("AccountExpiration")</label>
+                    <input id="userExpiredDate" name="ExpiredDate" type="date" />
+                </div>
+            </div>
+            <label class="management-switch">
+                <input id="userActive" name="IsActive" type="checkbox" checked value="true" />
+                <span class="switch-track"><span></span></span>
+                <span><strong>@Lang.Get("ActiveUser")</strong><small>@Lang.Get("ActiveUserHint")</small></span>
+            </label>
+        </form>
+    </section>
+
+    <section class="group-access-workspace" aria-labelledby="userAccessWorkspaceTitle">
+        <div class="group-access-heading">
+            <div>
+                <span class="eyebrow-text">@Lang.Get("UserConfiguration")</span>
+                <h2 id="userAccessWorkspaceTitle">@Lang.Get("UserAccessWorkspace")</h2>
+            </div>
+            <span class="group-access-context"><i class="bi bi-person-badge"></i>@Lang.Get("UserScopedSettings")</span>
+        </div>
+        <div class="group-tabs-scroll">
+            <nav class="group-tabs-nav" role="tablist" aria-label="@Lang.Get("UserAccessWorkspace")">
+                <button class="group-tab-button active" id="assignedPermissionsTab" type="button" role="tab" aria-selected="true" aria-controls="assignedPermissionsPanel" data-bs-toggle="tab" data-bs-target="#assignedPermissionsPanel">
+                    <span class="group-tab-icon"><i class="bi bi-shield-check"></i></span>
+                    <span>@Lang.Get("AssignedGroupPermissions")</span>
+                </button>
+                <button class="group-tab-button" id="userProfileTab" type="button" role="tab" aria-selected="false" aria-controls="userProfilePanel" data-bs-toggle="tab" data-bs-target="#userProfilePanel">
+                    <span class="group-tab-icon"><i class="bi bi-person-vcard"></i></span>
+                    <span>@Lang.Get("UserInformation")</span>
+                </button>
+            </nav>
+        </div>
+        <div class="tab-content group-tabs-content">
+            <div class="tab-pane fade show active" id="assignedPermissionsPanel" role="tabpanel" aria-labelledby="assignedPermissionsTab" tabindex="0"
+                 data-forms-label="@Lang.Get("Forms")"
+                 data-enabled-label="@Lang.Get("EnabledPermissions")">
+                <div class="permission-matrix-toolbar">
+                    <div><strong id="userPermissionTitle">@Lang.Get("AssignedGroupPermissions")</strong><small id="userPermissionSubtitle">@Lang.Get("ExistingPermissionsHint")</small></div>
+                    <div class="permission-summary">
+                        <span class="permission-enabled-count" id="userPermissionEnabledCount"><i class="bi bi-check2-circle"></i><span>0 @Lang.Get("EnabledPermissions")</span></span>
+                        <span class="permission-record-count" id="userPermissionRecordCount">0 @Lang.Get("Forms")</span>
+                    </div>
+                </div>
+                <div class="permission-tools">
+                    <label class="permission-filter" for="userPermissionFilterInput"><i class="bi bi-search"></i><input id="userPermissionFilterInput" type="search" placeholder="@Lang.Get("FilterSystemForms")" autocomplete="off" /><kbd>Ctrl K</kbd></label>
+                    <span class="permission-reading-guide"><i class="bi bi-info-circle"></i>@Lang.Get("PermissionReadingGuide")</span>
+                </div>
+                <div class="permission-loading d-none" id="userPermissionLoading"><span class="spinner-border spinner-border-sm" aria-hidden="true"></span><span>@Lang.Get("LoadingFormsPermissions")</span></div>
+                <div class="permission-error d-none" id="userPermissionError" role="alert"><i class="bi bi-exclamation-triangle"></i><span>@Lang.Get("FormsPermissionsLoadError")</span><button type="button" id="retryUserPermissionsButton">@Lang.Get("Retry")</button></div>
+                <div class="permission-table-wrap d-none" id="userPermissionTableWrap">
+                    <table class="permission-table">
+                        <thead>
+                            <tr>
+                                <th class="permission-form-column">@Lang.Get("SystemForm")</th>
+                                <th><span class="permission-column-heading"><i class="bi bi-eye"></i><span>@Lang.Get("CanView")</span></span></th>
+                                <th><span class="permission-column-heading"><i class="bi bi-floppy"></i><span>@Lang.Get("CanSave")</span></span></th>
+                                <th><span class="permission-column-heading permission-danger-heading"><i class="bi bi-trash3"></i><span>@Lang.Get("CanDelete")</span></span></th>
+                                <th><span class="permission-column-heading"><i class="bi bi-search"></i><span>@Lang.Get("CanSearch")</span></span></th>
+                                <th><span class="permission-column-heading"><i class="bi bi-printer"></i><span>@Lang.Get("CanPrint")</span></span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="userPermissionRows"></tbody>
+                    </table>
+                </div>
+                <div class="group-tab-empty-state" id="userPermissionEmptyState"><span><i class="bi bi-shield-lock"></i></span><div><h3>@Lang.Get("SelectGroupToManageAccess")</h3><p>@Lang.Get("Select group for user to view active security permissions.")</p></div></div>
+            </div>
+            <div class="tab-pane fade" id="userProfilePanel" role="tabpanel" aria-labelledby="userProfileTab" tabindex="0">
+                <div class="group-tab-empty-state" id="userProfileSummaryState">
+                    <span><i class="bi bi-person-badge"></i></span>
+                    <div>
+                        <h3 id="userProfileSummaryName">@Lang.Get("NoUserSelected")</h3>
+                        <p id="userProfileSummaryDetails">@Lang.Get("Select a user from the directory to inspect account details.")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div class="modal fade management-directory-modal" id="userDirectoryModal" tabindex="-1" aria-labelledby="userDirectoryModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <span class="modal-icon"><i class="bi bi-person-lines-fill"></i></span>
+                    <div><span class="eyebrow-text">@Lang.Get("Directory")</span><h2 class="modal-title" id="userDirectoryModalTitle">@Lang.Get("SystemUsers")</h2></div>
+                </div>
+                <div class="modal-header-actions">
+                    <span class="result-count" id="userResultCount">0 @Lang.Get("Records")</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="management-search"><i class="bi bi-search"></i><input id="userSearchInput" type="search" placeholder="@Lang.Get("SearchUsersPlaceholder")" /><kbd>Enter</kbd></div>
+                <div class="directory-loading" id="userDirectoryLoading"><span class="spinner-border spinner-border-sm" aria-hidden="true"></span><span>@Lang.Get("LoadingUsers")</span></div>
+                <div class="directory-error d-none" id="userDirectoryError"><i class="bi bi-exclamation-triangle"></i><span>@Lang.Get("UsersLoadError")</span><button type="button" id="retryUsersButton">@Lang.Get("Retry")</button></div>
+                <div class="directory-table-wrap d-none" id="userDirectoryTableWrap">
+                    <table class="directory-table">
+                        <thead>
+                            <tr>
+                                <th>@Lang.Get("UserCode")</th>
+                                <th>@Lang.Get("EnglishName")</th>
+                                <th>@Lang.Get("ArabicName")</th>
+                                <th>@Lang.Get("AssignedGroup")</th>
+                                <th>@Lang.Get("EmailAddress")</th>
+                                <th>@Lang.Get("Status")</th>
+                                <th>@Lang.Get("Registered")</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userDirectoryRows"></tbody>
+                    </table>
+                </div>
+                <div class="management-empty-state d-none" id="userDirectoryEmpty">
+                    <span><i class="bi bi-person-x"></i></span>
+                    <h3>@Lang.Get("NoUsersFound")</h3>
+                    <p>@Lang.Get("NoUsersFoundHint")</p>
+                    <button class="toolbar-button toolbar-button-primary" type="button" data-focus-new-user><i class="bi bi-plus-lg"></i>@Lang.Get("CreateFirstUser")</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade management-action-modal" id="userActionModal" tabindex="-1" aria-labelledby="userActionModalTitle" aria-hidden="true"
+     data-no-selection-title="@Lang.Get("DeleteUserNoSelectionTitle")"
+     data-no-selection-message="@Lang.Get("DeleteUserNoSelectionMessage")"
+     data-confirm-title="@Lang.Get("DeleteUserConfirmTitle")"
+     data-confirm-message="@Lang.Get("DeleteUserConfirmMessage")"
+     data-not-found-message="@Lang.Get("DeleteUserNotFoundMessage")"
+     data-failed-message="@Lang.Get("DeleteUserFailedMessage")">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <span class="action-modal-icon" id="userActionModalIcon"><i class="bi bi-exclamation-triangle"></i></span>
+                <h2 class="modal-title" id="userActionModalTitle"></h2>
+                <p id="userActionModalMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="toolbar-button" id="userActionCancelButton" data-bs-dismiss="modal">@Lang.Get("Cancel")</button>
+                <button type="button" class="toolbar-button toolbar-button-danger" id="userActionConfirmButton">@Lang.Get("Delete")</button>
+                <button type="button" class="toolbar-button toolbar-button-primary d-none" id="userActionOkButton" data-bs-dismiss="modal">@Lang.Get("OK")</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (() => {
+            const form = document.getElementById('userEditorForm');
+            const userCode = document.getElementById('userCode');
+            const userGroupIdSelect = document.getElementById('userGroupId');
+            const directoryElement = document.getElementById('userDirectoryModal');
+            const directoryModal = directoryElement ? new bootstrap.Modal(directoryElement) : null;
+            const searchInput = document.getElementById('userSearchInput');
+            const rowsElement = document.getElementById('userDirectoryRows');
+            const tableWrap = document.getElementById('userDirectoryTableWrap');
+            const emptyState = document.getElementById('userDirectoryEmpty');
+            const loadingState = document.getElementById('userDirectoryLoading');
+            const errorState = document.getElementById('userDirectoryError');
+            const resultCount = document.getElementById('userResultCount');
+            const actionElement = document.getElementById('userActionModal');
+            const actionModal = actionElement ? new bootstrap.Modal(actionElement) : null;
+            const actionTitle = document.getElementById('userActionModalTitle');
+            const actionMessage = document.getElementById('userActionModalMessage');
+            const actionIcon = document.getElementById('userActionModalIcon');
+            const actionCancel = document.getElementById('userActionCancelButton');
+            const actionConfirm = document.getElementById('userActionConfirmButton');
+            const actionOk = document.getElementById('userActionOkButton');
+            const deleteButton = document.getElementById('deleteUserButton');
+            const saveButton = document.getElementById('saveUserButton');
+            const assignedPermissionsPanel = document.getElementById('assignedPermissionsPanel');
+            const permissionLoading = document.getElementById('userPermissionLoading');
+            const permissionError = document.getElementById('userPermissionError');
+            const permissionTableWrap = document.getElementById('userPermissionTableWrap');
+            const permissionRows = document.getElementById('userPermissionRows');
+            const permissionEmptyState = document.getElementById('userPermissionEmptyState');
+            const permissionRecordCount = document.getElementById('userPermissionRecordCount');
+            const permissionEnabledCount = document.getElementById('userPermissionEnabledCount');
+            const permissionFilterInput = document.getElementById('userPermissionFilterInput');
+            const recordBadgeText = document.getElementById('userRecordBadgeText');
+            
+            let users = [];
+            let groups = [];
+            let formPermissions = [];
+            let permissionRequestController = null;
+
+            const resetEditor = () => {
+                form?.reset();
+                document.getElementById('userId').value = '';
+                document.getElementById('userActive').checked = true;
+                if (recordBadgeText) recordBadgeText.textContent = '@Lang.Get("NewRecord")';
+                loadGroupPermissions(userGroupIdSelect?.value);
+                userCode?.focus();
+            };
+
+            const showActionModal = (title, message, confirmation = false) => {
+                actionTitle.textContent = title;
+                actionMessage.textContent = message;
+                actionIcon.classList.toggle('confirmation', confirmation);
+                actionIcon.innerHTML = confirmation ? '<i class="bi bi-trash3"></i>' : '<i class="bi bi-exclamation-triangle"></i>';
+                actionCancel.classList.toggle('d-none', !confirmation);
+                actionConfirm.classList.toggle('d-none', !confirmation);
+                actionOk.classList.toggle('d-none', confirmation);
+                actionModal?.show();
+            };
+
+            const loadGroupsOptions = async () => {
+                try {
+                    const response = await fetch('@Url.Action("GetAllGroups", "Administration")', { headers: { 'Accept': 'application/json' } });
+                    if (!response.ok) return;
+                    groups = await response.json();
+                    const currentValue = userGroupIdSelect.value;
+                    userGroupIdSelect.replaceChildren();
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = '@Lang.Get("SelectGroup")';
+                    userGroupIdSelect.appendChild(defaultOption);
+
+                    groups.forEach(group => {
+                        if (!group.isActive) return;
+                        const option = document.createElement('option');
+                        option.value = group.groupID;
+                        const groupName = document.documentElement.dir === 'rtl'
+                            ? (group.groupArabicName || group.groupEnglishName)
+                            : (group.groupEnglishName || group.groupArabicName);
+                        option.textContent = `${group.groupCode} - ${groupName}`;
+                        userGroupIdSelect.appendChild(option);
+                    });
+
+                    if (currentValue) userGroupIdSelect.value = currentValue;
+                } catch (err) {
+                    console.error('Failed to load group options', err);
+                }
+            };
+
+            const displayName = user => document.documentElement.dir === 'rtl' ? (user.userArabicName || user.userEnglishName) : (user.userEnglishName || user.userArabicName);
+            const displayGroupName = user => document.documentElement.dir === 'rtl' ? (user.groupArabicName || user.groupEnglishName) : (user.groupEnglishName || user.groupArabicName);
+
+            const permissionName = (item, englishProperty, arabicProperty) => document.documentElement.dir === 'rtl'
+                ? (item[arabicProperty] || item[englishProperty])
+                : (item[englishProperty] || item[arabicProperty]);
+
+            const renderGroupPermissions = items => {
+                permissionRows.replaceChildren();
+                const permissionProperties = ['canView', 'canSave', 'canDelete', 'canSearch', 'canPrint'];
+                items.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.dataset.formId = item.formID;
+                    const formCell = document.createElement('td');
+                    formCell.className = 'permission-form-cell';
+                    const moduleName = permissionName(item, 'moduleEnglishName', 'moduleArabicName');
+                    const subModuleName = permissionName(item, 'subModuleEnglishName', 'subModuleArabicName');
+                    const module = document.createElement('span');
+                    module.className = 'permission-module-name';
+                    module.innerHTML = '<i class="bi bi-grid"></i>';
+                    module.append(document.createTextNode(moduleName || '@Lang.Get("SystemForm")'));
+                    const formName = document.createElement('strong');
+                    formName.textContent = permissionName(item, 'formEnglishName', 'formArabicName');
+                    const hierarchy = document.createElement('small');
+                    hierarchy.textContent = [subModuleName, item.formCode].filter(Boolean).join('  •  ');
+                    formCell.append(module, formName, hierarchy);
+                    row.appendChild(formCell);
+
+                    permissionProperties.forEach(property => {
+                        const cell = document.createElement('td');
+                        const isChecked = item[property] === true;
+                        cell.innerHTML = isChecked 
+                            ? '<span class="text-success"><i class="bi bi-check-circle-fill"></i></span>'
+                            : '<span class="text-muted opacity-25"><i class="bi bi-dash-circle"></i></span>';
+                        row.appendChild(cell);
+                    });
+                    permissionRows.appendChild(row);
+                });
+                permissionRecordCount.textContent = `${items.length} ${assignedPermissionsPanel.dataset.formsLabel}`;
+                const enabled = items.reduce((total, item) => total + permissionProperties.filter(property => item[property] === true).length, 0);
+                permissionEnabledCount.querySelector('span').textContent = `${enabled} ${assignedPermissionsPanel.dataset.enabledLabel}`;
+                permissionTableWrap.classList.toggle('d-none', items.length === 0);
+                permissionEmptyState.classList.toggle('d-none', items.length !== 0);
+            };
+
+            const filterFormPermissions = () => {
+                const term = (permissionFilterInput?.value || '').trim().toLocaleLowerCase();
+                const filtered = formPermissions.filter(item => [item.formEnglishName, item.formArabicName, item.formCode, item.moduleEnglishName, item.moduleArabicName, item.subModuleEnglishName, item.subModuleArabicName]
+                    .some(value => (value || '').toLocaleLowerCase().includes(term)));
+                renderGroupPermissions(filtered);
+            };
+
+            const loadGroupPermissions = async (groupId) => {
+                permissionRequestController?.abort();
+                if (!groupId) {
+                    formPermissions = [];
+                    renderGroupPermissions([]);
+                    return;
+                }
+                const requestController = new AbortController();
+                permissionRequestController = requestController;
+                permissionLoading.classList.remove('d-none');
+                permissionError.classList.add('d-none');
+                permissionTableWrap.classList.add('d-none');
+                permissionEmptyState.classList.add('d-none');
+                try {
+                    const endpoint = `@Url.Action("GetGroupPermissions", "Administration")?groupId=${encodeURIComponent(groupId)}`;
+                    const response = await fetch(endpoint, { headers: { 'Accept': 'application/json' }, signal: requestController.signal });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    formPermissions = await response.json();
+                    permissionFilterInput.value = '';
+                    renderGroupPermissions(formPermissions);
+                } catch (error) {
+                    if (error.name === 'AbortError') return;
+                    console.error('Unable to load group permissions.', error);
+                    permissionRecordCount.textContent = `0 ${assignedPermissionsPanel.dataset.formsLabel}`;
+                    permissionError.classList.remove('d-none');
+                } finally {
+                    if (permissionRequestController === requestController) permissionLoading.classList.add('d-none');
+                }
+            };
+
+            userGroupIdSelect?.addEventListener('change', () => {
+                loadGroupPermissions(userGroupIdSelect.value);
+            });
+
+            permissionFilterInput?.addEventListener('input', filterFormPermissions);
+
+            const renderUsers = () => {
+                const term = (searchInput?.value || '').trim().toLocaleLowerCase();
+                const filtered = users.filter(user => [user.userCode, user.userEnglishName, user.userArabicName, user.email, user.groupEnglishName, user.groupArabicName]
+                    .some(value => (value || '').toLocaleLowerCase().includes(term)));
+                rowsElement.replaceChildren();
+                filtered.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.tabIndex = 0;
+                    row.setAttribute('role', 'button');
+                    row.setAttribute('aria-label', displayName(user));
+                    
+                    const values = [user.userCode, user.userEnglishName, user.userArabicName, displayGroupName(user), user.email];
+                    values.forEach(value => { 
+                        const cell = document.createElement('td'); 
+                        cell.textContent = value || '—'; 
+                        row.appendChild(cell); 
+                    });
+
+                    const status = document.createElement('td');
+                    status.innerHTML = user.isActive ? '<span class="group-status active">@Lang.Get("Active")</span>' : '<span class="group-status inactive">@Lang.Get("Inactive")</span>';
+                    row.appendChild(status);
+
+                    const registered = document.createElement('td');
+                    registered.textContent = user.regDate ? new Intl.DateTimeFormat(document.documentElement.lang).format(new Date(user.regDate)) : '—';
+                    row.appendChild(registered);
+
+                    const selectUser = () => {
+                        document.getElementById('userId').value = user.userID;
+                        userCode.value = user.userCode || '';
+                        userGroupIdSelect.value = user.groupID || '';
+                        document.getElementById('userEnglishName').value = user.userEnglishName || '';
+                        document.getElementById('userArabicName').value = user.userArabicName || '';
+                        document.getElementById('userEmail').value = user.email || '';
+                        document.getElementById('userMobileNum').value = user.mobileNum || '';
+                        document.getElementById('userPreferredLanguage').value = user.preferredLanguage || 'en-US';
+                        if (user.expiredDate) {
+                            document.getElementById('userExpiredDate').value = user.expiredDate.split('T')[0];
+                        } else {
+                            document.getElementById('userExpiredDate').value = '';
+                        }
+                        document.getElementById('userActive').checked = user.isActive;
+                        if (recordBadgeText) recordBadgeText.textContent = user.userCode;
+
+                        loadGroupPermissions(user.groupID);
+                        directoryModal?.hide();
+                    };
+
+                    row.addEventListener('click', selectUser);
+                    row.addEventListener('keydown', event => { if (event.key === 'Enter') selectUser(); });
+                    rowsElement.appendChild(row);
+                });
+
+                resultCount.textContent = `${filtered.length} @Lang.Get("Records")`;
+                tableWrap.classList.toggle('d-none', filtered.length === 0);
+                emptyState.classList.toggle('d-none', filtered.length !== 0);
+            };
+
+            const loadUsers = async () => {
+                loadingState.classList.remove('d-none'); 
+                errorState.classList.add('d-none'); 
+                tableWrap.classList.add('d-none'); 
+                emptyState.classList.add('d-none');
+                try {
+                    const response = await fetch('@Url.Action("GetAllUsers", "Administration")', { headers: { 'Accept': 'application/json' } });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    users = await response.json();
+                    renderUsers();
+                } catch (error) {
+                    console.error('Unable to load system users.', error);
+                    errorState.classList.remove('d-none');
+                } finally { 
+                    loadingState.classList.add('d-none'); 
+                }
+            };
+
+            const saveUser = async () => {
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+
+                saveButton.disabled = true;
+                try {
+                    const formData = new FormData(form);
+                    const response = await fetch('@Url.Action("SaveUser", "Administration")', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+                    if (!response.ok || !result.success) {
+                        throw new Error(result.message || result.code || 'SaveFailed');
+                    }
+
+                    if (result.userId) {
+                        document.getElementById('userId').value = result.userId;
+                    }
+
+                    await loadUsers();
+                    showActionModal('@Lang.Get("Save")', '@Lang.Get("SaveUserSuccess")');
+                } catch (error) {
+                    showActionModal('@Lang.Get("Save")', error.message || '@Lang.Get("SaveUserFailed")');
+                } finally {
+                    saveButton.disabled = false;
+                }
+            };
+
+            const deleteSelectedUser = () => {
+                const userId = document.getElementById('userId').value;
+                if (!userId) {
+                    showActionModal(actionElement.dataset.noSelectionTitle, actionElement.dataset.noSelectionMessage);
+                    return;
+                }
+                showActionModal(actionElement.dataset.confirmTitle, actionElement.dataset.confirmMessage, true);
+            };
+
+            const confirmUserDeletion = async () => {
+                const userId = document.getElementById('userId').value;
+                if (!userId) {
+                    actionModal?.hide();
+                    showActionModal(actionElement.dataset.noSelectionTitle, actionElement.dataset.noSelectionMessage);
+                    return;
+                }
+
+                actionConfirm.disabled = true;
+                deleteButton.disabled = true;
+                try {
+                    const token = form.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                    const body = new URLSearchParams({ userId });
+                    const response = await fetch('@Url.Action("DeleteUser", "Administration")', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                            'RequestVerificationToken': token || ''
+                        },
+                        body
+                    });
+
+                    const result = await response.json().catch(() => ({ code: 'DeleteFailed' }));
+                    if (!response.ok || !result.success) {
+                        throw new Error(result.code || 'DeleteFailed');
+                    }
+
+                    actionModal?.hide();
+                    resetEditor();
+                    users = users.map(u => String(u.userID) === String(userId) ? { ...u, isActive: false } : u);
+                    renderUsers();
+                } catch (error) {
+                    const message = error.message === 'UserNotFound'
+                        ? actionElement.dataset.notFoundMessage
+                        : actionElement.dataset.failedMessage;
+                    showActionModal(actionElement.dataset.noSelectionTitle, message);
+                } finally {
+                    actionConfirm.disabled = false;
+                    deleteButton.disabled = false;
+                }
+            };
+
+            document.getElementById('newUserButton')?.addEventListener('click', resetEditor);
+            saveButton?.addEventListener('click', saveUser);
+            deleteButton?.addEventListener('click', deleteSelectedUser);
+            actionConfirm?.addEventListener('click', confirmUserDeletion);
+
+            document.querySelector('[data-focus-new-user]')?.addEventListener('click', () => {
+                resetEditor();
+                directoryModal?.hide();
+                directoryElement?.addEventListener('hidden.bs.modal', () => userCode?.focus(), { once: true });
+            });
+
+            document.getElementById('searchUserButton')?.addEventListener('click', () => directoryModal?.show());
+            directoryElement?.addEventListener('shown.bs.modal', () => {
+                searchInput?.focus();
+                loadUsers();
+            });
+
+            searchInput?.addEventListener('input', renderUsers);
+            document.getElementById('retryUsersButton')?.addEventListener('click', loadUsers);
+            document.getElementById('retryUserPermissionsButton')?.addEventListener('click', () => loadGroupPermissions(userGroupIdSelect?.value));
+            document.getElementById('importUserButton')?.addEventListener('click', () => document.getElementById('userImportFile')?.click());
+            document.getElementById('printUserButton')?.addEventListener('click', () => window.print());
+
+            loadGroupsOptions();
+        })();
+    </script>
+}

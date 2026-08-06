@@ -164,6 +164,39 @@ namespace AhmedRawdiBusinessPlatform.Services
             ,{ "Inactive", "Inactive" }
             ,{ "NoGroupsFound", "No groups found" }
             ,{ "NoGroupsFoundHint", "Try another search term or create a new group." }
+            ,{ "UsersManagement", "Users Management" }
+            ,{ "UsersSubtitle", "Create, organize, and maintain system user accounts from one secure workspace." }
+            ,{ "UserRecord", "User record" }
+            ,{ "UserDetails", "User details" }
+            ,{ "AssignedGroup", "Assigned group" }
+            ,{ "SelectGroup", "Select group..." }
+            ,{ "EmailAddress", "Email address" }
+            ,{ "EmailPlaceholder", "e.g. user@domain.com" }
+            ,{ "MobileNumber", "Mobile number" }
+            ,{ "MobileNumPlaceholder", "e.g. +966500000000" }
+            ,{ "AccountExpiration", "Account expiration" }
+            ,{ "ActiveUser", "Active user" }
+            ,{ "ActiveUserHint", "Active users can log in and perform actions based on their group permissions." }
+            ,{ "UserConfiguration", "User Account Scope" }
+            ,{ "UserAccessWorkspace", "User Profile & Permissions" }
+            ,{ "UserScopedSettings", "User-level settings" }
+            ,{ "UserInformation", "User Profile" }
+            ,{ "AssignedGroupPermissions", "Group Permissions" }
+            ,{ "UserDirectory", "System Users Directory" }
+            ,{ "SearchUsersPlaceholder", "Search by code, name, email, or group..." }
+            ,{ "LoadingUsers", "Loading system users..." }
+            ,{ "UsersLoadError", "Unable to load system users from the database." }
+            ,{ "NoUsersFound", "No users found" }
+            ,{ "NoUsersFoundHint", "Try another search term or create a new system user." }
+            ,{ "CreateFirstUser", "Create new user" }
+            ,{ "DeleteUserNoSelectionTitle", "No User Selected" }
+            ,{ "DeleteUserNoSelectionMessage", "Please select a user from the directory before attempting deletion." }
+            ,{ "DeleteUserConfirmTitle", "Deactivate User" }
+            ,{ "DeleteUserConfirmMessage", "Are you sure you want to deactivate this user? This action can be reversed by editing the user." }
+            ,{ "DeleteUserNotFoundMessage", "The selected user could not be found in the database." }
+            ,{ "DeleteUserFailedMessage", "Failed to deactivate user. Please check database connectivity and try again." }
+            ,{ "SaveUserSuccess", "User saved successfully." }
+            ,{ "SaveUserFailed", "Failed to save user details." }
         };
 
         private static readonly Dictionary<string, string> ArDict = new(StringComparer.OrdinalIgnoreCase)
@@ -320,6 +353,39 @@ namespace AhmedRawdiBusinessPlatform.Services
             ,{ "Inactive", "غير نشط" }
             ,{ "NoGroupsFound", "لم يتم العثور على مجموعات" }
             ,{ "NoGroupsFoundHint", "جرّب مصطلح بحث آخر أو أنشئ مجموعة جديدة." }
+            ,{ "UsersManagement", "إدارة المستخدمين" }
+            ,{ "UsersSubtitle", "إنشاء حسابات مستخدمي النظام وتنظيمها وإدارتها من مساحة عمل آمنة." }
+            ,{ "UserRecord", "سجل المستخدم" }
+            ,{ "UserDetails", "تفاصيل المستخدم" }
+            ,{ "AssignedGroup", "المجموعة المعينة" }
+            ,{ "SelectGroup", "اختر المجموعة..." }
+            ,{ "EmailAddress", "البريد الإلكتروني" }
+            ,{ "EmailPlaceholder", "مثال: user@domain.com" }
+            ,{ "MobileNumber", "رقم الجوال" }
+            ,{ "MobileNumPlaceholder", "مثال: +966500000000" }
+            ,{ "AccountExpiration", "تاريخ انتهاء الحساب" }
+            ,{ "ActiveUser", "مستخدم نشط" }
+            ,{ "ActiveUserHint", "المستخدمون النشطون يمكنهم تسجيل الدخول واستخدام الصلاحيات المعينة لمجموعتهم." }
+            ,{ "UserConfiguration", "نطاق حساب المستخدم" }
+            ,{ "UserAccessWorkspace", "ملف المستخدم والصلاحيات" }
+            ,{ "UserScopedSettings", "إعدادات مستوى المستخدم" }
+            ,{ "UserInformation", "ملف المستخدم" }
+            ,{ "AssignedGroupPermissions", "صلاحيات المجموعة" }
+            ,{ "UserDirectory", "دليل مستخدمي النظام" }
+            ,{ "SearchUsersPlaceholder", "البحث بكود المستخدم أو الاسم أو البريد أو المجموعة..." }
+            ,{ "LoadingUsers", "جارٍ تحميل مستخدمي النظام..." }
+            ,{ "UsersLoadError", "تعذر تحميل مستخدمي النظام من قاعدة البيانات." }
+            ,{ "NoUsersFound", "لم يتم العثور على مستخدمين" }
+            ,{ "NoUsersFoundHint", "جرّب مصطلح بحث آخر أو أنشئ مستخدم نظام جديد." }
+            ,{ "CreateFirstUser", "إنشاء مستخدم جديد" }
+            ,{ "DeleteUserNoSelectionTitle", "لم يتم تحديد مستخدم" }
+            ,{ "DeleteUserNoSelectionMessage", "يرجى تحديد مستخدم من الدليل قبل محاولة الحذف." }
+            ,{ "DeleteUserConfirmTitle", "إلغاء تفعيل المستخدم" }
+            ,{ "DeleteUserConfirmMessage", "هل أنت تأكد من أنك تريد إلغاء تفعيل هذا المستخدم؟ يمكن التراجع عن هذا الإجراء تعديل المستخدم." }
+            ,{ "DeleteUserNotFoundMessage", "تعذر العثور على المستخدم المحدد في قاعدة البيانات." }
+            ,{ "DeleteUserFailedMessage", "فشل إلغاء تفعيل المستخدم. يرجى التحقق من الاتصال بقاعدة البيانات والمحاولة مرة أخرى." }
+            ,{ "SaveUserSuccess", "تم حفظ بيانات المستخدم بنجاح." }
+            ,{ "SaveUserFailed", "فشل حفظ بيانات المستخدم." }
         };
 
         public LanguageService(IHttpContextAccessor httpContextAccessor)

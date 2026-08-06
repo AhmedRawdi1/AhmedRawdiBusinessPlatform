@@ -173,6 +173,7 @@ namespace AhmedRawdiBusinessPlatform.Services
             return formCode switch
             {
                 var f when f.Contains("UserGroupsManagement", StringComparison.OrdinalIgnoreCase) => "bi-people-fill",
+                var f when f.Contains("UsersManagement", StringComparison.OrdinalIgnoreCase) || f.Contains("SystemUsers", StringComparison.OrdinalIgnoreCase) => "bi-person-gear",
                 var f when f.Contains("Patient", StringComparison.OrdinalIgnoreCase) => "bi-person-fill",
                 var f when f.Contains("Lab", StringComparison.OrdinalIgnoreCase) => "bi-eyedropper",
                 var f when f.Contains("RIS", StringComparison.OrdinalIgnoreCase) => "bi-cpu-fill",
@@ -190,8 +191,13 @@ namespace AhmedRawdiBusinessPlatform.Services
             {
                 var code when code?.Contains("UserGroupsManagement", StringComparison.OrdinalIgnoreCase) == true
                     => "/Administration/UserGroups",
+                var code when code?.Contains("UsersManagement", StringComparison.OrdinalIgnoreCase) == true
+                           || code?.Contains("SystemUsers", StringComparison.OrdinalIgnoreCase) == true
+                           || code?.Equals("101") == true
+                    => "/Administration/Users",
                 _ => "javascript:void(0);"
             };
         }
     }
 }
+
