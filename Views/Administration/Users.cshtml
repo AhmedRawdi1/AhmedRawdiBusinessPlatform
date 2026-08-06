@@ -99,7 +99,7 @@
             <nav class="group-tabs-nav" role="tablist" aria-label="@Lang.Get("UserAccessWorkspace")">
                 <button class="group-tab-button active" id="assignedPermissionsTab" type="button" role="tab" aria-selected="true" aria-controls="assignedPermissionsPanel" data-bs-toggle="tab" data-bs-target="#assignedPermissionsPanel">
                     <span class="group-tab-icon"><i class="bi bi-shield-check"></i></span>
-                    <span>@Lang.Get("AssignedGroupPermissions")</span>
+                    <span>@Lang.Get("UserPermissions")</span>
                 </button>
                 <button class="group-tab-button" id="userProfileTab" type="button" role="tab" aria-selected="false" aria-controls="userProfilePanel" data-bs-toggle="tab" data-bs-target="#userProfilePanel">
                     <span class="group-tab-icon"><i class="bi bi-person-vcard"></i></span>
@@ -112,7 +112,7 @@
                  data-forms-label="@Lang.Get("Forms")"
                  data-enabled-label="@Lang.Get("EnabledPermissions")">
                 <div class="permission-matrix-toolbar">
-                    <div><strong id="userPermissionTitle">@Lang.Get("AssignedGroupPermissions")</strong><small id="userPermissionSubtitle">@Lang.Get("ExistingPermissionsHint")</small></div>
+                    <div><strong id="userPermissionTitle">@Lang.Get("UserPermissions")</strong><small id="userPermissionSubtitle">@Lang.Get("ExistingPermissionsHint")</small></div>
                     <div class="permission-summary">
                         <span class="permission-enabled-count" id="userPermissionEnabledCount"><i class="bi bi-check2-circle"></i><span>0 @Lang.Get("EnabledPermissions")</span></span>
                         <span class="permission-record-count" id="userPermissionRecordCount">0 @Lang.Get("Forms")</span>
@@ -120,7 +120,7 @@
                 </div>
                 <div class="permission-tools">
                     <label class="permission-filter" for="userPermissionFilterInput"><i class="bi bi-search"></i><input id="userPermissionFilterInput" type="search" placeholder="@Lang.Get("FilterSystemForms")" autocomplete="off" /><kbd>Ctrl K</kbd></label>
-                    <span class="permission-reading-guide"><i class="bi bi-info-circle"></i>@Lang.Get("PermissionReadingGuide")</span>
+                    <span class="permission-reading-guide"><i class="bi bi-info-circle"></i>@Lang.Get("PermissionReadingGuideUser")</span>
                 </div>
                 <div class="permission-loading d-none" id="userPermissionLoading"><span class="spinner-border spinner-border-sm" aria-hidden="true"></span><span>@Lang.Get("LoadingFormsPermissions")</span></div>
                 <div class="permission-error d-none" id="userPermissionError" role="alert"><i class="bi bi-exclamation-triangle"></i><span>@Lang.Get("FormsPermissionsLoadError")</span><button type="button" id="retryUserPermissionsButton">@Lang.Get("Retry")</button></div>
@@ -139,7 +139,7 @@
                         <tbody id="userPermissionRows"></tbody>
                     </table>
                 </div>
-                <div class="group-tab-empty-state" id="userPermissionEmptyState"><span><i class="bi bi-shield-lock"></i></span><div><h3>@Lang.Get("SelectGroupToManageAccess")</h3><p>@Lang.Get("Select group for user to view active security permissions.")</p></div></div>
+                <div class="group-tab-empty-state" id="userPermissionEmptyState"><span><i class="bi bi-shield-lock"></i></span><div><h3>@Lang.Get("SelectUserToManageAccess")</h3><p>@Lang.Get("Select a user from directory or assign a group to view active security permissions.")</p></div></div>
             </div>
             <div class="tab-pane fade" id="userProfilePanel" role="tabpanel" aria-labelledby="userProfileTab" tabindex="0">
                 <div class="group-tab-empty-state" id="userProfileSummaryState">
@@ -267,7 +267,7 @@
                 document.getElementById('userId').value = '';
                 document.getElementById('userActive').checked = true;
                 if (recordBadgeText) recordBadgeText.textContent = '@Lang.Get("NewRecord")';
-                loadGroupPermissions(userGroupIdSelect?.value);
+                loadUserPermissions(null, userGroupIdSelect?.value);
                 userCode?.focus();
             };
 
@@ -301,7 +301,7 @@
                         const groupName = document.documentElement.dir === 'rtl'
                             ? (group.groupArabicName || group.groupEnglishName)
                             : (group.groupEnglishName || group.groupArabicName);
-                        option.textContent = `${group.groupCode} - ${groupName}`;
+                        option.textContent = groupName;
                         userGroupIdSelect.appendChild(option);
                     });
 
@@ -318,7 +318,7 @@
                 ? (item[arabicProperty] || item[englishProperty])
                 : (item[englishProperty] || item[arabicProperty]);
 
-            const renderGroupPermissions = items => {
+            const renderUserPermissions = items => {
                 permissionRows.replaceChildren();
                 const permissionProperties = ['canView', 'canSave', 'canDelete', 'canSearch', 'canPrint'];
                 items.forEach(item => {
@@ -334,6 +334,13 @@
                     module.append(document.createTextNode(moduleName || '@Lang.Get("SystemForm")'));
                     const formName = document.createElement('strong');
                     formName.textContent = permissionName(item, 'formEnglishName', 'formArabicName');
+                    if (item.hasUserOverride) {
+                        const overrideBadge = document.createElement('span');
+                        overrideBadge.className = 'badge bg-info-subtle text-info ms-2';
+                        overrideBadge.title = 'User Override';
+                        overrideBadge.innerHTML = '<i class="bi bi-person-fill-gear me-1"></i>Override';
+                        formName.appendChild(overrideBadge);
+                    }
                     const hierarchy = document.createElement('small');
                     hierarchy.textContent = [subModuleName, item.formCode].filter(Boolean).join('  •  ');
                     formCell.append(module, formName, hierarchy);
@@ -360,14 +367,14 @@
                 const term = (permissionFilterInput?.value || '').trim().toLocaleLowerCase();
                 const filtered = formPermissions.filter(item => [item.formEnglishName, item.formArabicName, item.formCode, item.moduleEnglishName, item.moduleArabicName, item.subModuleEnglishName, item.subModuleArabicName]
                     .some(value => (value || '').toLocaleLowerCase().includes(term)));
-                renderGroupPermissions(filtered);
+                renderUserPermissions(filtered);
             };
 
-            const loadGroupPermissions = async (groupId) => {
+            const loadUserPermissions = async (userId = null, groupId = null) => {
                 permissionRequestController?.abort();
-                if (!groupId) {
+                if (!userId && !groupId) {
                     formPermissions = [];
-                    renderGroupPermissions([]);
+                    renderUserPermissions([]);
                     return;
                 }
                 const requestController = new AbortController();
@@ -377,15 +384,19 @@
                 permissionTableWrap.classList.add('d-none');
                 permissionEmptyState.classList.add('d-none');
                 try {
-                    const endpoint = `@Url.Action("GetGroupPermissions", "Administration")?groupId=${encodeURIComponent(groupId)}`;
+                    const queryParams = new URLSearchParams();
+                    if (userId) queryParams.append('userId', userId);
+                    if (groupId) queryParams.append('groupId', groupId);
+
+                    const endpoint = `@Url.Action("GetUserPermissions", "Administration")?${queryParams.toString()}`;
                     const response = await fetch(endpoint, { headers: { 'Accept': 'application/json' }, signal: requestController.signal });
                     if (!response.ok) throw new Error(`HTTP ${response.status}`);
                     formPermissions = await response.json();
                     permissionFilterInput.value = '';
-                    renderGroupPermissions(formPermissions);
+                    renderUserPermissions(formPermissions);
                 } catch (error) {
                     if (error.name === 'AbortError') return;
-                    console.error('Unable to load group permissions.', error);
+                    console.error('Unable to load user permissions.', error);
                     permissionRecordCount.textContent = `0 ${assignedPermissionsPanel.dataset.formsLabel}`;
                     permissionError.classList.remove('d-none');
                 } finally {
@@ -394,7 +405,8 @@
             };
 
             userGroupIdSelect?.addEventListener('change', () => {
-                loadGroupPermissions(userGroupIdSelect.value);
+                const activeUserId = document.getElementById('userId').value;
+                loadUserPermissions(activeUserId, userGroupIdSelect.value);
             });
 
             permissionFilterInput?.addEventListener('input', filterFormPermissions);
@@ -442,7 +454,7 @@
                         document.getElementById('userActive').checked = user.isActive;
                         if (recordBadgeText) recordBadgeText.textContent = user.userCode;
 
-                        loadGroupPermissions(user.groupID);
+                        loadUserPermissions(user.userID, user.groupID);
                         directoryModal?.hide();
                     };
 
@@ -577,7 +589,7 @@
 
             searchInput?.addEventListener('input', renderUsers);
             document.getElementById('retryUsersButton')?.addEventListener('click', loadUsers);
-            document.getElementById('retryUserPermissionsButton')?.addEventListener('click', () => loadGroupPermissions(userGroupIdSelect?.value));
+            document.getElementById('retryUserPermissionsButton')?.addEventListener('click', () => loadUserPermissions(document.getElementById('userId').value, userGroupIdSelect?.value));
             document.getElementById('importUserButton')?.addEventListener('click', () => document.getElementById('userImportFile')?.click());
             document.getElementById('printUserButton')?.addEventListener('click', () => window.print());
 

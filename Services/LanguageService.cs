@@ -181,7 +181,10 @@ namespace AhmedRawdiBusinessPlatform.Services
             ,{ "UserAccessWorkspace", "User Profile & Permissions" }
             ,{ "UserScopedSettings", "User-level settings" }
             ,{ "UserInformation", "User Profile" }
-            ,{ "AssignedGroupPermissions", "Group Permissions" }
+            , { "UserPermissions", "User Permissions" }
+            , { "AssignedGroupPermissions", "User Permissions" }
+            , { "SelectUserToManageAccess", "Select a user to view active security permissions" }
+            , { "PermissionReadingGuideUser", "A blue check means this user has effective permission." }
             ,{ "UserDirectory", "System Users Directory" }
             ,{ "SearchUsersPlaceholder", "Search by code, name, email, or group..." }
             ,{ "LoadingUsers", "Loading system users..." }
@@ -370,7 +373,10 @@ namespace AhmedRawdiBusinessPlatform.Services
             ,{ "UserAccessWorkspace", "ملف المستخدم والصلاحيات" }
             ,{ "UserScopedSettings", "إعدادات مستوى المستخدم" }
             ,{ "UserInformation", "ملف المستخدم" }
-            ,{ "AssignedGroupPermissions", "صلاحيات المجموعة" }
+            ,{ "UserPermissions", "صلاحيات المستخدم" }
+            ,{ "AssignedGroupPermissions", "صلاحيات المستخدم" }
+            ,{ "SelectUserToManageAccess", "اختر مستخدماً لعرض صلاحيات الأمان النشطة" }
+            ,{ "PermissionReadingGuideUser", "علامة الاختيار الزرقاء تعني أن المستخدم يمتلك الصلاحية." }
             ,{ "UserDirectory", "دليل مستخدمي النظام" }
             ,{ "SearchUsersPlaceholder", "البحث بكود المستخدم أو الاسم أو البريد أو المجموعة..." }
             ,{ "LoadingUsers", "جارٍ تحميل مستخدمي النظام..." }

@@ -12,11 +12,13 @@ namespace AhmedRawdiBusinessPlatform.Controllers
     {
         private readonly IGroupService _groupService;
         private readonly IUserService _userService;
+        private readonly IPermissionService _permissionService;
 
-        public AdministrationController(IGroupService groupService, IUserService userService)
+        public AdministrationController(IGroupService groupService, IUserService userService, IPermissionService permissionService)
         {
             _groupService = groupService;
             _userService = userService;
+            _permissionService = permissionService;
         }
 
         [HttpGet]
@@ -60,6 +62,34 @@ namespace AhmedRawdiBusinessPlatform.Controllers
             catch (SqlException exception) when (exception.Number == 50002)
             {
                 return NotFound(new { success = false, code = "GroupNotFound" });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUserPermissions(long? userId, long? groupId)
+        {
+            if (!userId.HasValue && !groupId.HasValue)
+            {
+                return BadRequest(new { success = false, code = "InvalidSelection" });
+            }
+
+            try
+            {
+                var permissions = await _permissionService.GetUserPermissionsAsync(userId, groupId);
+                return Json(permissions);
+            }
+            catch (SqlException exception) when (exception.Number == 50011)
+            {
+                return NotFound(new { success = false, code = "GroupNotFound" });
+            }
+            catch (SqlException exception) when (exception.Number == 50012)
+            {
+                return NotFound(new { success = false, code = "UserNotFound" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new { success = false, message = ex.Message });
             }
         }
 
