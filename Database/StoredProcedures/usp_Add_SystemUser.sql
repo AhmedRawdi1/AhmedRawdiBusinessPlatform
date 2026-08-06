@@ -36,31 +36,54 @@ BEGIN
         IF @Code IS NULL THROW 50051, 'User code is required.', 1;
         IF @EngName IS NULL THROW 50052, 'User English name is required.', 1;
 
+        IF @ArbName IS NULL SET @ArbName = @EngName;
+
         BEGIN TRANSACTION;
 
-        IF NOT EXISTS (SELECT 1 FROM dbo.SystemGroups WHERE ID = @GroupID AND IsActive = 1 AND CancellationDate IS NULL)
+        IF NOT EXISTS (SELECT 1 FROM dbo.SystemGroups WITH (UPDLOCK, HOLDLOCK) WHERE ID = @GroupID AND IsActive = 1 AND CancellationDate IS NULL)
             THROW 50050, 'The supplied group is not active or does not exist.', 1;
-
-        IF EXISTS (SELECT 1 FROM dbo.SystemUsers WITH (UPDLOCK, HOLDLOCK) WHERE Code = @Code AND ID <> ISNULL(@UserID, 0))
-            THROW 50053, 'A system user with the same code already exists.', 1;
 
         IF ISNULL(@UserID, 0) = 0
         BEGIN
-            INSERT dbo.SystemUsers
-                (GroupID, Code, EngName, ArbName, IsActive, UserPass, Email, MobileNum, PreferredLanguage, RegBy, ExpiredDate)
-            VALUES
-                (@GroupID, @Code, @EngName, @ArbName, @IsActive, NULL, @Email, @MobileNum, @PreferredLanguage, @RegBy, @ExpiredDate);
+            DECLARE @NextID BIGINT = ISNULL((SELECT MAX(ID) FROM dbo.SystemUsers WITH (UPDLOCK, HOLDLOCK)), 0) + 1;
+            DECLARE @IdStr NVARCHAR(20) = CAST(@NextID AS NVARCHAR(20));
+            DECLARE @FinalCode NVARCHAR(100) = @Code;
 
-            SET @NewUserID = CONVERT(bigint, SCOPE_IDENTITY());
+            IF @Code NOT LIKE '%' + @IdStr
+            BEGIN
+                SET @FinalCode = SUBSTRING(@Code + '_' + @IdStr, 1, 100);
+            END;
+
+            IF EXISTS (SELECT 1 FROM dbo.SystemUsers WITH (UPDLOCK, HOLDLOCK) WHERE Code = @FinalCode)
+                THROW 50053, 'A system user with the same code already exists.', 1;
+
+            INSERT dbo.SystemUsers
+                (ID, GroupID, Code, EngName, ArbName, IsActive, UserPass, Email, MobileNum, PreferredLanguage, RegBy, ExpiredDate, RegDate)
+            VALUES
+                (@NextID, @GroupID, @FinalCode, @EngName, @ArbName, @IsActive, NULL, @Email, @MobileNum, @PreferredLanguage, @RegBy, @ExpiredDate, GETDATE());
+
+            SET @NewUserID = @NextID;
         END
         ELSE
         BEGIN
             IF NOT EXISTS (SELECT 1 FROM dbo.SystemUsers WITH (UPDLOCK, HOLDLOCK) WHERE ID = @UserID)
                 THROW 50054, 'The system user to update was not found.', 1;
 
+            SET @NewUserID = @UserID;
+            DECLARE @UpdateIdStr NVARCHAR(20) = CAST(@UserID AS NVARCHAR(20));
+            DECLARE @UpdatedCode NVARCHAR(100) = @Code;
+
+            IF @Code NOT LIKE '%' + @UpdateIdStr
+            BEGIN
+                SET @UpdatedCode = SUBSTRING(@Code + '_' + @UpdateIdStr, 1, 100);
+            END;
+
+            IF EXISTS (SELECT 1 FROM dbo.SystemUsers WITH (UPDLOCK, HOLDLOCK) WHERE Code = @UpdatedCode AND ID <> @UserID)
+                THROW 50053, 'A system user with the same code already exists.', 1;
+
             UPDATE dbo.SystemUsers
             SET GroupID = @GroupID,
-                Code = @Code,
+                Code = @UpdatedCode,
                 EngName = @EngName,
                 ArbName = @ArbName,
                 IsActive = @IsActive,
@@ -70,8 +93,6 @@ BEGIN
                 RegBy = COALESCE(@RegBy, RegBy),
                 ExpiredDate = @ExpiredDate
             WHERE ID = @UserID;
-
-            SET @NewUserID = @UserID;
         END;
 
         COMMIT TRANSACTION;
