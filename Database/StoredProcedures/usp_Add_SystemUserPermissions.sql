@@ -14,6 +14,7 @@ BEGIN
     SET @ErrorDesc = NULL;
 
     BEGIN TRY
+        -- 1. Validate inputs
         IF ISNULL(@UserID, 0) = 0
             THROW 50001, 'User ID is required.', 1;
 
@@ -23,8 +24,17 @@ BEGIN
         IF @PermissionsJson IS NULL OR LTRIM(RTRIM(@PermissionsJson)) = N'' OR ISJSON(@PermissionsJson) = 0
             THROW 50003, 'A valid JSON array of form permissions is required.', 1;
 
+        -- 2. If GroupID is not supplied, fetch active GroupID from SystemUsers
+        IF @GroupID IS NULL
+        BEGIN
+            SELECT @GroupID = GroupID
+            FROM dbo.SystemUsers WITH (NOLOCK)
+            WHERE ID = @UserID;
+        END;
+
         BEGIN TRANSACTION;
 
+        -- 3. Parse JSON array into temporary table
         SELECT
             FormID,
             CAST(ISNULL(CanSave, 0) AS BIT)   AS CanSave,
@@ -43,6 +53,7 @@ BEGIN
             CanPrint  BIT      '$.CanPrint'
         );
 
+        -- 4. Upsert user-specific permissions (overriding or extending group inherited permissions)
         MERGE INTO dbo.SystemFormsPermissions WITH (UPDLOCK, HOLDLOCK) AS Target
         USING #ParsedUserPermissions AS Source
         ON (Target.UserID = @UserID 
@@ -50,6 +61,7 @@ BEGIN
             AND Target.CancelledDate IS NULL)
         WHEN MATCHED THEN
             UPDATE SET
+                GroupID   = ISNULL(@GroupID, Target.GroupID),
                 CanSave   = Source.CanSave,
                 CanUpdate = Source.CanUpdate,
                 CanDelete = Source.CanDelete,
