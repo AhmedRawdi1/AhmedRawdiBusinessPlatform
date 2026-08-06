@@ -123,6 +123,16 @@
                     <label class="permission-filter" for="userPermissionFilterInput"><i class="bi bi-search"></i><input id="userPermissionFilterInput" type="search" placeholder="@Lang.Get("FilterSystemForms")" autocomplete="off" /><kbd>Ctrl K</kbd></label>
                     <span class="permission-reading-guide"><i class="bi bi-info-circle"></i>@Lang.Get("PermissionReadingGuideUser")</span>
                 </div>
+                <div class="permission-legend">
+                    <span class="permission-legend-item"><span class="permission-legend-dot inherited"></span>Group Inherited</span>
+                    <span class="permission-legend-item"><span class="permission-legend-dot override"></span>User Custom Override</span>
+                    <span class="permission-legend-item"><span class="permission-legend-dot default"></span>Not Granted</span>
+                </div>
+                <div class="permission-quick-filters" id="userPermissionQuickFilters">
+                    <button type="button" class="permission-filter-pill active" data-filter="all">All Forms</button>
+                    <button type="button" class="permission-filter-pill" data-filter="overrides">User Overrides Only</button>
+                    <button type="button" class="permission-filter-pill" data-filter="enabled">Active Permissions Only</button>
+                </div>
                 <div class="permission-loading d-none" id="userPermissionLoading"><span class="spinner-border spinner-border-sm" aria-hidden="true"></span><span>@Lang.Get("LoadingFormsPermissions")</span></div>
                 <div class="permission-error d-none" id="userPermissionError" role="alert"><i class="bi bi-exclamation-triangle"></i><span>@Lang.Get("FormsPermissionsLoadError")</span><button type="button" id="retryUserPermissionsButton">@Lang.Get("Retry")</button></div>
                 <div class="permission-table-wrap d-none" id="userPermissionTableWrap">
@@ -334,47 +344,110 @@
                 return wrapper;
             };
 
+            let activeQuickFilter = 'all';
+
             const renderUserPermissions = items => {
                 permissionRows.replaceChildren();
                 const permissionLabels = ['@Lang.Get("CanView")', '@Lang.Get("CanSave")', '@Lang.Get("CanDelete")', '@Lang.Get("CanSearch")', '@Lang.Get("CanPrint")'];
                 const permissionProperties = ['canView', 'canSave', 'canDelete', 'canSearch', 'canPrint'];
-                items.forEach(item => {
-                    const row = document.createElement('tr');
-                    row.dataset.formId = item.formID;
-                    const formCell = document.createElement('td');
-                    formCell.className = 'permission-form-cell';
-                    const moduleName = permissionName(item, 'moduleEnglishName', 'moduleArabicName');
-                    const subModuleName = permissionName(item, 'subModuleEnglishName', 'subModuleArabicName');
-                    const module = document.createElement('span');
-                    module.className = 'permission-module-name';
-                    module.innerHTML = '<i class="bi bi-grid"></i>';
-                    module.append(document.createTextNode(moduleName || '@Lang.Get("SystemForm")'));
-                    const formName = document.createElement('strong');
-                    formName.textContent = permissionName(item, 'formEnglishName', 'formArabicName');
-                    if (item.hasUserOverride) {
-                        const overrideBadge = document.createElement('span');
-                        overrideBadge.className = 'badge bg-info-subtle text-info ms-2';
-                        overrideBadge.title = 'User Override';
-                        overrideBadge.innerHTML = '<i class="bi bi-person-fill-gear me-1"></i>Override';
-                        formName.appendChild(overrideBadge);
-                    }
-                    const hierarchy = document.createElement('small');
-                    hierarchy.textContent = [subModuleName, item.formCode].filter(Boolean).join('  •  ');
-                    formCell.append(module, formName, hierarchy);
-                    row.appendChild(formCell);
 
-                    permissionProperties.forEach((property, index) => {
-                        const cell = document.createElement('td');
-                        cell.appendChild(createPermissionCheckbox(item, property, permissionLabels[index]));
-                        row.appendChild(cell);
-                    });
-                    permissionRows.appendChild(row);
+                // Filter by quick filter tab
+                let filteredItems = items;
+                if (activeQuickFilter === 'overrides') {
+                    filteredItems = items.filter(item => item.hasUserOverride === true);
+                } else if (activeQuickFilter === 'enabled') {
+                    filteredItems = items.filter(item => permissionProperties.some(prop => item[prop] === true));
+                }
+
+                // Group by Module
+                const modulesMap = new Map();
+                filteredItems.forEach(item => {
+                    const moduleName = permissionName(item, 'moduleEnglishName', 'moduleArabicName') || '@Lang.Get("SystemForm")';
+                    if (!modulesMap.has(moduleName)) {
+                        modulesMap.set(moduleName, []);
+                    }
+                    modulesMap.get(moduleName).push(item);
                 });
-                permissionRecordCount.textContent = `${items.length} ${assignedPermissionsPanel.dataset.formsLabel}`;
+
+                modulesMap.forEach((moduleItems, moduleName) => {
+                    // Render Module Header Row
+                    const headerRow = document.createElement('tr');
+                    headerRow.className = 'permission-module-header';
+                    const headerCell = document.createElement('td');
+                    headerCell.colSpan = 6;
+                    
+                    const activeInModule = moduleItems.reduce((acc, it) => acc + permissionProperties.filter(p => it[p] === true).length, 0);
+
+                    headerCell.innerHTML = `
+                        <div class="permission-module-header-content">
+                            <i class="bi bi-folder2-open"></i>
+                            <span>${moduleName}</span>
+                            <span class="permission-module-count">${moduleItems.length} ${assignedPermissionsPanel.dataset.formsLabel} • ${activeInModule} active</span>
+                        </div>
+                    `;
+                    headerRow.appendChild(headerCell);
+                    permissionRows.appendChild(headerRow);
+
+                    // Render Module Items
+                    moduleItems.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.dataset.formId = item.formID;
+                        if (item.hasUserOverride) {
+                            row.classList.add('has-user-override');
+                        }
+
+                        const formCell = document.createElement('td');
+                        formCell.className = 'permission-form-cell';
+                        const subModuleName = permissionName(item, 'subModuleEnglishName', 'subModuleArabicName');
+
+                        const formTitleWrap = document.createElement('div');
+                        formTitleWrap.className = 'permission-form-title-wrap';
+
+                        if (item.formCode) {
+                            const codePill = document.createElement('span');
+                            codePill.className = 'form-code-pill';
+                            codePill.textContent = item.formCode;
+                            formTitleWrap.appendChild(codePill);
+                        }
+
+                        const formName = document.createElement('strong');
+                        formName.textContent = permissionName(item, 'formEnglishName', 'formArabicName');
+                        formTitleWrap.appendChild(formName);
+
+                        if (item.hasUserOverride) {
+                            const overrideBadge = document.createElement('span');
+                            overrideBadge.className = 'perm-status-badge override-badge';
+                            overrideBadge.title = 'Custom User Override';
+                            overrideBadge.innerHTML = '<i class="bi bi-person-fill-gear"></i>User Override';
+                            formTitleWrap.appendChild(overrideBadge);
+                        } else if (permissionProperties.some(prop => item[prop] === true)) {
+                            const inheritedBadge = document.createElement('span');
+                            inheritedBadge.className = 'perm-status-badge inherited-badge';
+                            inheritedBadge.title = 'Inherited from Group';
+                            inheritedBadge.innerHTML = '<i class="bi bi-shield-check"></i>Group Inherited';
+                            formTitleWrap.appendChild(inheritedBadge);
+                        }
+
+                        const hierarchy = document.createElement('small');
+                        hierarchy.textContent = subModuleName || 'System Form';
+
+                        formCell.append(formTitleWrap, hierarchy);
+                        row.appendChild(formCell);
+
+                        permissionProperties.forEach((property, index) => {
+                            const cell = document.createElement('td');
+                            cell.appendChild(createPermissionCheckbox(item, property, permissionLabels[index]));
+                            row.appendChild(cell);
+                        });
+                        permissionRows.appendChild(row);
+                    });
+                });
+
+                permissionRecordCount.textContent = `${filteredItems.length} ${assignedPermissionsPanel.dataset.formsLabel}`;
                 const enabled = items.reduce((total, item) => total + permissionProperties.filter(property => item[property] === true).length, 0);
                 permissionEnabledCount.querySelector('span').textContent = `${enabled} ${assignedPermissionsPanel.dataset.enabledLabel}`;
-                permissionTableWrap.classList.toggle('d-none', items.length === 0);
-                permissionEmptyState.classList.toggle('d-none', items.length !== 0);
+                permissionTableWrap.classList.toggle('d-none', filteredItems.length === 0 && modulesMap.size === 0);
+                permissionEmptyState.classList.toggle('d-none', filteredItems.length !== 0 || modulesMap.size !== 0);
 
                 const savePermBtn = document.getElementById('saveUserPermissionsButton');
                 if (savePermBtn) {
@@ -388,6 +461,15 @@
                     .some(value => (value || '').toLocaleLowerCase().includes(term)));
                 renderUserPermissions(filtered);
             };
+
+            document.getElementById('userPermissionQuickFilters')?.addEventListener('click', event => {
+                const btn = event.target.closest('.permission-filter-pill');
+                if (!btn) return;
+                document.querySelectorAll('#userPermissionQuickFilters .permission-filter-pill').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                activeQuickFilter = btn.dataset.filter || 'all';
+                filterFormPermissions();
+            });
 
             const loadUserPermissions = async (userId = null, groupId = null) => {
                 permissionRequestController?.abort();
