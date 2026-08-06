@@ -6,6 +6,10 @@
 # dotenv files
 .env
 
+# Temporary drive upload folder
+.tmp.driveupload/
+
+
 # User-specific files
 *.rsuser
 *.suo
