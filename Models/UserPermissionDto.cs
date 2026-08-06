@@ -14,6 +14,7 @@ namespace AhmedRawdiBusinessPlatform.Models
         public string FormCode { get; set; } = string.Empty;
         public string? FormEnglishName { get; set; }
         public string? FormArabicName { get; set; }
+        public bool CanView { get; set; }
         public bool CanSave { get; set; }
         public bool CanUpdate { get; set; }
         public bool CanDelete { get; set; }
