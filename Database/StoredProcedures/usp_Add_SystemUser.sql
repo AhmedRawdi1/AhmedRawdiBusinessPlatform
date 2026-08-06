@@ -15,7 +15,9 @@ CREATE OR ALTER PROCEDURE dbo.usp_Add_SystemUser
     @ErrorDesc nvarchar(2048) OUTPUT,
     @UserID bigint = NULL,
     @PreferredLanguage varchar(25) = NULL,
-    @NewUserID bigint = NULL OUTPUT
+    @NewUserID bigint = NULL OUTPUT,
+    @UserPass nvarchar(256) = NULL,
+    @Passphrase nvarchar(128) = N'ARBP_Secure_Passphrase_Key_2026'
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -31,12 +33,19 @@ BEGIN
         SET @ArbName = NULLIF(LTRIM(RTRIM(@ArbName)), N'');
         SET @Email = NULLIF(LTRIM(RTRIM(@Email)), N'');
         SET @MobileNum = NULLIF(LTRIM(RTRIM(@MobileNum)), N'');
+        SET @UserPass = NULLIF(LTRIM(RTRIM(@UserPass)), N'');
         SET @PreferredLanguage = COALESCE(NULLIF(LTRIM(RTRIM(@PreferredLanguage)), ''), 'en-US');
 
         IF @Code IS NULL THROW 50051, 'User code is required.', 1;
         IF @EngName IS NULL THROW 50052, 'User English name is required.', 1;
 
         IF @ArbName IS NULL SET @ArbName = @EngName;
+
+        DECLARE @EncryptedPass VARBINARY(MAX) = NULL;
+        IF @UserPass IS NOT NULL
+        BEGIN
+            SET @EncryptedPass = ENCRYPTBYPASSPHRASE(@Passphrase, @UserPass);
+        END;
 
         BEGIN TRANSACTION;
 
@@ -60,7 +69,7 @@ BEGIN
             INSERT dbo.SystemUsers
                 (ID, GroupID, Code, EngName, ArbName, IsActive, UserPass, Email, MobileNum, PreferredLanguage, RegBy, ExpiredDate, RegDate)
             VALUES
-                (@NextID, @GroupID, @FinalCode, @EngName, @ArbName, @IsActive, NULL, @Email, @MobileNum, @PreferredLanguage, @RegBy, @ExpiredDate, GETDATE());
+                (@NextID, @GroupID, @FinalCode, @EngName, @ArbName, @IsActive, @EncryptedPass, @Email, @MobileNum, @PreferredLanguage, @RegBy, @ExpiredDate, GETDATE());
 
             SET @NewUserID = @NextID;
         END
@@ -87,6 +96,7 @@ BEGIN
                 EngName = @EngName,
                 ArbName = @ArbName,
                 IsActive = @IsActive,
+                UserPass = COALESCE(@EncryptedPass, UserPass),
                 Email = @Email,
                 MobileNum = @MobileNum,
                 PreferredLanguage = @PreferredLanguage,

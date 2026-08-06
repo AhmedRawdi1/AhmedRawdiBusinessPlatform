@@ -14,5 +14,6 @@ namespace AhmedRawdiBusinessPlatform.Models
         public string? PreferredLanguage { get; set; }
         public bool IsActive { get; set; } = true;
         public DateTime? ExpiredDate { get; set; }
+        public string? UserPass { get; set; }
     }
 }
