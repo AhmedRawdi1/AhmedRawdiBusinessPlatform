@@ -184,6 +184,34 @@ namespace AhmedRawdiBusinessPlatform.Controllers
                     new { success = false, code = "DeleteFailed" });
             }
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveUserPermissions(long userId, long? groupId, string permissionsJson)
+        {
+            if (userId <= 0)
+            {
+                return BadRequest(new { success = false, code = "InvalidSelection" });
+            }
+
+            try
+            {
+                long? regBy = null;
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (long.TryParse(userIdClaim, out var currentUserId))
+                {
+                    regBy = currentUserId;
+                }
+
+                await _permissionService.SaveUserPermissionsAsync(userId, groupId, permissionsJson, regBy);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new { success = false, message = ex.Message });
+            }
+        }
     }
 }
 

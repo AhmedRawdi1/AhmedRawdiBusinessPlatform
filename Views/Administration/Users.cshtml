@@ -114,6 +114,7 @@
                 <div class="permission-matrix-toolbar">
                     <div><strong id="userPermissionTitle">@Lang.Get("UserPermissions")</strong><small id="userPermissionSubtitle">@Lang.Get("ExistingPermissionsHint")</small></div>
                     <div class="permission-summary">
+                        <button class="toolbar-button toolbar-button-primary btn-sm me-2 d-none" type="button" id="saveUserPermissionsButton"><i class="bi bi-check2-circle"></i><span>@Lang.Get("Save")</span></button>
                         <span class="permission-enabled-count" id="userPermissionEnabledCount"><i class="bi bi-check2-circle"></i><span>0 @Lang.Get("EnabledPermissions")</span></span>
                         <span class="permission-record-count" id="userPermissionRecordCount">0 @Lang.Get("Forms")</span>
                     </div>
@@ -318,8 +319,24 @@
                 ? (item[arabicProperty] || item[englishProperty])
                 : (item[englishProperty] || item[arabicProperty]);
 
+            const createPermissionCheckbox = (item, property, label) => {
+                const wrapper = document.createElement('label');
+                wrapper.className = 'permission-checkbox';
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.checked = item[property] === true;
+                input.dataset.formId = item.formID;
+                input.dataset.permission = property;
+                input.setAttribute('aria-label', `${label}: ${permissionName(item, 'formEnglishName', 'formArabicName')}`);
+                const visual = document.createElement('span');
+                visual.innerHTML = '<i class="bi bi-check"></i>';
+                wrapper.append(input, visual);
+                return wrapper;
+            };
+
             const renderUserPermissions = items => {
                 permissionRows.replaceChildren();
+                const permissionLabels = ['@Lang.Get("CanView")', '@Lang.Get("CanSave")', '@Lang.Get("CanDelete")', '@Lang.Get("CanSearch")', '@Lang.Get("CanPrint")'];
                 const permissionProperties = ['canView', 'canSave', 'canDelete', 'canSearch', 'canPrint'];
                 items.forEach(item => {
                     const row = document.createElement('tr');
@@ -346,12 +363,9 @@
                     formCell.append(module, formName, hierarchy);
                     row.appendChild(formCell);
 
-                    permissionProperties.forEach(property => {
+                    permissionProperties.forEach((property, index) => {
                         const cell = document.createElement('td');
-                        const isChecked = item[property] === true;
-                        cell.innerHTML = isChecked 
-                            ? '<span class="text-success"><i class="bi bi-check-circle-fill"></i></span>'
-                            : '<span class="text-muted opacity-25"><i class="bi bi-dash-circle"></i></span>';
+                        cell.appendChild(createPermissionCheckbox(item, property, permissionLabels[index]));
                         row.appendChild(cell);
                     });
                     permissionRows.appendChild(row);
@@ -361,6 +375,11 @@
                 permissionEnabledCount.querySelector('span').textContent = `${enabled} ${assignedPermissionsPanel.dataset.enabledLabel}`;
                 permissionTableWrap.classList.toggle('d-none', items.length === 0);
                 permissionEmptyState.classList.toggle('d-none', items.length !== 0);
+
+                const savePermBtn = document.getElementById('saveUserPermissionsButton');
+                if (savePermBtn) {
+                    savePermBtn.classList.toggle('d-none', items.length === 0 || !document.getElementById('userId').value);
+                }
             };
 
             const filterFormPermissions = () => {
@@ -410,6 +429,70 @@
             });
 
             permissionFilterInput?.addEventListener('input', filterFormPermissions);
+
+            permissionRows?.addEventListener('change', event => {
+                const input = event.target.closest('input[type="checkbox"]');
+                if (!input) return;
+                const item = formPermissions.find(entry => String(entry.formID) === input.dataset.formId);
+                if (item) {
+                    item[input.dataset.permission] = input.checked;
+                    item.hasUserOverride = true;
+                }
+                filterFormPermissions();
+            });
+
+            const saveUserPermissions = async () => {
+                const userId = document.getElementById('userId').value;
+                if (!userId) {
+                    showActionModal('@Lang.Get("Save")', '@Lang.Get("DeleteUserNoSelectionMessage")');
+                    return;
+                }
+
+                const payload = formPermissions.map(item => ({
+                    FormID: item.formID,
+                    CanSave: item.canSave === true,
+                    CanUpdate: item.canUpdate === true,
+                    CanDelete: item.canDelete === true,
+                    CanSearch: item.canSearch === true,
+                    CanPrint: item.canPrint === true
+                }));
+
+                const token = form.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                const body = new URLSearchParams({
+                    userId: userId,
+                    groupId: userGroupIdSelect.value || '',
+                    permissionsJson: JSON.stringify(payload)
+                });
+
+                const savePermBtn = document.getElementById('saveUserPermissionsButton');
+                if (savePermBtn) savePermBtn.disabled = true;
+
+                try {
+                    const response = await fetch('@Url.Action("SaveUserPermissions", "Administration")', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                            'RequestVerificationToken': token || ''
+                        },
+                        body
+                    });
+
+                    const result = await response.json();
+                    if (!response.ok || !result.success) {
+                        throw new Error(result.message || 'Failed to save user permissions');
+                    }
+
+                    showActionModal('@Lang.Get("Save")', '@Lang.Get("SaveUserSuccess")');
+                    await loadUserPermissions(userId, userGroupIdSelect.value);
+                } catch (err) {
+                    showActionModal('@Lang.Get("Save")', err.message || '@Lang.Get("SaveUserFailed")');
+                } finally {
+                    if (savePermBtn) savePermBtn.disabled = false;
+                }
+            };
+
+            document.getElementById('saveUserPermissionsButton')?.addEventListener('click', saveUserPermissions);
 
             const renderUsers = () => {
                 const term = (searchInput?.value || '').trim().toLocaleLowerCase();

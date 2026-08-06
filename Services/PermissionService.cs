@@ -198,6 +198,37 @@ namespace AhmedRawdiBusinessPlatform.Services
                 _ => "javascript:void(0);"
             };
         }
+
+        public async Task SaveUserPermissionsAsync(long userId, long? groupId, string permissionsJson, long? registeredUserId = null)
+        {
+            if (userId <= 0) throw new ArgumentException("User ID is required.", nameof(userId));
+            if (string.IsNullOrWhiteSpace(permissionsJson)) throw new ArgumentException("Permissions JSON is required.", nameof(permissionsJson));
+
+            var userParam = new SqlParameter("@UserID", userId);
+            var groupParam = new SqlParameter("@GroupID", (object?)groupId ?? DBNull.Value);
+            var jsonParam = new SqlParameter("@PermissionsJson", permissionsJson);
+            var regUserParam = new SqlParameter("@RegUserID", (object?)registeredUserId ?? DBNull.Value);
+
+            var hasErrorParam = new SqlParameter("@HasError", SqlDbType.Bit) { Direction = ParameterDirection.Output };
+            var errorDescParam = new SqlParameter("@ErrorDesc", SqlDbType.NVarChar, 2048) { Direction = ParameterDirection.Output };
+
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC dbo.usp_Add_SystemUserPermissions " +
+                "@UserID = @UserID, " +
+                "@GroupID = @GroupID, " +
+                "@PermissionsJson = @PermissionsJson, " +
+                "@RegUserID = @RegUserID, " +
+                "@HasError = @HasError OUTPUT, " +
+                "@ErrorDesc = @ErrorDesc OUTPUT",
+                userParam, groupParam, jsonParam, regUserParam, hasErrorParam, errorDescParam
+            );
+
+            if (hasErrorParam.Value != DBNull.Value && Convert.ToBoolean(hasErrorParam.Value))
+            {
+                var errorMsg = errorDescParam.Value != DBNull.Value ? errorDescParam.Value.ToString() : "An error occurred while saving user permissions.";
+                throw new InvalidOperationException(errorMsg);
+            }
+        }
     }
 }
 
