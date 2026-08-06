@@ -101,6 +101,42 @@ namespace AhmedRawdiBusinessPlatform.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveGroup([FromForm] SaveGroupDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { success = false, code = "InvalidData" });
+            }
+
+            try
+            {
+                long? regBy = null;
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (long.TryParse(userIdClaim, out var currentUserId))
+                {
+                    regBy = currentUserId;
+                }
+
+                var groupId = await _groupService.SaveGroupAsync(model, regBy);
+                return Json(new { success = true, groupId });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (SqlException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new { success = false, code = "SaveFailed", message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> SaveUser([FromForm] SaveUserDto model)
         {
             if (!ModelState.IsValid)
