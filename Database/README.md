@@ -11,6 +11,8 @@ Database changes are versioned with the application. Do not edit production proc
 5. Run `Migrations/FinalizePasswordHashMigration.sql` to remove the reversible password column.
 6. Provision a dedicated SQL login outside source control, then run `Migrations/GrantApplicationLeastPrivilege.sql`.
 7. Run `Tests/VerifyCoreAdministrationProcedures.sql`.
+8. Run `Migrations/ApplyMasterDataManagement.sql` from the repository root with `sqlcmd -b`.
+9. Run `Tests/VerifyMasterDataCrud.sql`; its test transaction is always rolled back.
 
 The application connection string belongs in .NET User Secrets for local development and a managed secret store or environment variable in deployed environments. Never commit database passwords.
 

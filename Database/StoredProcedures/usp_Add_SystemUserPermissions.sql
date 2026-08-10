@@ -19,8 +19,8 @@ BEGIN
     SELECT @HasError = 0, @ErrorDesc = NULL;
 
     BEGIN TRY
-        SELECT @GroupID = COALESCE(@GroupID, GroupID) FROM dbo.SystemUsers WHERE ID = @UserID AND CancellationDate IS NULL;
-        IF @GroupID IS NULL THROW 50002, 'The selected system user does not exist.', 1;
+        IF NOT EXISTS (SELECT 1 FROM dbo.SystemUsers WHERE ID = @UserID AND CancellationDate IS NULL)
+            THROW 50002, 'The selected system user does not exist.', 1;
         IF ISJSON(@PermissionsJson) <> 1 THROW 50003, 'A valid JSON array of form permissions is required.', 1;
 
         CREATE TABLE #Permissions
@@ -45,7 +45,7 @@ BEGIN
         BEGIN TRANSACTION;
 
         UPDATE target WITH (UPDLOCK, SERIALIZABLE)
-        SET GroupID = @GroupID, CanView = source.CanView, CanSave = source.CanSave, CanUpdate = source.CanUpdate,
+        SET GroupID = NULL, CanView = source.CanView, CanSave = source.CanSave, CanUpdate = source.CanUpdate,
             CanDelete = source.CanDelete, CanSearch = source.CanSearch, CanPrint = source.CanPrint,
             RegUserID = COALESCE(@RegUserID, target.RegUserID), RegDate = GETDATE()
         FROM dbo.SystemFormsPermissions target
@@ -53,7 +53,7 @@ BEGIN
         WHERE target.UserID = @UserID AND target.CancelledDate IS NULL;
 
         INSERT dbo.SystemFormsPermissions (FormID, GroupID, UserID, CanView, CanSave, CanUpdate, CanDelete, CanSearch, CanPrint, RegUserID)
-        SELECT source.FormID, @GroupID, @UserID, source.CanView, source.CanSave, source.CanUpdate, source.CanDelete, source.CanSearch, source.CanPrint, COALESCE(@RegUserID, 1)
+        SELECT source.FormID, NULL, @UserID, source.CanView, source.CanSave, source.CanUpdate, source.CanDelete, source.CanSearch, source.CanPrint, COALESCE(@RegUserID, 1)
         FROM #Permissions source
         WHERE NOT EXISTS
         (

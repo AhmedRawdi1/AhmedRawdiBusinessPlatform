@@ -1,0 +1,205 @@
+@model AhmedRawdiBusinessPlatform.Models.MasterDataPageViewModel
+@inject AhmedRawdiBusinessPlatform.Services.ILanguageService Lang
+@{
+    var rtl = Lang.IsRightToLeft;
+    var title = rtl ? Model.ArabicTitle : Model.EnglishTitle;
+    var subtitle = rtl ? Model.ArabicSubtitle : Model.EnglishSubtitle;
+    ViewData["Title"] = title;
+}
+
+<section class="management-header master-data-header">
+    <div>
+        <span class="eyebrow-text"><i class="bi bi-sliders2"></i>@(rtl ? "الإعدادات والبيانات المرجعية" : "Settings & master data")</span>
+        <h1>@title</h1>
+        <p>@subtitle</p>
+    </div>
+    <span class="management-context"><i class="bi @Model.IconClass"></i>@(rtl ? "سجل رئيسي" : "Master record")</span>
+</section>
+
+<section class="management-toolbar" aria-label="@Lang.Get("PageActions")">
+    <div class="master-toolbar-label"><span>@(rtl ? "إجراءات السجل" : "Record actions")</span><small>@(rtl ? "إدارة البيانات الحالية" : "Manage the current record")</small></div>
+    <div class="toolbar-actions master-toolbar-actions">
+        <div class="master-toolbar-group master-toolbar-core">
+            <button class="toolbar-button toolbar-button-primary" type="button" id="newRecordButton"><i class="bi bi-plus-lg"></i><span>@Lang.Get("New")</span></button>
+            <button class="toolbar-button master-save-button" type="button" id="saveRecordButton"><i class="bi bi-check2-circle"></i><span>@Lang.Get("Save")</span></button>
+            <button class="toolbar-button toolbar-button-danger" type="button" id="deleteRecordButton"><i class="bi bi-trash3"></i><span>@Lang.Get("Delete")</span></button>
+        </div>
+        <span class="master-toolbar-separator" aria-hidden="true"></span>
+        <div class="master-toolbar-group">
+            <button class="toolbar-button" type="button" id="searchRecordButton"><i class="bi bi-search"></i><span>@Lang.Get("Search")</span></button>
+            <button class="toolbar-button" type="button" id="exportRecordButton"><i class="bi bi-box-arrow-up"></i><span>@Lang.Get("Export")</span></button>
+            <button class="toolbar-button" type="button" id="importRecordButton"><i class="bi bi-box-arrow-in-down"></i><span>@Lang.Get("Import")</span></button>
+            <button class="toolbar-button" type="button" id="printRecordButton"><i class="bi bi-printer"></i><span>@Lang.Get("Print")</span></button>
+        </div>
+    </div>
+</section>
+
+<div class="master-data-shell" data-entity="@Model.EntityKey">
+    <section class="management-panel master-data-editor" aria-labelledby="recordEditorTitle">
+        <div class="management-panel-heading">
+            <div class="master-editor-heading">
+                <span class="master-editor-icon"><i class="bi @Model.IconClass"></i></span>
+                <div>
+                <span class="eyebrow-text">@(rtl ? "بيانات السجل" : "Record information")</span>
+                <h2 id="recordEditorTitle">@(rtl ? $"تفاصيل {title}" : $"{title} details")</h2>
+                </div>
+            </div>
+            <span class="record-state"><span></span><span id="recordStateText">@Lang.Get("NewRecord")</span></span>
+        </div>
+
+        <form id="masterDataForm" novalidate>
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="ID" id="recordId" />
+            <div class="master-data-field-grid">
+                @foreach (var field in Model.Fields)
+                {
+                    var label = rtl ? field.ArabicLabel : field.EnglishLabel;
+                    var placeholder = rtl ? field.ArabicPlaceholder : field.EnglishPlaceholder;
+                    var css = field.FullWidth ? "management-field master-field-wide" : "management-field";
+                    <div class="@css">
+                        @if (field.Type == "checkbox")
+                        {
+                            <label class="management-switch master-data-switch">
+                                <input name="@field.Name" id="field-@field.Name" type="checkbox" checked />
+                                <span class="switch-track"><span></span></span>
+                                <span><strong>@label</strong><small>@(rtl ? "يمكن استخدام هذا السجل في العمليات النشطة." : "This record can be used in active operations.")</small></span>
+                            </label>
+                        }
+                        else
+                        {
+                            <label for="field-@field.Name">@label @if(field.Required){<span aria-hidden="true">*</span>}</label>
+                            @if (field.Type == "textarea")
+                            {
+                                <textarea id="field-@field.Name" name="@field.Name" rows="3" maxlength="@field.MaxLength" placeholder="@placeholder" required="@field.Required"></textarea>
+                            }
+                            else if (field.Type == "lookup")
+                            {
+                                <select id="field-@field.Name" name="@field.Name" required data-lookup-entity="@field.LookupEntity">
+                                    <option value="">@(rtl ? $"اختر {label}" : $"Select {label.ToLowerInvariant()}")</option>
+                                </select>
+                            }
+                            else
+                            {
+                                <input id="field-@field.Name" name="@field.Name" type="@field.Type" maxlength="@field.MaxLength" placeholder="@placeholder" required="@field.Required" min="@(field.Type == "number" ? "0" : null)" />
+                            }
+                            <span class="master-field-validation">@(rtl ? "هذا الحقل مطلوب" : "This field is required")</span>
+                        }
+                    </div>
+                }
+            </div>
+        </form>
+    </section>
+
+    <aside class="master-data-summary" aria-label="@(rtl ? "ملخص السجل" : "Record summary")">
+        <div class="master-summary-icon"><i class="bi @Model.IconClass"></i></div>
+        <span class="eyebrow-text">@(rtl ? "مساحة عمل موحدة" : "Unified workspace")</span>
+        <h2>@title</h2>
+        <p>@(rtl ? "أنشئ السجلات وابحث عنها وأدرها من واجهة واحدة منظمة ومتجاوبة مع جميع الأجهزة." : "Create, find and maintain records from one organized workspace designed for every screen size.")</p>
+        <div class="master-workflow-list">
+            <div><span>01</span><div><strong>@(rtl ? "ابدأ بسجل" : "Start a record")</strong><small>@(rtl ? "أدخل البيانات الأساسية" : "Enter the core information")</small></div></div>
+            <div><span>02</span><div><strong>@(rtl ? "راجع التفاصيل" : "Review details")</strong><small>@(rtl ? "تحقق من الحقول المطلوبة" : "Check required fields")</small></div></div>
+            <div><span>03</span><div><strong>@(rtl ? "احفظ بأمان" : "Save securely")</strong><small>@(rtl ? "يتم تسجيل العملية تلقائيًا" : "The action is audited automatically")</small></div></div>
+        </div>
+        <div class="master-summary-status"><span></span><div><strong>@(rtl ? "جاهز للإدخال" : "Ready for entry")</strong><small>@(rtl ? "ابدأ بسجل جديد أو استخدم البحث" : "Start a new record or use search")</small></div></div>
+    </aside>
+</div>
+
+<div class="modal fade management-directory-modal" id="masterDirectoryModal" tabindex="-1" aria-labelledby="masterDirectoryTitle" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title-group"><span class="modal-icon"><i class="bi @Model.IconClass"></i></span><div><span class="eyebrow-text">@Lang.Get("Directory")</span><h2 class="modal-title" id="masterDirectoryTitle">@title</h2></div></div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="management-search"><i class="bi bi-search"></i><input id="masterSearchInput" type="search" placeholder="@(rtl ? "ابحث بالكود أو الاسم..." : "Search by code or name...")" /><kbd>Enter</kbd></div>
+                <div class="master-directory-loading d-none" id="masterDirectoryLoading"><span class="spinner-border spinner-border-sm"></span><span>@(rtl ? "جاري تحميل السجلات..." : "Loading records...")</span></div>
+                <div class="master-directory-table-wrap d-none" id="masterDirectoryTableWrap"><table class="master-directory-table"><thead><tr><th>@(rtl ? "الكود" : "Code")</th><th>@(rtl ? "الاسم" : "Name")</th><th>@Lang.Get("Status")</th><th></th></tr></thead><tbody id="masterDirectoryRows"></tbody></table></div>
+                <div class="management-empty-state" id="masterDirectoryEmpty">
+                    <span><i class="bi bi-inboxes"></i></span>
+                    <h3>@(rtl ? "لا توجد سجلات محملة" : "No records loaded")</h3>
+                    <p>@(rtl ? "استخدم البحث لتحميل السجلات المتاحة." : "Use search to load available records.")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="masterDataToast" class="toast master-data-toast" role="status" aria-live="polite" aria-atomic="true">
+        <div class="toast-body"><i class="bi bi-info-circle"></i><span id="masterDataToastText"></span></div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(() => {
+    const form = document.getElementById('masterDataForm');
+    const searchModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('masterDirectoryModal'));
+    const toastElement = document.getElementById('masterDataToast');
+    const toast = bootstrap.Toast.getOrCreateInstance(toastElement, { delay: 3500 });
+    const rtl = document.documentElement.dir === 'rtl';
+    const entity = document.querySelector('.master-data-shell').dataset.entity;
+    const directoryRows = document.getElementById('masterDirectoryRows');
+    const directoryEmpty = document.getElementById('masterDirectoryEmpty');
+    const directoryTable = document.getElementById('masterDirectoryTableWrap');
+    const directoryLoading = document.getElementById('masterDirectoryLoading');
+    const notify = text => { document.getElementById('masterDataToastText').textContent = text; toast.show(); };
+    const antiForgeryToken = form.querySelector('input[name="__RequestVerificationToken"]').value;
+    const reset = () => {
+        form.reset(); document.getElementById('recordId').value = '';
+        form.querySelectorAll('input[type="checkbox"]').forEach(input => input.checked = true);
+        form.classList.remove('was-validated');
+        document.getElementById('recordStateText').textContent = '@Html.Raw(Lang.Get("NewRecord").Replace("'", "\\'"))';
+        form.querySelector('input:not([type="hidden"]),select,textarea')?.focus();
+    };
+    const loadLookups = async () => {
+        await Promise.all([...form.querySelectorAll('select[data-lookup-entity]')].map(async select => {
+            const response = await fetch(`/Administration/MasterData/${encodeURIComponent(select.dataset.lookupEntity)}/Search`); if (!response.ok) return;
+            const records = await response.json(); const placeholder = select.options[0]; select.replaceChildren(placeholder);
+            records.filter(record => record.isActive).forEach(record => { const option = document.createElement('option'); option.value = record.id; option.textContent = `${record.code} — ${rtl ? (record.arabicName || record.englishName) : (record.englishName || record.arabicName)}`; select.appendChild(option); });
+        }));
+    };
+    loadLookups();
+    document.getElementById('newRecordButton').addEventListener('click', reset);
+    const openRecord = async id => {
+        const response = await fetch(`/Administration/MasterData/${encodeURIComponent(entity)}/${id}`);
+        if (!response.ok) { notify(rtl ? 'تعذر فتح السجل.' : 'The record could not be opened.'); return; }
+        const record = await response.json(); document.getElementById('recordId').value = record.ID;
+        Object.entries(record).forEach(([key, value]) => { const control = form.elements.namedItem(key); if (!control) return; if (control.type === 'checkbox') control.checked = Boolean(value); else control.value = value ?? ''; });
+        document.getElementById('recordStateText').textContent = rtl ? 'سجل محفوظ' : 'Saved record'; searchModal.hide();
+    };
+    const loadDirectory = async () => {
+        directoryLoading.classList.remove('d-none'); directoryTable.classList.add('d-none'); directoryEmpty.classList.add('d-none');
+        try {
+            const q = document.getElementById('masterSearchInput').value.trim(); const response = await fetch(`/Administration/MasterData/${encodeURIComponent(entity)}/Search?q=${encodeURIComponent(q)}`); if (!response.ok) throw new Error();
+            const records = await response.json(); directoryRows.replaceChildren();
+            records.forEach(record => { const row = document.createElement('tr'); const name = rtl ? (record.arabicName || record.englishName) : (record.englishName || record.arabicName); row.innerHTML = `<td><strong></strong></td><td></td><td><span class="master-status-pill ${record.isActive ? 'active' : ''}"></span></td><td><button type="button" class="master-row-open"><i class="bi bi-arrow-right"></i></button></td>`; row.children[0].querySelector('strong').textContent = record.code; row.children[1].textContent = name; const status = row.children[2].querySelector('span'); status.textContent = record.isActive ? (rtl ? 'نشط' : 'Active') : (rtl ? 'غير نشط' : 'Inactive'); row.querySelector('button').addEventListener('click', () => openRecord(record.id)); directoryRows.appendChild(row); });
+            directoryTable.classList.toggle('d-none', records.length === 0); directoryEmpty.classList.toggle('d-none', records.length !== 0);
+        } catch { directoryEmpty.classList.remove('d-none'); notify(rtl ? 'تعذر تحميل السجلات.' : 'Records could not be loaded.'); } finally { directoryLoading.classList.add('d-none'); }
+    };
+    document.getElementById('searchRecordButton').addEventListener('click', () => { searchModal.show(); loadDirectory(); });
+    document.getElementById('masterSearchInput').addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); loadDirectory(); } });
+    document.getElementById('printRecordButton').addEventListener('click', () => window.print());
+    document.getElementById('saveRecordButton').addEventListener('click', async () => {
+        form.classList.add('was-validated');
+        if (!form.checkValidity()) { form.querySelector(':invalid')?.focus(); return; }
+        const payload = { ID: Number(document.getElementById('recordId').value) || null };
+        form.querySelectorAll('[name]:not([name="__RequestVerificationToken"]):not([name="ID"])').forEach(control => { payload[control.name] = control.type === 'checkbox' ? control.checked : control.type === 'number' || control.tagName === 'SELECT' ? (control.value === '' ? null : Number(control.value)) : control.value.trim(); });
+        const response = await fetch(`/Administration/MasterData/${encodeURIComponent(entity)}/Save`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': antiForgeryToken }, body: JSON.stringify(payload) });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) { notify(result.message === 'DuplicateCode' ? (rtl ? 'الكود مستخدم في سجل آخر.' : 'The code is already used by another record.') : (rtl ? 'تعذر حفظ السجل.' : 'The record could not be saved.')); return; }
+        document.getElementById('recordId').value = result.id; document.getElementById('recordStateText').textContent = rtl ? 'سجل محفوظ' : 'Saved record'; form.classList.remove('was-validated'); notify(rtl ? 'تم حفظ السجل بنجاح.' : 'The record was saved successfully.');
+    });
+    document.getElementById('deleteRecordButton').addEventListener('click', async () => { const id = document.getElementById('recordId').value; if (!id) { notify(rtl ? 'اختر سجلًا من البحث أولًا.' : 'Select a record from search first.'); return; } if (!confirm(rtl ? 'هل تريد تعطيل هذا السجل؟' : 'Deactivate this record?')) return; const body = new URLSearchParams({ id, __RequestVerificationToken: antiForgeryToken }); const response = await fetch(`/Administration/MasterData/${encodeURIComponent(entity)}/Delete`, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body }); if (!response.ok) { notify(rtl ? 'تعذر تعطيل السجل.' : 'The record could not be deactivated.'); return; } notify(rtl ? 'تم تعطيل السجل بنجاح.' : 'The record was deactivated successfully.'); reset(); });
+    document.getElementById('exportRecordButton').addEventListener('click', () => notify(rtl ? 'لا توجد بيانات متاحة للتصدير بعد.' : 'No data is available to export yet.'));
+    document.getElementById('importRecordButton').addEventListener('click', () => notify(rtl ? 'سيتم تفعيل الاستيراد بعد ربط البيانات.' : 'Import will be enabled after data integration.'));
+    form.addEventListener('keydown', event => {
+        if (event.key !== 'Enter' || event.target.tagName === 'TEXTAREA') return;
+        event.preventDefault();
+        const controls = [...form.querySelectorAll('input:not([type="hidden"]),select,textarea')].filter(x => !x.disabled);
+        controls[(controls.indexOf(event.target) + 1) % controls.length]?.focus();
+    });
+})();
+</script>
+}

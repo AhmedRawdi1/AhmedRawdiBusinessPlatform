@@ -43,6 +43,24 @@ EXEC dbo.usp_Add_SystemUserPermissions
     @UserID = @UserID, @GroupID = @GroupID, @PermissionsJson = @Permissions, @RegUserID = 1,
     @HasError = @HasError OUTPUT, @ErrorDesc = @ErrorDesc OUTPUT;
 SELECT N'UserPermissionSave' AS Test, @HasError AS HasError;
+IF NOT EXISTS
+(
+    SELECT 1 FROM dbo.SystemFormsPermissions
+    WHERE UserID=@UserID AND GroupID IS NULL AND FormID=1 AND CanView=1 AND CanSave=0 AND CanSearch=1 AND CancelledDate IS NULL
+)
+    THROW 50997, 'The direct user permission was not stored independently from the group.', 1;
+
+CREATE TABLE #EffectivePermissions
+(
+    ModuleID bigint, ModuleCode varchar(100), ModuleEnglishName varchar(200), ModuleArabicName nvarchar(200),
+    SubModuleID bigint, SubModuleCode varchar(100), SubModuleEnglishName varchar(200), SubModuleArabicName nvarchar(200),
+    FormID bigint, FormCode varchar(200), FormEnglishName varchar(200), FormArabicName nvarchar(200),
+    CanView bit, CanSave bit, CanUpdate bit, CanDelete bit, CanSearch bit, CanPrint bit, HasUserOverride bit
+);
+INSERT #EffectivePermissions EXEC dbo.usp_Get_UserPermissions @UserID=@UserID,@GroupID=NULL;
+IF NOT EXISTS (SELECT 1 FROM #EffectivePermissions WHERE FormID=1 AND CanView=1 AND CanSave=0 AND CanSearch=1 AND HasUserOverride=1)
+    THROW 50998, 'The effective user permission did not preserve the saved CanView override.', 1;
+SELECT N'EffectivePermissionRead' AS Test, CONVERT(bit,1) AS Passed;
 
 ROLLBACK TRANSACTION;
 

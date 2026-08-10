@@ -16,7 +16,9 @@
                     <div class="sidebar-subnav">
                         @foreach (var form in sub.Forms)
                         {
-                            <a class="sidebar-sublink" href="@form.Url"><i class="@form.IconClass"></i><span>@form.Name</span>@if(form.CanSave || form.CanUpdate){<span class="access-dot" title="Write access"></span>}</a>
+                            var isInternalPath = !string.IsNullOrWhiteSpace(form.Url) && form.Url.StartsWith('/');
+                            var isCurrentForm = isInternalPath && Context.Request.Path.Equals(new PathString(form.Url));
+                            <a class="sidebar-sublink @(isCurrentForm ? "active" : null)" href="@form.Url" aria-current="@(isCurrentForm ? "page" : null)"><i class="@form.IconClass"></i><span>@form.Name</span>@if(form.CanSave || form.CanUpdate){<span class="access-dot" title="Write access"></span>}</a>
                         }
                     </div>
                 </div>
@@ -30,7 +32,4 @@
         <a class="sidebar-link" asp-controller="Administration" asp-action="UserGroups"><i class="bi bi-shield-check"></i><span>@Lang.Get("SystemGroups")</span></a>
         <a class="sidebar-link" href="javascript:void(0)"><i class="bi bi-bar-chart"></i><span>@Lang.Get("BusinessAnalytics")</span></a>
     }
-    <div class="nav-section-label">@Lang.Get("SystemAndData")</div>
-    <a class="sidebar-link" href="javascript:void(0)"><i class="bi bi-database"></i><span>@Lang.Get("SqlServer")</span></a>
-    <a class="sidebar-link" asp-controller="Home" asp-action="Privacy"><i class="bi bi-lock"></i><span>@Lang.Get("PrivacyAndSecurity")</span></a>
 </nav>

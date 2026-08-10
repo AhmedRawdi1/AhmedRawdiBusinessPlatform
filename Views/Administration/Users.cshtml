@@ -114,7 +114,6 @@
                 <div class="permission-matrix-toolbar">
                     <div><strong id="userPermissionTitle">@Lang.Get("UserPermissions")</strong><small id="userPermissionSubtitle">@Lang.Get("ExistingPermissionsHint")</small></div>
                     <div class="permission-summary">
-                        <button class="toolbar-button toolbar-button-primary btn-sm me-2 d-none" type="button" id="saveUserPermissionsButton"><i class="bi bi-check2-circle"></i><span>@Lang.Get("Save")</span></button>
                         <span class="permission-enabled-count" id="userPermissionEnabledCount"><i class="bi bi-check2-circle"></i><span>0 @Lang.Get("EnabledPermissions")</span></span>
                         <span class="permission-record-count" id="userPermissionRecordCount">0 @Lang.Get("Forms")</span>
                     </div>
@@ -449,10 +448,6 @@
                 permissionTableWrap.classList.toggle('d-none', filteredItems.length === 0 && modulesMap.size === 0);
                 permissionEmptyState.classList.toggle('d-none', filteredItems.length !== 0 || modulesMap.size !== 0);
 
-                const savePermBtn = document.getElementById('saveUserPermissionsButton');
-                if (savePermBtn) {
-                    savePermBtn.classList.toggle('d-none', items.length === 0 || !document.getElementById('userId').value);
-                }
             };
 
             const filterFormPermissions = () => {
@@ -523,21 +518,22 @@
                 filterFormPermissions();
             });
 
-            const saveUserPermissions = async () => {
-                const userId = document.getElementById('userId').value;
+            const persistUserPermissions = async userId => {
                 if (!userId) {
-                    showActionModal('@Lang.Get("Save")', '@Lang.Get("DeleteUserNoSelectionMessage")');
-                    return;
+                    throw new Error('@Lang.Get("DeleteUserNoSelectionMessage")');
                 }
 
-                const payload = formPermissions.map(item => ({
+                const payload = formPermissions.filter(item => item.hasUserOverride === true).map(item => ({
                     FormID: item.formID,
+                    CanView: item.canView === true,
                     CanSave: item.canSave === true,
                     CanUpdate: item.canUpdate === true,
                     CanDelete: item.canDelete === true,
                     CanSearch: item.canSearch === true,
                     CanPrint: item.canPrint === true
                 }));
+
+                if (payload.length === 0) return false;
 
                 const token = form.querySelector('input[name="__RequestVerificationToken"]')?.value;
                 const body = new URLSearchParams({
@@ -546,11 +542,7 @@
                     permissionsJson: JSON.stringify(payload)
                 });
 
-                const savePermBtn = document.getElementById('saveUserPermissionsButton');
-                if (savePermBtn) savePermBtn.disabled = true;
-
-                try {
-                    const response = await fetch('@Url.Action("SaveUserPermissions", "Administration")', {
+                const response = await fetch('@Url.Action("SaveUserPermissions", "Administration")', {
                         method: 'POST',
                         headers: {
                             'Accept': 'application/json',
@@ -560,21 +552,13 @@
                         body
                     });
 
-                    const result = await response.json();
+                    const result = await response.json().catch(() => ({}));
                     if (!response.ok || !result.success) {
-                        throw new Error(result.message || 'Failed to save user permissions');
+                        if (response.status === 403) throw new Error('You do not have permission to update user permissions.');
+                        throw new Error(result.message || `Failed to save user permissions (HTTP ${response.status})`);
                     }
-
-                    showActionModal('@Lang.Get("Save")', '@Lang.Get("SaveUserSuccess")');
-                    await loadUserPermissions(userId, userGroupIdSelect.value);
-                } catch (err) {
-                    showActionModal('@Lang.Get("Save")', err.message || '@Lang.Get("SaveUserFailed")');
-                } finally {
-                    if (savePermBtn) savePermBtn.disabled = false;
-                }
+                return true;
             };
-
-            document.getElementById('saveUserPermissionsButton')?.addEventListener('click', saveUserPermissions);
 
             const renderUsers = () => {
                 const term = (searchInput?.value || '').trim().toLocaleLowerCase();
@@ -674,7 +658,10 @@
                         document.getElementById('userId').value = result.userId;
                     }
 
+                    const savedUserId = result.userId || document.getElementById('userId').value;
+                    await persistUserPermissions(savedUserId);
                     await loadUsers();
+                    if (savedUserId) await loadUserPermissions(savedUserId, userGroupIdSelect.value);
                     showActionModal('@Lang.Get("Save")', '@Lang.Get("SaveUserSuccess")');
                 } catch (error) {
                     showActionModal('@Lang.Get("Save")', error.message || '@Lang.Get("SaveUserFailed")');

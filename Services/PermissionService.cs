@@ -58,7 +58,9 @@ namespace AhmedRawdiBusinessPlatform.Services
 
         public async Task<NavigationMenuViewModel> GetNavigationMenuAsync(long? userId, long? groupId = null)
         {
-            var permissions = await GetUserPermissionsAsync(userId, groupId);
+            var permissions = (await GetUserPermissionsAsync(userId, groupId))
+                .Where(permission => permission.CanView)
+                .ToList();
             var isRtl = _languageService.IsRightToLeft;
 
             var viewModel = new NavigationMenuViewModel();
@@ -140,6 +142,24 @@ namespace AhmedRawdiBusinessPlatform.Services
             return viewModel;
         }
 
+        public async Task<bool> HasFormPermissionAsync(long? userId, long? groupId, string formCode, string permission)
+        {
+            if (string.IsNullOrWhiteSpace(formCode)) return false;
+            var form = (await GetUserPermissionsAsync(userId, groupId)).FirstOrDefault(item =>
+                string.Equals(item.FormCode?.Trim(), formCode.Trim(), StringComparison.OrdinalIgnoreCase));
+            if (form is null || !form.CanView) return false;
+            return permission.Trim().ToUpperInvariant() switch
+            {
+                "VIEW" => form.CanView,
+                "SAVE" => form.CanSave,
+                "UPDATE" => form.CanUpdate,
+                "DELETE" => form.CanDelete,
+                "SEARCH" => form.CanSearch,
+                "PRINT" => form.CanPrint,
+                _ => false
+            };
+        }
+
         private static string GetModuleIcon(string moduleCode)
         {
             return moduleCode?.ToUpperInvariant() switch
@@ -167,6 +187,8 @@ namespace AhmedRawdiBusinessPlatform.Services
                 "107" => "bi-activity",
                 "108" => "bi-droplet-half",
                 "109" => "bi-display",
+                "100101" => "bi-shield-lock",
+                "100102" => "bi-sliders2",
                 _ => "bi-folder2-open"
             };
         }
@@ -182,6 +204,15 @@ namespace AhmedRawdiBusinessPlatform.Services
                 var f when f.Contains("RIS", StringComparison.OrdinalIgnoreCase) => "bi-cpu-fill",
                 var f when f.Contains("Nursing", StringComparison.OrdinalIgnoreCase) => "bi-heart-pulse-fill",
                 var f when f.Contains("Doctor", StringComparison.OrdinalIgnoreCase) => "bi-stethoscope",
+                var f when f.Contains("Physician", StringComparison.OrdinalIgnoreCase) => "bi-person-badge",
+                var f when f.Contains("MedicalSpecial", StringComparison.OrdinalIgnoreCase) => "bi-heart-pulse",
+                var f when f.Contains("Company", StringComparison.OrdinalIgnoreCase) => "bi-buildings",
+                var f when f.Contains("Branches", StringComparison.OrdinalIgnoreCase) => "bi-diagram-3",
+                var f when f.Contains("CostCenters", StringComparison.OrdinalIgnoreCase) => "bi-bullseye",
+                var f when f.Contains("Nationalit", StringComparison.OrdinalIgnoreCase) => "bi-globe2",
+                var f when f.Contains("Identity", StringComparison.OrdinalIgnoreCase) => "bi-person-vcard",
+                var f when f.Contains("Marital", StringComparison.OrdinalIgnoreCase) => "bi-people",
+                var f when f.Contains("Gender", StringComparison.OrdinalIgnoreCase) => "bi-gender-ambiguous",
                 var f when f.Contains("Appointment", StringComparison.OrdinalIgnoreCase) => "bi-clock-history",
                 var f when f.Contains("Invoice", StringComparison.OrdinalIgnoreCase) => "bi-file-earmark-spreadsheet-fill",
                 _ => "bi-file-earmark-text"
@@ -198,6 +229,18 @@ namespace AhmedRawdiBusinessPlatform.Services
                            || code?.Contains("SystemUsers", StringComparison.OrdinalIgnoreCase) == true
                            || code?.Equals("101") == true
                     => "/Administration/Users",
+                "Frm_Companies" => "/Administration/Companies",
+                "Frm_Branches" => "/Administration/Branches",
+                "Frm_CostCentersGroup" => "/Administration/CostCentersGroup",
+                "Frm_CostCentersTypes" => "/Administration/CostCentersTypes",
+                "Frm_CostCenters" => "/Administration/CostCenters",
+                "Frm_Nationalities" => "/Administration/Nationalities",
+                "Frm_IdentityTypes" => "/Administration/IdentityTypes",
+                "Frm_MaritalStatuses" => "/Administration/MaritalStatuses",
+                "Frm_Gender" => "/Administration/Gender",
+                "Frm_MedicalSpecialties" => "/Administration/MedicalSpecialties",
+                "Frm_PhysiciansLevels" => "/Administration/PhysiciansLevels",
+                "Frm_Physicians" => "/Administration/Physicians",
                 _ => "javascript:void(0);"
             };
         }

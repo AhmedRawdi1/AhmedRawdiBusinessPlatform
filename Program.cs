@@ -28,6 +28,7 @@ builder.Services.AddScoped<ILanguageService, LanguageService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IMasterDataService, MasterDataService>();
 builder.Services.AddSingleton<IPasswordService, PasswordService>();
 
 builder.Services.AddRateLimiter(options =>
