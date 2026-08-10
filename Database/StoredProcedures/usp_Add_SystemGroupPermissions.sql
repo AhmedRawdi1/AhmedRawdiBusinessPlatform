@@ -5,9 +5,8 @@ SET ANSI_NULLS ON;
 SET QUOTED_IDENTIFIER ON;
 GO
 
-CREATE OR ALTER PROCEDURE dbo.usp_Add_SystemUserPermissions
-    @UserID bigint,
-    @GroupID bigint = NULL,
+CREATE OR ALTER PROCEDURE dbo.usp_Add_SystemGroupPermissions
+    @GroupID bigint,
     @PermissionsJson nvarchar(max),
     @RegUserID bigint = NULL,
     @HasError bit OUTPUT,
@@ -19,9 +18,10 @@ BEGIN
     SELECT @HasError = 0, @ErrorDesc = NULL;
 
     BEGIN TRY
-        SELECT @GroupID = COALESCE(@GroupID, GroupID) FROM dbo.SystemUsers WHERE ID = @UserID AND CancellationDate IS NULL;
-        IF @GroupID IS NULL THROW 50002, 'The selected system user does not exist.', 1;
-        IF ISJSON(@PermissionsJson) <> 1 THROW 50003, 'A valid JSON array of form permissions is required.', 1;
+        IF NOT EXISTS (SELECT 1 FROM dbo.SystemGroups WHERE ID = @GroupID AND CancellationDate IS NULL)
+            THROW 50002, 'The selected system group does not exist.', 1;
+        IF ISJSON(@PermissionsJson) <> 1
+            THROW 50003, 'A valid JSON array of form permissions is required.', 1;
 
         CREATE TABLE #Permissions
         (
@@ -45,20 +45,20 @@ BEGIN
         BEGIN TRANSACTION;
 
         UPDATE target WITH (UPDLOCK, SERIALIZABLE)
-        SET GroupID = @GroupID, CanView = source.CanView, CanSave = source.CanSave, CanUpdate = source.CanUpdate,
+        SET CanView = source.CanView, CanSave = source.CanSave, CanUpdate = source.CanUpdate,
             CanDelete = source.CanDelete, CanSearch = source.CanSearch, CanPrint = source.CanPrint,
             RegUserID = COALESCE(@RegUserID, target.RegUserID), RegDate = GETDATE()
         FROM dbo.SystemFormsPermissions target
         INNER JOIN #Permissions source ON source.FormID = target.FormID
-        WHERE target.UserID = @UserID AND target.CancelledDate IS NULL;
+        WHERE target.GroupID = @GroupID AND target.UserID IS NULL AND target.CancelledDate IS NULL;
 
         INSERT dbo.SystemFormsPermissions (FormID, GroupID, UserID, CanView, CanSave, CanUpdate, CanDelete, CanSearch, CanPrint, RegUserID)
-        SELECT source.FormID, @GroupID, @UserID, source.CanView, source.CanSave, source.CanUpdate, source.CanDelete, source.CanSearch, source.CanPrint, COALESCE(@RegUserID, 1)
+        SELECT source.FormID, @GroupID, NULL, source.CanView, source.CanSave, source.CanUpdate, source.CanDelete, source.CanSearch, source.CanPrint, COALESCE(@RegUserID, 1)
         FROM #Permissions source
         WHERE NOT EXISTS
         (
             SELECT 1 FROM dbo.SystemFormsPermissions target WITH (UPDLOCK, SERIALIZABLE)
-            WHERE target.FormID = source.FormID AND target.UserID = @UserID AND target.CancelledDate IS NULL
+            WHERE target.FormID = source.FormID AND target.GroupID = @GroupID AND target.UserID IS NULL AND target.CancelledDate IS NULL
         );
 
         COMMIT TRANSACTION;

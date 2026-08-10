@@ -12,10 +12,12 @@ namespace AhmedRawdiBusinessPlatform.Services
     public class UserService : IUserService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IPasswordService _passwordService;
 
-        public UserService(ApplicationDbContext context)
+        public UserService(ApplicationDbContext context, IPasswordService passwordService)
         {
             _context = context;
+            _passwordService = passwordService;
         }
 
         public async Task<IReadOnlyList<UserListItemDto>> GetAllUsersAsync()
@@ -40,7 +42,10 @@ namespace AhmedRawdiBusinessPlatform.Services
             var expiredDateParam = new SqlParameter("@ExpiredDate", (object?)model.ExpiredDate ?? DBNull.Value);
             var userIdParam = new SqlParameter("@UserID", (object?)model.UserID ?? DBNull.Value);
             var langParam = new SqlParameter("@PreferredLanguage", (object?)model.PreferredLanguage ?? DBNull.Value);
-            var userPassParam = new SqlParameter("@UserPass", (object?)model.UserPass ?? DBNull.Value);
+            var passwordHash = string.IsNullOrWhiteSpace(model.UserPass) ? null : _passwordService.HashPassword(model.UserPass);
+            if (!model.UserID.HasValue && passwordHash == null)
+                throw new ArgumentException("A password is required for a new user.", nameof(model));
+            var passwordHashParam = new SqlParameter("@PasswordHash", (object?)passwordHash ?? DBNull.Value);
 
             var hasErrorParam = new SqlParameter("@HasError", SqlDbType.Bit)
             {
@@ -71,10 +76,10 @@ namespace AhmedRawdiBusinessPlatform.Services
                 "@UserID = @UserID, " +
                 "@PreferredLanguage = @PreferredLanguage, " +
                 "@NewUserID = @NewUserID OUTPUT, " +
-                "@UserPass = @UserPass",
+                "@PasswordHash = @PasswordHash",
                 groupParam, codeParam, engNameParam, arbNameParam, isActiveParam, emailParam,
                 mobileNumParam, regByParam, expiredDateParam, hasErrorParam, errorDescParam,
-                userIdParam, langParam, newUserIdParam, userPassParam
+                userIdParam, langParam, newUserIdParam, passwordHashParam
             );
 
             if (hasErrorParam.Value != DBNull.Value && Convert.ToBoolean(hasErrorParam.Value))

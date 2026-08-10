@@ -14,11 +14,13 @@ namespace AhmedRawdiBusinessPlatform.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly ILanguageService _languageService;
+        private readonly ILogger<PermissionService> _logger;
 
-        public PermissionService(ApplicationDbContext context, ILanguageService languageService)
+        public PermissionService(ApplicationDbContext context, ILanguageService languageService, ILogger<PermissionService> logger)
         {
             _context = context;
             _languageService = languageService;
+            _logger = logger;
         }
 
         public async Task<List<UserPermissionDto>> GetUserPermissionsAsync(long? userId, long? groupId = null)
@@ -46,9 +48,10 @@ namespace AhmedRawdiBusinessPlatform.Services
 
                 return result ?? new List<UserPermissionDto>();
             }
-            catch (Exception)
+            catch (Exception exception)
             {
-                // In case of error (e.g. database connection issue), safely return empty list
+                _logger.LogError(exception, "Failed to load effective permissions for user {UserID} and group {GroupID}.", userId, groupId);
+                // Fail closed: no database result means no granted navigation permissions.
                 return new List<UserPermissionDto>();
             }
         }

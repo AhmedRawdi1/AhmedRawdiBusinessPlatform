@@ -8,7 +8,7 @@ namespace AhmedRawdiBusinessPlatform.Models
         public string UserCode { get; set; } = string.Empty;
         public string? UserEnglishName { get; set; }
         public string? UserArabicName { get; set; }
-        public string? UserPass { get; set; }
+        public string? PasswordHash { get; set; }
         public string? Email { get; set; }
         public string? MobileNum { get; set; }
         public bool IsActive { get; set; }
