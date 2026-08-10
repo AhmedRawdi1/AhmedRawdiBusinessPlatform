@@ -14,11 +14,13 @@ namespace AhmedRawdiBusinessPlatform.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly ILanguageService _languageService;
+        private readonly ILogger<PermissionService> _logger;
 
-        public PermissionService(ApplicationDbContext context, ILanguageService languageService)
+        public PermissionService(ApplicationDbContext context, ILanguageService languageService, ILogger<PermissionService> logger)
         {
             _context = context;
             _languageService = languageService;
+            _logger = logger;
         }
 
         public async Task<List<UserPermissionDto>> GetUserPermissionsAsync(long? userId, long? groupId = null)
@@ -46,9 +48,10 @@ namespace AhmedRawdiBusinessPlatform.Services
 
                 return result ?? new List<UserPermissionDto>();
             }
-            catch (Exception)
+            catch (Exception exception)
             {
-                // In case of error (e.g. database connection issue), safely return empty list
+                _logger.LogError(exception, "Failed to load effective permissions for user {UserID} and group {GroupID}.", userId, groupId);
+                // Fail closed: no database result means no granted navigation permissions.
                 return new List<UserPermissionDto>();
             }
         }
@@ -173,6 +176,7 @@ namespace AhmedRawdiBusinessPlatform.Services
             return formCode switch
             {
                 var f when f.Contains("UserGroupsManagement", StringComparison.OrdinalIgnoreCase) => "bi-people-fill",
+                var f when f.Contains("UsersManagement", StringComparison.OrdinalIgnoreCase) || f.Contains("SystemUsers", StringComparison.OrdinalIgnoreCase) => "bi-person-gear",
                 var f when f.Contains("Patient", StringComparison.OrdinalIgnoreCase) => "bi-person-fill",
                 var f when f.Contains("Lab", StringComparison.OrdinalIgnoreCase) => "bi-eyedropper",
                 var f when f.Contains("RIS", StringComparison.OrdinalIgnoreCase) => "bi-cpu-fill",
@@ -190,8 +194,44 @@ namespace AhmedRawdiBusinessPlatform.Services
             {
                 var code when code?.Contains("UserGroupsManagement", StringComparison.OrdinalIgnoreCase) == true
                     => "/Administration/UserGroups",
+                var code when code?.Contains("UsersManagement", StringComparison.OrdinalIgnoreCase) == true
+                           || code?.Contains("SystemUsers", StringComparison.OrdinalIgnoreCase) == true
+                           || code?.Equals("101") == true
+                    => "/Administration/Users",
                 _ => "javascript:void(0);"
             };
         }
+
+        public async Task SaveUserPermissionsAsync(long userId, long? groupId, string permissionsJson, long? registeredUserId = null)
+        {
+            if (userId <= 0) throw new ArgumentException("User ID is required.", nameof(userId));
+            if (string.IsNullOrWhiteSpace(permissionsJson)) throw new ArgumentException("Permissions JSON is required.", nameof(permissionsJson));
+
+            var userParam = new SqlParameter("@UserID", userId);
+            var groupParam = new SqlParameter("@GroupID", (object?)groupId ?? DBNull.Value);
+            var jsonParam = new SqlParameter("@PermissionsJson", permissionsJson);
+            var regUserParam = new SqlParameter("@RegUserID", (object?)registeredUserId ?? DBNull.Value);
+
+            var hasErrorParam = new SqlParameter("@HasError", SqlDbType.Bit) { Direction = ParameterDirection.Output };
+            var errorDescParam = new SqlParameter("@ErrorDesc", SqlDbType.NVarChar, 2048) { Direction = ParameterDirection.Output };
+
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC dbo.usp_Add_SystemUserPermissions " +
+                "@UserID = @UserID, " +
+                "@GroupID = @GroupID, " +
+                "@PermissionsJson = @PermissionsJson, " +
+                "@RegUserID = @RegUserID, " +
+                "@HasError = @HasError OUTPUT, " +
+                "@ErrorDesc = @ErrorDesc OUTPUT",
+                userParam, groupParam, jsonParam, regUserParam, hasErrorParam, errorDescParam
+            );
+
+            if (hasErrorParam.Value != DBNull.Value && Convert.ToBoolean(hasErrorParam.Value))
+            {
+                var errorMsg = errorDescParam.Value != DBNull.Value ? errorDescParam.Value.ToString() : "An error occurred while saving user permissions.";
+                throw new InvalidOperationException(errorMsg);
+            }
+        }
     }
 }
+

@@ -11,10 +11,14 @@ namespace AhmedRawdiBusinessPlatform.Services
     public class AuthService : IAuthService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IPasswordService _passwordService;
+        private readonly ILogger<AuthService> _logger;
 
-        public AuthService(ApplicationDbContext context)
+        public AuthService(ApplicationDbContext context, IPasswordService passwordService, ILogger<AuthService> logger)
         {
             _context = context;
+            _passwordService = passwordService;
+            _logger = logger;
         }
 
         public async Task<UserInfoResultDto?> GetUserInfoByUserCodeAsync(string userCode)
@@ -50,7 +54,8 @@ namespace AhmedRawdiBusinessPlatform.Services
             }
             catch (Exception ex)
             {
-                return (false, $"Error fetching user info: {ex.Message}", null);
+                _logger.LogError(ex, "Authentication lookup failed for user code {UserCode}.", userCode);
+                return (false, "Authentication is temporarily unavailable. Please try again.", null);
             }
 
             if (userInfo == null)
@@ -68,7 +73,7 @@ namespace AhmedRawdiBusinessPlatform.Services
                 return (false, "This user account has expired.", null);
             }
 
-            if (userInfo.UserPass != password)
+            if (!_passwordService.VerifyPassword(password, userInfo.PasswordHash ?? string.Empty))
             {
                 return (false, "Invalid user code or password.", null);
             }

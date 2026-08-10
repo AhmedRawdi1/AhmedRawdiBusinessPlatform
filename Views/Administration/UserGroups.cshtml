@@ -428,7 +428,69 @@
                 } finally { loadingState.classList.add('d-none'); }
             };
 
+            const saveGroup = async () => {
+                if (!form?.checkValidity()) {
+                    form?.reportValidity();
+                    return;
+                }
+
+                const saveButton = document.getElementById('saveGroupButton');
+                if (saveButton) saveButton.disabled = true;
+
+                try {
+                    const formData = new FormData(form);
+                    formData.set('IsActive', document.getElementById('groupActive').checked ? 'true' : 'false');
+
+                    const permissionsData = formPermissions.map(item => ({
+                        FormID: item.formID,
+                        CanSave: item.canView === true || item.canSave === true,
+                        CanUpdate: item.canSave === true,
+                        CanDelete: item.canDelete === true,
+                        CanSearch: item.canSearch === true,
+                        CanPrint: item.canPrint === true
+                    }));
+
+                    formData.set('PermissionsJson', JSON.stringify(permissionsData));
+
+                    const token = form.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                    const response = await fetch('@Url.Action("SaveGroup", "Administration")', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'RequestVerificationToken': token || ''
+                        },
+                        body: formData
+                    });
+
+                    const result = await response.json().catch(() => ({ success: false }));
+                    if (!response.ok || !result.success) {
+                        throw new Error(result.message || 'SaveFailed');
+                    }
+
+                    if (result.groupId) {
+                        document.getElementById('groupId').value = result.groupId;
+                    }
+
+                    showActionModal(
+                        document.documentElement.dir === 'rtl' ? 'تم الحفظ' : 'Saved Successfully',
+                        document.documentElement.dir === 'rtl' ? 'تم حفظ بيانات المجموعة والصلاحيات بنجاح.' : 'Group details and form permissions have been saved successfully.'
+                    );
+
+                    loadGroups();
+                } catch (error) {
+                    console.error('Save group failed:', error);
+                    showActionModal(
+                        document.documentElement.dir === 'rtl' ? 'خطأ في الحفظ' : 'Save Failed',
+                        error.message || (document.documentElement.dir === 'rtl' ? 'تعذر حفظ بيانات المجموعة.' : 'Unable to save group details.')
+                    );
+                } finally {
+                    if (saveButton) saveButton.disabled = false;
+                }
+            };
+
             document.getElementById('newGroupButton')?.addEventListener('click', resetEditor);
+            document.getElementById('saveGroupButton')?.addEventListener('click', saveGroup);
+            form?.addEventListener('submit', event => { event.preventDefault(); saveGroup(); });
             deleteButton?.addEventListener('click', deleteSelectedGroup);
             actionConfirm?.addEventListener('click', confirmGroupDeletion);
             document.querySelector('[data-focus-new]')?.addEventListener('click', () => { resetEditor(); directoryModal?.hide(); directoryElement?.addEventListener('hidden.bs.modal', () => groupCode?.focus(), { once: true }); });
