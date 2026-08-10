@@ -22,20 +22,23 @@ namespace AhmedRawdiBusinessPlatform.Controllers
         }
 
         [HttpGet]
-        public IActionResult UserGroups()
+        public async Task<IActionResult> UserGroups()
         {
+            if (!await CanAsync("Frm_UserGroupsManagement", "View")) return Forbid();
             return View();
         }
 
         [HttpGet]
-        public IActionResult Users()
+        public async Task<IActionResult> Users()
         {
+            if (!await CanAsync("Frm_UsersManagement", "View")) return Forbid();
             return View();
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllGroups()
         {
+            if (!await CanAsync("Frm_UserGroupsManagement", "Search") && !await CanAsync("Frm_UsersManagement", "View")) return Forbid();
             var groups = await _groupService.GetAllGroupsAsync();
             return Json(groups);
         }
@@ -43,6 +46,7 @@ namespace AhmedRawdiBusinessPlatform.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
+            if (!await CanAsync("Frm_UsersManagement", "Search")) return Forbid();
             var users = await _userService.GetAllUsersAsync();
             return Json(users);
         }
@@ -50,6 +54,7 @@ namespace AhmedRawdiBusinessPlatform.Controllers
         [HttpGet]
         public async Task<IActionResult> GetGroupPermissions(long? groupId)
         {
+            if (!await CanAsync("Frm_UserGroupsManagement", "Search")) return Forbid();
             if (!groupId.HasValue)
             {
                 return BadRequest(new { success = false, code = "InvalidSelection" });
@@ -68,6 +73,7 @@ namespace AhmedRawdiBusinessPlatform.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUserPermissions(long? userId, long? groupId)
         {
+            if (!await CanAsync("Frm_UsersManagement", "Search")) return Forbid();
             if (!userId.HasValue && !groupId.HasValue)
             {
                 return BadRequest(new { success = false, code = "InvalidSelection" });
@@ -96,6 +102,7 @@ namespace AhmedRawdiBusinessPlatform.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllSystemForms()
         {
+            if (!await CanAsync("Frm_UserGroupsManagement", "View")) return Forbid();
             return Json(await _groupService.GetAllSystemFormsAsync());
         }
 
@@ -103,6 +110,7 @@ namespace AhmedRawdiBusinessPlatform.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SaveGroup([FromForm] SaveGroupDto model)
         {
+            if (!await CanAsync("Frm_UserGroupsManagement", model.GroupID.HasValue ? "Update" : "Save")) return Forbid();
             if (!ModelState.IsValid)
             {
                 return BadRequest(new { success = false, code = "InvalidData" });
@@ -139,6 +147,7 @@ namespace AhmedRawdiBusinessPlatform.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SaveUser([FromForm] SaveUserDto model)
         {
+            if (!await CanAsync("Frm_UsersManagement", model.UserID.HasValue ? "Update" : "Save")) return Forbid();
             if (!ModelState.IsValid)
             {
                 return BadRequest(new { success = false, code = "InvalidData" });
@@ -175,6 +184,7 @@ namespace AhmedRawdiBusinessPlatform.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteGroup(long? groupId)
         {
+            if (!await CanAsync("Frm_UserGroupsManagement", "Delete")) return Forbid();
             if (!groupId.HasValue)
             {
                 return BadRequest(new { success = false, code = "InvalidSelection" });
@@ -200,6 +210,7 @@ namespace AhmedRawdiBusinessPlatform.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUser(long? userId)
         {
+            if (!await CanAsync("Frm_UsersManagement", "Delete")) return Forbid();
             if (!userId.HasValue)
             {
                 return BadRequest(new { success = false, code = "InvalidSelection" });
@@ -225,6 +236,7 @@ namespace AhmedRawdiBusinessPlatform.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SaveUserPermissions(long userId, long? groupId, string permissionsJson)
         {
+            if (!await CanAsync("Frm_UsersManagement", "Update")) return Forbid();
             if (userId <= 0)
             {
                 return BadRequest(new { success = false, code = "InvalidSelection" });
@@ -248,6 +260,11 @@ namespace AhmedRawdiBusinessPlatform.Controllers
                     new { success = false, message = ex.Message });
             }
         }
+
+        private long? CurrentUserId() => long.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id : null;
+        private long? CurrentGroupId() => long.TryParse(User.FindFirstValue("GroupID"), out var id) ? id : null;
+        private Task<bool> CanAsync(string formCode, string permission) =>
+            _permissionService.HasFormPermissionAsync(CurrentUserId(), CurrentGroupId(), formCode, permission);
     }
 }
 

@@ -55,7 +55,7 @@ BEGIN
     ),
     GroupPermissions AS
     (
-        SELECT FormID, CanSave, CanUpdate, CanDelete, CanSearch, CanPrint
+        SELECT FormID, CanView, CanSave, CanUpdate, CanDelete, CanSearch, CanPrint
         FROM RankedGroupPermissions
         WHERE RowNumber = 1
     ),
@@ -75,7 +75,7 @@ BEGIN
     ),
     UserPermissions AS
     (
-        SELECT FormID, CanSave, CanUpdate, CanDelete, CanSearch, CanPrint
+        SELECT FormID, CanView, CanSave, CanUpdate, CanDelete, CanSearch, CanPrint
         FROM RankedUserPermissions
         WHERE RowNumber = 1
     ),
@@ -89,11 +89,7 @@ BEGIN
     (
         SELECT
             ids.FormID,
-            CONVERT(bit, CASE 
-                WHEN up.FormID IS NOT NULL THEN (CASE WHEN up.CanSave=1 OR up.CanUpdate=1 OR up.CanDelete=1 OR up.CanSearch=1 OR up.CanPrint=1 THEN 1 ELSE 0 END)
-                WHEN gp.FormID IS NOT NULL THEN (CASE WHEN gp.CanSave=1 OR gp.CanUpdate=1 OR gp.CanDelete=1 OR gp.CanSearch=1 OR gp.CanPrint=1 THEN 1 ELSE 0 END)
-                ELSE 0 
-            END) AS CanView,
+            CONVERT(bit, COALESCE(up.CanView, gp.CanView, 0)) AS CanView,
             CONVERT(bit, COALESCE(up.CanSave, gp.CanSave, 0)) AS CanSave,
             CONVERT(bit, COALESCE(up.CanUpdate, gp.CanUpdate, 0)) AS CanUpdate,
             CONVERT(bit, COALESCE(up.CanDelete, gp.CanDelete, 0)) AS CanDelete,

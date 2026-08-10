@@ -8,6 +8,7 @@ namespace AhmedRawdiBusinessPlatform.Services
     {
         Task<List<UserPermissionDto>> GetUserPermissionsAsync(long? userId, long? groupId = null);
         Task<NavigationMenuViewModel> GetNavigationMenuAsync(long? userId, long? groupId = null);
+        Task<bool> HasFormPermissionAsync(long? userId, long? groupId, string formCode, string permission);
         Task SaveUserPermissionsAsync(long userId, long? groupId, string permissionsJson, long? registeredUserId = null);
     }
 }
