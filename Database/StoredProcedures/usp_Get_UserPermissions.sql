@@ -8,6 +8,7 @@ BEGIN
 
     DECLARE @EffectiveGroupID bigint;
     DECLARE @UserGroupID bigint;
+    DECLARE @IsSystemOwner bit = 0;
 
     IF @GroupID IS NULL AND @UserID IS NULL
         THROW 50010, 'At least one of GroupID or UserID is required.', 1;
@@ -26,7 +27,7 @@ BEGIN
 
     IF @UserID IS NOT NULL
     BEGIN
-        SELECT @UserGroupID = su.GroupID
+        SELECT @UserGroupID = su.GroupID, @IsSystemOwner = su.IsSystemOwner
         FROM dbo.SystemUsers AS su
         WHERE su.ID = @UserID
           AND su.IsActive = 1
@@ -89,12 +90,12 @@ BEGIN
     (
         SELECT
             ids.FormID,
-            CONVERT(bit, COALESCE(up.CanView, gp.CanView, 0)) AS CanView,
-            CONVERT(bit, COALESCE(up.CanSave, gp.CanSave, 0)) AS CanSave,
-            CONVERT(bit, COALESCE(up.CanUpdate, gp.CanUpdate, 0)) AS CanUpdate,
-            CONVERT(bit, COALESCE(up.CanDelete, gp.CanDelete, 0)) AS CanDelete,
-            CONVERT(bit, COALESCE(up.CanSearch, gp.CanSearch, 0)) AS CanSearch,
-            CONVERT(bit, COALESCE(up.CanPrint, gp.CanPrint, 0)) AS CanPrint,
+            CONVERT(bit, CASE WHEN @IsSystemOwner=1 THEN 1 ELSE COALESCE(up.CanView, gp.CanView, 0) END) AS CanView,
+            CONVERT(bit, CASE WHEN @IsSystemOwner=1 THEN 1 ELSE COALESCE(up.CanSave, gp.CanSave, 0) END) AS CanSave,
+            CONVERT(bit, CASE WHEN @IsSystemOwner=1 THEN 1 ELSE COALESCE(up.CanUpdate, gp.CanUpdate, 0) END) AS CanUpdate,
+            CONVERT(bit, CASE WHEN @IsSystemOwner=1 THEN 1 ELSE COALESCE(up.CanDelete, gp.CanDelete, 0) END) AS CanDelete,
+            CONVERT(bit, CASE WHEN @IsSystemOwner=1 THEN 1 ELSE COALESCE(up.CanSearch, gp.CanSearch, 0) END) AS CanSearch,
+            CONVERT(bit, CASE WHEN @IsSystemOwner=1 THEN 1 ELSE COALESCE(up.CanPrint, gp.CanPrint, 0) END) AS CanPrint,
             CONVERT(bit, CASE WHEN up.FormID IS NULL THEN 0 ELSE 1 END) AS HasUserOverride
         FROM PermissionFormIds AS ids
         LEFT JOIN GroupPermissions AS gp ON gp.FormID = ids.FormID

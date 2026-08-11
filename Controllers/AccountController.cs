@@ -14,10 +14,12 @@ namespace AhmedRawdiBusinessPlatform.Controllers
     public class AccountController : Controller
     {
         private readonly IAuthService _authService;
+        private readonly IUserService _userService;
 
-        public AccountController(IAuthService authService)
+        public AccountController(IAuthService authService, IUserService userService)
         {
             _authService = authService;
+            _userService = userService;
         }
 
         [HttpGet]
@@ -59,6 +61,9 @@ namespace AhmedRawdiBusinessPlatform.Controllers
                 new Claim(ClaimTypes.Role, userInfo.GroupEnglishName ?? userInfo.GroupCode ?? "User"),
                 new Claim("GroupID", userInfo.GroupID.ToString()),
                 new Claim("GroupCode", userInfo.GroupCode ?? string.Empty)
+                ,new Claim("IsSystemOwner", userInfo.IsSystemOwner.ToString())
+                ,new Claim("MustChangePassword", userInfo.MustChangePassword.ToString())
+                ,new Claim("SecurityStamp", userInfo.SecurityStamp.ToString())
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -73,7 +78,42 @@ namespace AhmedRawdiBusinessPlatform.Controllers
                 new ClaimsPrincipal(claimsIdentity),
                 authProperties);
 
-            return RedirectToLocal(returnUrl);
+            return userInfo.MustChangePassword
+                ? RedirectToAction(nameof(ChangePassword))
+                : RedirectToLocal(returnUrl);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult ChangePassword() => View(new ChangePasswordViewModel());
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+            var userCode = User.FindFirstValue(ClaimTypes.Name) ?? string.Empty;
+            var userIdText = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var verification = await _authService.ValidateUserAsync(userCode, model.CurrentPassword);
+            if (!verification.IsSuccess || !long.TryParse(userIdText, out var userId))
+            {
+                ModelState.AddModelError(nameof(model.CurrentPassword), "The current password is incorrect.");
+                return View(model);
+            }
+
+            try
+            {
+                await _userService.ChangeOwnPasswordAsync(userId, model.NewPassword);
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                TempData["PasswordChanged"] = "Password changed successfully. Please sign in again.";
+                return RedirectToAction(nameof(Login));
+            }
+            catch (ArgumentException exception)
+            {
+                ModelState.AddModelError(nameof(model.NewPassword), exception.Message);
+                return View(model);
+            }
         }
 
         [HttpPost]

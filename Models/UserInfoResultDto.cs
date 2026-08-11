@@ -9,6 +9,9 @@ namespace AhmedRawdiBusinessPlatform.Models
         public string? UserEnglishName { get; set; }
         public string? UserArabicName { get; set; }
         public string? PasswordHash { get; set; }
+        public bool IsSystemOwner { get; set; }
+        public bool MustChangePassword { get; set; }
+        public Guid SecurityStamp { get; set; }
         public string? Email { get; set; }
         public string? MobileNum { get; set; }
         public bool IsActive { get; set; }

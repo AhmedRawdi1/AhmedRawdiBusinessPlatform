@@ -234,6 +234,25 @@ namespace AhmedRawdiBusinessPlatform.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetUserPassword([FromForm] ResetPasswordDto model)
+        {
+            if (!User.HasClaim("IsSystemOwner", bool.TrueString)) return Forbid();
+            if (!ModelState.IsValid) return BadRequest(new { success=false, code="InvalidPassword" });
+            if (!long.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var ownerId)) return Forbid();
+
+            try
+            {
+                await _userService.ResetPasswordAsync(model.UserID, model.NewPassword, ownerId);
+                return Json(new { success=true });
+            }
+            catch (Exception exception) when (exception is ArgumentException or SqlException)
+            {
+                return BadRequest(new { success=false, message=exception.Message });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> SaveUserPermissions(long userId, long? groupId, string permissionsJson)
         {
             if (!await CanAsync("Frm_UsersManagement", "Update")) return Forbid();

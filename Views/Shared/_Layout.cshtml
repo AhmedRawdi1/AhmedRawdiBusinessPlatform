@@ -54,7 +54,7 @@
                         <div class="dropdown-menu dropdown-menu-end profile-menu">
                             <div class="profile-menu-head"><span class="avatar avatar-lg">@initial</span><div><strong>@displayName</strong><small>@(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value)</small></div></div>
                             <a class="dropdown-item" href="javascript:void(0)"><i class="bi bi-person"></i>@Lang.Get("MyProfile")</a>
-                            <a class="dropdown-item" href="javascript:void(0)"><i class="bi bi-sliders"></i>@Lang.Get("AccountSettings")</a>
+                            <a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword"><i class="bi bi-key"></i>@Lang.Get("AccountSettings")</a>
                             <div class="dropdown-divider"></div>
                             <form asp-controller="Account" asp-action="Logout" method="post">@Html.AntiForgeryToken()<button class="dropdown-item text-danger" type="submit"><i class="bi bi-box-arrow-right"></i>@Lang.Get("SignOut")</button></form>
                         </div>

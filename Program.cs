@@ -2,6 +2,7 @@ using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 using AhmedRawdiBusinessPlatform.Data;
 using AhmedRawdiBusinessPlatform.Services;
 using Microsoft.AspNetCore.RateLimiting;
@@ -60,6 +61,17 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
             ? CookieSecurePolicy.SameAsRequest
             : CookieSecurePolicy.Always;
         options.AccessDeniedPath = "/Account/Login";
+        options.Events.OnValidatePrincipal = async context =>
+        {
+            var userIdValue = context.Principal?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var stampValue = context.Principal?.FindFirst("SecurityStamp")?.Value;
+            if (!long.TryParse(userIdValue, out var userId) || !Guid.TryParse(stampValue, out var stamp) ||
+                !await context.HttpContext.RequestServices.GetRequiredService<IUserService>().IsSessionValidAsync(userId, stamp))
+            {
+                context.RejectPrincipal();
+                await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            }
+        };
     });
 
 var supportedCultures = new[]
@@ -92,6 +104,20 @@ app.UseRouting();
 app.UseRateLimiter();
 
 app.UseAuthentication();
+app.Use(async (context, next) =>
+{
+    var requiresPasswordChange = context.User.Identity?.IsAuthenticated == true &&
+        string.Equals(context.User.FindFirst("MustChangePassword")?.Value, bool.TrueString, StringComparison.OrdinalIgnoreCase);
+    var allowedPath = context.Request.Path.StartsWithSegments("/Account/ChangePassword") ||
+        context.Request.Path.StartsWithSegments("/Account/Logout") ||
+        context.Request.Path.StartsWithSegments("/Language");
+    if (requiresPasswordChange && !allowedPath)
+    {
+        context.Response.Redirect("/Account/ChangePassword");
+        return;
+    }
+    await next();
+});
 app.UseAuthorization();
 
 app.MapStaticAssets();

@@ -101,6 +101,10 @@
                         }
 
                         <form asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" id="loginForm">
+                            @if (TempData["PasswordChanged"] is string passwordChangedMessage)
+                            {
+                                <div class="alert alert-success" role="status">@passwordChangedMessage</div>
+                            }
                             @Html.AntiForgeryToken()
                             <div class="field-group">
                                 <label asp-for="UserCode">@Lang.Get("UserCode") <span class="required-mark" aria-hidden="true">*</span></label>

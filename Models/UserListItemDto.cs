@@ -15,6 +15,8 @@ namespace AhmedRawdiBusinessPlatform.Models
         public bool IsActive { get; set; }
         public DateTime? RegDate { get; set; }
         public DateTime? ExpiredDate { get; set; }
+        public bool IsSystemOwner { get; set; }
+        public bool MustChangePassword { get; set; }
         public string GroupCode { get; set; } = string.Empty;
         public string GroupEnglishName { get; set; } = string.Empty;
         public string? GroupArabicName { get; set; }
