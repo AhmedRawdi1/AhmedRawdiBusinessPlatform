@@ -17,7 +17,6 @@
 </section>
 
 <section class="management-toolbar" aria-label="@Lang.Get("PageActions")">
-    <div class="master-toolbar-label"><span>@(rtl ? "إجراءات السجل" : "Record actions")</span><small>@(rtl ? "إدارة البيانات الحالية" : "Manage the current record")</small></div>
     <div class="toolbar-actions master-toolbar-actions">
         <div class="master-toolbar-group master-toolbar-core">
             <button class="toolbar-button toolbar-button-primary" type="button" id="newRecordButton"><i class="bi bi-plus-lg"></i><span>@Lang.Get("New")</span></button>
@@ -44,7 +43,6 @@
                 <h2 id="recordEditorTitle">@(rtl ? $"تفاصيل {title}" : $"{title} details")</h2>
                 </div>
             </div>
-            <span class="record-state"><span></span><span id="recordStateText">@Lang.Get("NewRecord")</span></span>
         </div>
 
         <form id="masterDataForm" novalidate>
@@ -90,18 +88,6 @@
         </form>
     </section>
 
-    <aside class="master-data-summary" aria-label="@(rtl ? "ملخص السجل" : "Record summary")">
-        <div class="master-summary-icon"><i class="bi @Model.IconClass"></i></div>
-        <span class="eyebrow-text">@(rtl ? "مساحة عمل موحدة" : "Unified workspace")</span>
-        <h2>@title</h2>
-        <p>@(rtl ? "أنشئ السجلات وابحث عنها وأدرها من واجهة واحدة منظمة ومتجاوبة مع جميع الأجهزة." : "Create, find and maintain records from one organized workspace designed for every screen size.")</p>
-        <div class="master-workflow-list">
-            <div><span>01</span><div><strong>@(rtl ? "ابدأ بسجل" : "Start a record")</strong><small>@(rtl ? "أدخل البيانات الأساسية" : "Enter the core information")</small></div></div>
-            <div><span>02</span><div><strong>@(rtl ? "راجع التفاصيل" : "Review details")</strong><small>@(rtl ? "تحقق من الحقول المطلوبة" : "Check required fields")</small></div></div>
-            <div><span>03</span><div><strong>@(rtl ? "احفظ بأمان" : "Save securely")</strong><small>@(rtl ? "يتم تسجيل العملية تلقائيًا" : "The action is audited automatically")</small></div></div>
-        </div>
-        <div class="master-summary-status"><span></span><div><strong>@(rtl ? "جاهز للإدخال" : "Ready for entry")</strong><small>@(rtl ? "ابدأ بسجل جديد أو استخدم البحث" : "Start a new record or use search")</small></div></div>
-    </aside>
 </div>
 
 <div class="modal fade management-directory-modal" id="masterDirectoryModal" tabindex="-1" aria-labelledby="masterDirectoryTitle" aria-hidden="true">
@@ -150,7 +136,6 @@
         form.reset(); document.getElementById('recordId').value = '';
         form.querySelectorAll('input[type="checkbox"]').forEach(input => input.checked = true);
         form.classList.remove('was-validated');
-        document.getElementById('recordStateText').textContent = '@Html.Raw(Lang.Get("NewRecord").Replace("'", "\\'"))';
         form.querySelector('input:not([type="hidden"]),select,textarea')?.focus();
     };
     const loadLookups = async () => {
@@ -167,7 +152,7 @@
         if (!response.ok) { notify(rtl ? 'تعذر فتح السجل.' : 'The record could not be opened.'); return; }
         const record = await response.json(); document.getElementById('recordId').value = record.ID;
         Object.entries(record).forEach(([key, value]) => { const control = form.elements.namedItem(key); if (!control) return; if (control.type === 'checkbox') control.checked = Boolean(value); else control.value = value ?? ''; });
-        document.getElementById('recordStateText').textContent = rtl ? 'سجل محفوظ' : 'Saved record'; searchModal.hide();
+        searchModal.hide();
     };
     const loadDirectory = async () => {
         directoryLoading.classList.remove('d-none'); directoryTable.classList.add('d-none'); directoryEmpty.classList.add('d-none');
@@ -189,7 +174,7 @@
         const response = await fetch(`/Administration/MasterData/${encodeURIComponent(entity)}/Save`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': antiForgeryToken }, body: JSON.stringify(payload) });
         const result = await response.json().catch(() => ({}));
         if (!response.ok) { notify(result.message === 'DuplicateCode' ? (rtl ? 'الكود مستخدم في سجل آخر.' : 'The code is already used by another record.') : (rtl ? 'تعذر حفظ السجل.' : 'The record could not be saved.')); return; }
-        document.getElementById('recordId').value = result.id; document.getElementById('recordStateText').textContent = rtl ? 'سجل محفوظ' : 'Saved record'; form.classList.remove('was-validated'); notify(rtl ? 'تم حفظ السجل بنجاح.' : 'The record was saved successfully.');
+        document.getElementById('recordId').value = result.id; form.classList.remove('was-validated'); notify(rtl ? 'تم حفظ السجل بنجاح.' : 'The record was saved successfully.');
     });
     document.getElementById('deleteRecordButton').addEventListener('click', async () => { const id = document.getElementById('recordId').value; if (!id) { notify(rtl ? 'اختر سجلًا من البحث أولًا.' : 'Select a record from search first.'); return; } if (!confirm(rtl ? 'هل تريد تعطيل هذا السجل؟' : 'Deactivate this record?')) return; const body = new URLSearchParams({ id, __RequestVerificationToken: antiForgeryToken }); const response = await fetch(`/Administration/MasterData/${encodeURIComponent(entity)}/Delete`, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body }); if (!response.ok) { notify(rtl ? 'تعذر تعطيل السجل.' : 'The record could not be deactivated.'); return; } notify(rtl ? 'تم تعطيل السجل بنجاح.' : 'The record was deactivated successfully.'); reset(); });
     document.getElementById('exportRecordButton').addEventListener('click', () => notify(rtl ? 'لا توجد بيانات متاحة للتصدير بعد.' : 'No data is available to export yet.'));

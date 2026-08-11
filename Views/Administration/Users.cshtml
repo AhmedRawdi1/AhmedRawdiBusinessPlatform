@@ -34,7 +34,6 @@
     <section class="management-panel group-editor" aria-labelledby="userEditorTitle">
         <div class="management-panel-heading">
             <div><span class="eyebrow-text">@Lang.Get("UserRecord")</span><h2 id="userEditorTitle">@Lang.Get("UserDetails")</h2></div>
-            <span class="record-state" id="userRecordBadge"><span></span><span id="userRecordBadgeText">@Lang.Get("NewRecord")</span></span>
         </div>
         <form id="userEditorForm" autocomplete="off">
             @Html.AntiForgeryToken()
@@ -292,7 +291,6 @@
             const permissionRecordCount = document.getElementById('userPermissionRecordCount');
             const permissionEnabledCount = document.getElementById('userPermissionEnabledCount');
             const permissionFilterInput = document.getElementById('userPermissionFilterInput');
-            const recordBadgeText = document.getElementById('userRecordBadgeText');
             
             let users = [];
             let groups = [];
@@ -308,7 +306,6 @@
                 saveButton.disabled = false;
                 deleteButton.disabled = false;
                 if (resetPasswordButton) resetPasswordButton.disabled = true;
-                if (recordBadgeText) recordBadgeText.textContent = '@Lang.Get("NewRecord")';
                 loadUserPermissions(null, userGroupIdSelect?.value);
                 userCode?.focus();
             };
@@ -641,7 +638,6 @@
                         saveButton.disabled = selectedUserIsOwner;
                         deleteButton.disabled = selectedUserIsOwner;
                         if (resetPasswordButton) resetPasswordButton.disabled = selectedUserIsOwner;
-                        if (recordBadgeText) recordBadgeText.textContent = user.userCode;
 
                         loadUserPermissions(user.userID, user.groupID);
                         directoryModal?.hide();
