@@ -41,6 +41,8 @@ BEGIN
 
         IF EXISTS (SELECT 1 FROM #Permissions p LEFT JOIN dbo.SystemForms f ON f.FormID = p.FormID WHERE f.FormID IS NULL)
             THROW 50004, 'One or more system forms do not exist.', 1;
+        IF EXISTS (SELECT 1 FROM #Permissions WHERE CanView=0 AND (CanSave=1 OR CanUpdate=1 OR CanDelete=1 OR CanSearch=1 OR CanPrint=1))
+            THROW 50005, 'CanView is required when another form permission is enabled.', 1;
 
         BEGIN TRANSACTION;
 

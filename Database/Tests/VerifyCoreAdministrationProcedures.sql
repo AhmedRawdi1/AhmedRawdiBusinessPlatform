@@ -39,6 +39,25 @@ SELECT N'UserUpdate' AS Test, @HasError AS HasError;
 
 DECLARE @Permissions nvarchar(max) = N'[{"FormID":1,"CanView":true,"CanSave":false,"CanUpdate":false,"CanDelete":false,"CanSearch":true,"CanPrint":false}]';
 
+EXEC dbo.usp_Add_SystemGroupPermissions
+    @GroupID = @GroupID, @PermissionsJson = @Permissions, @RegUserID = 1,
+    @HasError = @HasError OUTPUT, @ErrorDesc = @ErrorDesc OUTPUT;
+IF @HasError = 1
+    THROW 50995, 'The group permission could not be saved.', 1;
+
+CREATE TABLE #GroupPermissions
+(
+    GroupID bigint, GroupCode varchar(100), GroupEnglishName varchar(200), GroupArabicName nvarchar(200),
+    ModuleID bigint, ModuleCode varchar(100), ModuleEnglishName varchar(200), ModuleArabicName nvarchar(200),
+    SubModuleID bigint, SubModuleCode varchar(100), SubModuleEnglishName varchar(200), SubModuleArabicName nvarchar(200),
+    FormID bigint, FormCode varchar(200), FormEnglishName varchar(200), FormArabicName nvarchar(200),
+    IsPermitted bit, CanView bit, PermissionID bigint, CanSave bit, CanUpdate bit, CanDelete bit, CanSearch bit, CanPrint bit
+);
+INSERT #GroupPermissions EXEC dbo.usp_Get_GroupPermissions @GroupID=@GroupID;
+IF NOT EXISTS (SELECT 1 FROM #GroupPermissions WHERE FormID=1 AND IsPermitted=1 AND CanView=1 AND CanSave=0 AND CanSearch=1)
+    THROW 50996, 'The saved group CanView permission was not returned correctly.', 1;
+SELECT N'GroupPermissionRoundTrip' AS Test, CONVERT(bit,1) AS Passed;
+
 EXEC dbo.usp_Add_SystemUserPermissions
     @UserID = @UserID, @GroupID = @GroupID, @PermissionsJson = @Permissions, @RegUserID = 1,
     @HasError = @HasError OUTPUT, @ErrorDesc = @ErrorDesc OUTPUT;
