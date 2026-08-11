@@ -18,6 +18,8 @@ BEGIN
         ISNULL(u.IsActive, 0) AS IsActive,
         u.RegDate,
         u.ExpiredDate,
+        u.IsSystemOwner,
+        u.MustChangePassword,
         g.Code AS GroupCode,
         g.EngName AS GroupEnglishName,
         g.ArbName AS GroupArabicName

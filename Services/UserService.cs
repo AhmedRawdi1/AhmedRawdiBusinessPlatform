@@ -103,5 +103,36 @@ namespace AhmedRawdiBusinessPlatform.Services
                 "EXEC dbo.usp_Delete_User @UserID = @UserID",
                 userIdParam);
         }
+
+        public async Task ResetPasswordAsync(long userId, string newPassword, long performedByUserId)
+        {
+            ValidatePassword(newPassword);
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC dbo.usp_Reset_UserPassword @UserID={0}, @PasswordHash={1}, @PerformedByUserID={2}",
+                userId, _passwordService.HashPassword(newPassword), performedByUserId);
+        }
+
+        public async Task ChangeOwnPasswordAsync(long userId, string newPassword)
+        {
+            ValidatePassword(newPassword);
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC dbo.usp_Change_OwnPassword @UserID={0}, @PasswordHash={1}",
+                userId, _passwordService.HashPassword(newPassword));
+        }
+
+        public async Task<bool> IsSessionValidAsync(long userId, Guid securityStamp)
+        {
+            var userParam = new SqlParameter("@UserID", userId);
+            var stampParam = new SqlParameter("@SecurityStamp", securityStamp);
+            var result = await _context.Database.SqlQueryRaw<SessionValidationDto>(
+                "EXEC dbo.usp_Validate_UserSession @UserID=@UserID, @SecurityStamp=@SecurityStamp", userParam, stampParam).ToListAsync();
+            return result.FirstOrDefault()?.IsValid == true;
+        }
+
+        private static void ValidatePassword(string password)
+        {
+            if (string.IsNullOrWhiteSpace(password) || password.Length < 8)
+                throw new ArgumentException("Password must contain at least 8 characters.");
+        }
     }
 }

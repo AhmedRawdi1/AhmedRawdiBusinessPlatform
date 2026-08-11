@@ -1,6 +1,7 @@
 @inject AhmedRawdiBusinessPlatform.Services.ILanguageService Lang
 @{
     ViewData["Title"] = Lang.Get("UsersManagement");
+    var isSystemOwner = User.HasClaim("IsSystemOwner", bool.TrueString);
 }
 
 <section class="management-header">
@@ -17,6 +18,10 @@
         <button class="toolbar-button toolbar-button-primary" type="button" id="newUserButton"><i class="bi bi-plus-lg"></i><span>@Lang.Get("New")</span></button>
         <button class="toolbar-button" type="button" id="saveUserButton"><i class="bi bi-check2-circle"></i><span>@Lang.Get("Save")</span></button>
         <button class="toolbar-button toolbar-button-danger" type="button" id="deleteUserButton"><i class="bi bi-trash3"></i><span>@Lang.Get("Delete")</span></button>
+        @if (isSystemOwner)
+        {
+            <button class="toolbar-button" type="button" id="resetPasswordButton"><i class="bi bi-key"></i><span>Reset Password</span></button>
+        }
         <button class="toolbar-button" type="button" id="searchUserButton"><i class="bi bi-search"></i><span>@Lang.Get("Search")</span></button>
         <button class="toolbar-button" type="button" id="exportUserButton"><i class="bi bi-box-arrow-up"></i><span>@Lang.Get("Export")</span></button>
         <button class="toolbar-button" type="button" id="importUserButton"><i class="bi bi-box-arrow-in-down"></i><span>@Lang.Get("Import")</span></button>
@@ -231,6 +236,25 @@
     </div>
 </div>
 
+@if (isSystemOwner)
+{
+    <div class="modal fade management-action-modal" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header"><div class="modal-title-group"><span class="modal-icon"><i class="bi bi-key"></i></span><div><span class="eyebrow-text">System owner action</span><h2 class="modal-title" id="resetPasswordModalTitle">Reset user password</h2></div></div><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <p class="text-secondary">Set a temporary password. The user must replace it at the next sign-in, and all previous sessions will be invalidated.</p>
+                    <div class="management-field mb-3"><label for="temporaryPassword">Temporary password</label><input id="temporaryPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" /></div>
+                    <div class="management-field"><label for="confirmTemporaryPassword">Confirm temporary password</label><input id="confirmTemporaryPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" /></div>
+                    <small class="d-block mt-3 text-secondary">Use at least 8 characters.</small>
+                    <div class="text-danger mt-2 d-none" id="resetPasswordError" role="alert"></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="toolbar-button" data-bs-dismiss="modal">@Lang.Get("Cancel")</button><button type="button" class="toolbar-button toolbar-button-primary" id="confirmResetPasswordButton"><i class="bi bi-shield-check"></i>Reset Password</button></div>
+            </div>
+        </div>
+    </div>
+}
+
 @section Scripts {
     <script>
         (() => {
@@ -256,6 +280,9 @@
             const actionOk = document.getElementById('userActionOkButton');
             const deleteButton = document.getElementById('deleteUserButton');
             const saveButton = document.getElementById('saveUserButton');
+            const resetPasswordElement = document.getElementById('resetPasswordModal');
+            const resetPasswordModal = resetPasswordElement ? new bootstrap.Modal(resetPasswordElement) : null;
+            const resetPasswordButton = document.getElementById('resetPasswordButton');
             const assignedPermissionsPanel = document.getElementById('assignedPermissionsPanel');
             const permissionLoading = document.getElementById('userPermissionLoading');
             const permissionError = document.getElementById('userPermissionError');
@@ -271,11 +298,16 @@
             let groups = [];
             let formPermissions = [];
             let permissionRequestController = null;
+            let selectedUserIsOwner = false;
 
             const resetEditor = () => {
                 form?.reset();
                 document.getElementById('userId').value = '';
                 document.getElementById('userActive').checked = true;
+                selectedUserIsOwner = false;
+                saveButton.disabled = false;
+                deleteButton.disabled = false;
+                if (resetPasswordButton) resetPasswordButton.disabled = true;
                 if (recordBadgeText) recordBadgeText.textContent = '@Lang.Get("NewRecord")';
                 loadUserPermissions(null, userGroupIdSelect?.value);
                 userCode?.focus();
@@ -605,6 +637,10 @@
                             document.getElementById('userExpiredDate').value = '';
                         }
                         document.getElementById('userActive').checked = user.isActive;
+                        selectedUserIsOwner = user.isSystemOwner === true;
+                        saveButton.disabled = selectedUserIsOwner;
+                        deleteButton.disabled = selectedUserIsOwner;
+                        if (resetPasswordButton) resetPasswordButton.disabled = selectedUserIsOwner;
                         if (recordBadgeText) recordBadgeText.textContent = user.userCode;
 
                         loadUserPermissions(user.userID, user.groupID);
@@ -731,6 +767,39 @@
             deleteButton?.addEventListener('click', deleteSelectedUser);
             actionConfirm?.addEventListener('click', confirmUserDeletion);
 
+            resetPasswordButton?.addEventListener('click', () => {
+                const userId = document.getElementById('userId').value;
+                if (!userId || selectedUserIsOwner) {
+                    showActionModal('Reset password', selectedUserIsOwner ? 'The system owner password must be changed from Account Settings.' : 'Select a user first.');
+                    return;
+                }
+                document.getElementById('temporaryPassword').value = '';
+                document.getElementById('confirmTemporaryPassword').value = '';
+                document.getElementById('resetPasswordError').classList.add('d-none');
+                resetPasswordModal?.show();
+            });
+
+            document.getElementById('confirmResetPasswordButton')?.addEventListener('click', async event => {
+                const password = document.getElementById('temporaryPassword').value;
+                const confirmation = document.getElementById('confirmTemporaryPassword').value;
+                const error = document.getElementById('resetPasswordError');
+                if (password !== confirmation || password.length < 8) {
+                    error.textContent = password !== confirmation ? 'Passwords do not match.' : 'Password must be at least 8 characters.';
+                    error.classList.remove('d-none'); return;
+                }
+                event.currentTarget.disabled = true;
+                try {
+                    const token = form.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                    const body = new URLSearchParams({ UserID: document.getElementById('userId').value, NewPassword: password, ConfirmPassword: confirmation });
+                    const response = await fetch('@Url.Action("ResetUserPassword", "Administration")', { method:'POST', headers:{ 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8', 'RequestVerificationToken':token || '' }, body });
+                    const result = await response.json().catch(() => ({}));
+                    if (!response.ok || !result.success) throw new Error(result.message || 'Password reset failed.');
+                    resetPasswordModal?.hide();
+                    showActionModal('Password reset complete', 'A temporary password was assigned. The user must change it at the next sign-in.');
+                } catch (exception) { error.textContent = exception.message; error.classList.remove('d-none'); }
+                finally { event.currentTarget.disabled = false; }
+            });
+
             document.querySelector('[data-focus-new-user]')?.addEventListener('click', () => {
                 resetEditor();
                 directoryModal?.hide();
@@ -750,6 +819,7 @@
             document.getElementById('printUserButton')?.addEventListener('click', () => window.print());
 
             loadGroupsOptions();
+            if (resetPasswordButton) resetPasswordButton.disabled = true;
         })();
     </script>
 }

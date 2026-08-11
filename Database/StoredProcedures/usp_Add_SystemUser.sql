@@ -1,6 +1,10 @@
 USE [ARBP];
 GO
 
+SET ANSI_NULLS ON;
+SET QUOTED_IDENTIFIER ON;
+GO
+
 CREATE OR ALTER PROCEDURE dbo.usp_Add_SystemUser
     @GroupID bigint,
     @Code nvarchar(100),
@@ -59,6 +63,9 @@ BEGIN
         END
         ELSE
         BEGIN
+            IF EXISTS (SELECT 1 FROM dbo.SystemUsers WHERE ID=@UserID AND IsSystemOwner=1)
+                THROW 50231, 'The system owner account cannot be edited from user management.', 1;
+
             UPDATE dbo.SystemUsers
             SET GroupID = @GroupID,
                 Code = @Code,

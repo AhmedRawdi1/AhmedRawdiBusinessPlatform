@@ -21,6 +21,8 @@ BEGIN
     BEGIN TRY
         IF NOT EXISTS (SELECT 1 FROM dbo.SystemUsers WHERE ID = @UserID AND CancellationDate IS NULL)
             THROW 50002, 'The selected system user does not exist.', 1;
+        IF EXISTS (SELECT 1 FROM dbo.SystemUsers WHERE ID=@UserID AND IsSystemOwner=1)
+            THROW 50232, 'The system owner always has full access and cannot receive permission overrides.', 1;
         IF ISJSON(@PermissionsJson) <> 1 THROW 50003, 'A valid JSON array of form permissions is required.', 1;
 
         CREATE TABLE #Permissions
