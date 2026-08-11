@@ -44,7 +44,6 @@
                 <h2 id="recordEditorTitle">@(rtl ? $"تفاصيل {title}" : $"{title} details")</h2>
                 </div>
             </div>
-            <span class="record-state"><span></span><span id="recordStateText">@Lang.Get("NewRecord")</span></span>
         </div>
 
         <form id="masterDataForm" novalidate>
@@ -138,7 +137,6 @@
         form.reset(); document.getElementById('recordId').value = '';
         form.querySelectorAll('input[type="checkbox"]').forEach(input => input.checked = true);
         form.classList.remove('was-validated');
-        document.getElementById('recordStateText').textContent = '@Html.Raw(Lang.Get("NewRecord").Replace("'", "\\'"))';
         form.querySelector('input:not([type="hidden"]),select,textarea')?.focus();
     };
     const loadLookups = async () => {
@@ -155,7 +153,7 @@
         if (!response.ok) { notify(rtl ? 'تعذر فتح السجل.' : 'The record could not be opened.'); return; }
         const record = await response.json(); document.getElementById('recordId').value = record.ID;
         Object.entries(record).forEach(([key, value]) => { const control = form.elements.namedItem(key); if (!control) return; if (control.type === 'checkbox') control.checked = Boolean(value); else control.value = value ?? ''; });
-        document.getElementById('recordStateText').textContent = rtl ? 'سجل محفوظ' : 'Saved record'; searchModal.hide();
+        searchModal.hide();
     };
     const loadDirectory = async () => {
         directoryLoading.classList.remove('d-none'); directoryTable.classList.add('d-none'); directoryEmpty.classList.add('d-none');
@@ -177,7 +175,7 @@
         const response = await fetch(`/Administration/MasterData/${encodeURIComponent(entity)}/Save`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': antiForgeryToken }, body: JSON.stringify(payload) });
         const result = await response.json().catch(() => ({}));
         if (!response.ok) { notify(result.message === 'DuplicateCode' ? (rtl ? 'الكود مستخدم في سجل آخر.' : 'The code is already used by another record.') : (rtl ? 'تعذر حفظ السجل.' : 'The record could not be saved.')); return; }
-        document.getElementById('recordId').value = result.id; document.getElementById('recordStateText').textContent = rtl ? 'سجل محفوظ' : 'Saved record'; form.classList.remove('was-validated'); notify(rtl ? 'تم حفظ السجل بنجاح.' : 'The record was saved successfully.');
+        document.getElementById('recordId').value = result.id; form.classList.remove('was-validated'); notify(rtl ? 'تم حفظ السجل بنجاح.' : 'The record was saved successfully.');
     });
     document.getElementById('deleteRecordButton').addEventListener('click', async () => { const id = document.getElementById('recordId').value; if (!id) { notify(rtl ? 'اختر سجلًا من البحث أولًا.' : 'Select a record from search first.'); return; } if (!confirm(rtl ? 'هل تريد تعطيل هذا السجل؟' : 'Deactivate this record?')) return; const body = new URLSearchParams({ id, __RequestVerificationToken: antiForgeryToken }); const response = await fetch(`/Administration/MasterData/${encodeURIComponent(entity)}/Delete`, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body }); if (!response.ok) { notify(rtl ? 'تعذر تعطيل السجل.' : 'The record could not be deactivated.'); return; } notify(rtl ? 'تم تعطيل السجل بنجاح.' : 'The record was deactivated successfully.'); reset(); });
     document.getElementById('exportRecordButton').addEventListener('click', () => notify(rtl ? 'لا توجد بيانات متاحة للتصدير بعد.' : 'No data is available to export yet.'));
