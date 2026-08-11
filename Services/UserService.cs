@@ -131,10 +131,8 @@ namespace AhmedRawdiBusinessPlatform.Services
 
         private static void ValidatePassword(string password)
         {
-            if (string.IsNullOrWhiteSpace(password) || password.Length < 12 ||
-                !password.Any(char.IsUpper) || !password.Any(char.IsLower) ||
-                !password.Any(char.IsDigit) || !password.Any(ch => !char.IsLetterOrDigit(ch)))
-                throw new ArgumentException("Password must contain at least 12 characters, uppercase, lowercase, number, and special character.");
+            if (string.IsNullOrWhiteSpace(password) || password.Length < 8)
+                throw new ArgumentException("Password must contain at least 8 characters.");
         }
     }
 }
