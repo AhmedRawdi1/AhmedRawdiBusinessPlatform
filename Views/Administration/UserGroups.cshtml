@@ -372,7 +372,13 @@
                 const input = event.target.closest('input[type="checkbox"]');
                 if (!input) return;
                 const item = formPermissions.find(entry => String(entry.formID) === input.dataset.formId);
-                if (item) item[input.dataset.permission] = input.checked;
+                if (item) {
+                    item[input.dataset.permission] = input.checked;
+                    if (input.dataset.permission !== 'canView' && input.checked) item.canView = true;
+                    if (input.dataset.permission === 'canView' && !input.checked) {
+                        item.canSave = false; item.canUpdate = false; item.canDelete = false; item.canSearch = false; item.canPrint = false;
+                    }
+                }
                 filterFormPermissions();
             });
             document.addEventListener('keydown', event => {
@@ -443,8 +449,9 @@
 
                     const permissionsData = formPermissions.map(item => ({
                         FormID: item.formID,
-                        CanSave: item.canView === true || item.canSave === true,
-                        CanUpdate: item.canSave === true,
+                        CanView: item.canView === true,
+                        CanSave: item.canSave === true,
+                        CanUpdate: item.canUpdate === true || item.canSave === true,
                         CanDelete: item.canDelete === true,
                         CanSearch: item.canSearch === true,
                         CanPrint: item.canPrint === true

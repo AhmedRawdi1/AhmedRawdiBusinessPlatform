@@ -27,8 +27,8 @@ BEGIN
         f.FormCode,
         f.FormEngName           AS FormEnglishName,
         f.FormArbName           AS FormArabicName,
-        CAST(CASE WHEN permission.ID IS NULL THEN 0 ELSE 1 END AS BIT) AS IsPermitted,
-        CAST(CASE WHEN permission.ID IS NULL THEN 0 ELSE 1 END AS BIT) AS CanView,
+        CAST(ISNULL(permission.CanView, 0) AS BIT) AS IsPermitted,
+        CAST(ISNULL(permission.CanView, 0) AS BIT) AS CanView,
         permission.ID           AS PermissionID,
         CAST(ISNULL(permission.CanSave, 0) AS BIT)   AS CanSave,
         CAST(ISNULL(permission.CanUpdate, 0) AS BIT) AS CanUpdate,
@@ -43,6 +43,7 @@ BEGIN
     (
         SELECT TOP (1)
             p.ID,
+            p.CanView,
             p.CanSave,
             p.CanUpdate,
             p.CanDelete,

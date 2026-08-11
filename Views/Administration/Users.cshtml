@@ -513,6 +513,10 @@
                 const item = formPermissions.find(entry => String(entry.formID) === input.dataset.formId);
                 if (item) {
                     item[input.dataset.permission] = input.checked;
+                    if (input.dataset.permission !== 'canView' && input.checked) item.canView = true;
+                    if (input.dataset.permission === 'canView' && !input.checked) {
+                        item.canSave = false; item.canUpdate = false; item.canDelete = false; item.canSearch = false; item.canPrint = false;
+                    }
                     item.hasUserOverride = true;
                 }
                 filterFormPermissions();
