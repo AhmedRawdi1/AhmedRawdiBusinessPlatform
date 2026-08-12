@@ -21,8 +21,8 @@ BEGIN
         WHEN 'Gender' THEN 'Gender' WHEN 'MedicalSpecialties' THEN 'MedicalSpecialties'
         WHEN 'PhysiciansLevels' THEN 'PhysiciansLevels' WHEN 'Physicians' THEN 'Physicians' END,
       @AllowedColumns = CASE @EntityKey
-        WHEN 'Companies' THEN 'Code,EngName,ArbName,CRN,VATRN,AddressEngName,AddressArbName,PhoneNo,Email,LocationCountryID,LocationCityID,IsActive'
-        WHEN 'Branches' THEN 'CompanyID,Code,EngName,ArbName,CRN,VATRN,AddressEngName,AddressArbName,PhoneNo,Email,LocationCountryID,LocationCityID,IsActive'
+        WHEN 'Companies' THEN 'Code,EngName,ArbName,CRN,VATRN,AddressEngName,AddressArbName,PhoneNo,Email,CountryID,CityID,IsActive'
+        WHEN 'Branches' THEN 'CompanyID,Code,EngName,ArbName,CRN,VATRN,AddressEngName,AddressArbName,PhoneNo,Email,CountryID,CityID,IsActive'
         WHEN 'CostCentersGroup' THEN 'Code,EngName,ArbName,Remarks'
         WHEN 'CostCentersTypes' THEN 'Code,EngName,ArbName,Remarks'
         WHEN 'CostCenters' THEN 'CCGID,CCLID,CCTID,Code,EngName,ArbName,Remarks'
