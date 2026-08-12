@@ -13,7 +13,7 @@ BEGIN TRY
     EXEC dbo.usp_MasterData_Save
         @EntityKey='Companies',
         @ID=NULL,
-        @Payload=N'{"Code":"APP-DIAG-CO","EngName":"Application Diagnostic Company","ArbName":"Application Diagnostic Company","CRN":"123","VATRN":"456","PhoneNo":"0500000000","Email":"test@example.com","LocationCountryID":1,"LocationCityID":1,"AddressEngName":"Address","AddressArbName":"Address","IsActive":true}',
+        @Payload=N'{"Code":"APP-DIAG-CO","EngName":"Application Diagnostic Company","ArbName":"Application Diagnostic Company","CRN":"123","VATRN":"456","PhoneNo":"0500000000","Email":"test@example.com","LocationCountryID":1,"AddressEngName":"Address","AddressArbName":"Address","IsActive":true}',
         @RegUserID=1,
         @SavedID=@SavedID OUTPUT;
     REVERT;

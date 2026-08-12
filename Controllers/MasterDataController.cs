@@ -119,7 +119,7 @@ public sealed class MasterDataController : Controller
                 F("ArbName", "Arabic name", "الاسم بالعربية", true, max: 100), F("CRN", "Commercial registration no.", "رقم السجل التجاري", true, max: 100),
                 F("VATRN", "VAT registration no.", "الرقم الضريبي", true, max: 100), F("PhoneNo", "Phone number", "رقم الهاتف", true, "tel", 100),
                 F("Email", "Email address", "البريد الإلكتروني", true, "email", 100), Lookup("LocationCountryID", "Country", "الدولة", "Nationalities"),
-                F("LocationCityID", "City record ID", "معرّف المدينة", true, "number"), F("AddressEngName", "English address", "العنوان بالإنجليزية", true, "textarea", 200, true),
+                F("AddressEngName", "English address", "العنوان بالإنجليزية", true, "textarea", 200, true),
                 F("AddressArbName", "Arabic address", "العنوان بالعربية", true, "textarea", 200, true), F("IsActive", "Active company", "شركة نشطة", type: "checkbox", full: true)),
             Page("Branches", "Branches", "الفروع", "Organize company branches, locations and operational contact details.", "تنظيم فروع الشركات ومواقعها وبيانات التواصل التشغيلية.", "bi-diagram-3",
                 Lookup("CompanyID", "Company", "الشركة", "Companies"), F("Code", "Branch code", "كود الفرع", true, max: 150),
