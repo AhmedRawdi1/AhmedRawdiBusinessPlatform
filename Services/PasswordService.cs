@@ -11,7 +11,7 @@ namespace AhmedRawdiBusinessPlatform.Services
 
         public string HashPassword(string password)
         {
-            ArgumentException.ThrowIfNullOrWhiteSpace(password);
+            ArgumentException.ThrowIfNullOrEmpty(password);
 
             var salt = RandomNumberGenerator.GetBytes(SaltSize);
             var hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, Iterations, HashAlgorithmName.SHA256, HashSize);

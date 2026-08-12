@@ -22,7 +22,6 @@ namespace AhmedRawdiBusinessPlatform.Models
         public string? PreferredLanguage { get; set; }
         public bool IsActive { get; set; } = true;
         public DateTime? ExpiredDate { get; set; }
-        [MinLength(8), StringLength(256)]
         public string? UserPass { get; set; }
     }
 }
