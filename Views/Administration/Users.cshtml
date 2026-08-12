@@ -243,9 +243,8 @@
                 <div class="modal-header"><div class="modal-title-group"><span class="modal-icon"><i class="bi bi-key"></i></span><div><span class="eyebrow-text">System owner action</span><h2 class="modal-title" id="resetPasswordModalTitle">Reset user password</h2></div></div><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
                     <p class="text-secondary">Set a temporary password. The user must replace it at the next sign-in, and all previous sessions will be invalidated.</p>
-                    <div class="management-field mb-3"><label for="temporaryPassword">Temporary password</label><input id="temporaryPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" /></div>
-                    <div class="management-field"><label for="confirmTemporaryPassword">Confirm temporary password</label><input id="confirmTemporaryPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" /></div>
-                    <small class="d-block mt-3 text-secondary">Use at least 8 characters.</small>
+                    <div class="management-field mb-3"><label for="temporaryPassword">Temporary password</label><input id="temporaryPassword" type="password" autocomplete="new-password" /></div>
+                    <div class="management-field"><label for="confirmTemporaryPassword">Confirm temporary password</label><input id="confirmTemporaryPassword" type="password" autocomplete="new-password" /></div>
                     <div class="text-danger mt-2 d-none" id="resetPasswordError" role="alert"></div>
                 </div>
                 <div class="modal-footer"><button type="button" class="toolbar-button" data-bs-dismiss="modal">@Lang.Get("Cancel")</button><button type="button" class="toolbar-button toolbar-button-primary" id="confirmResetPasswordButton"><i class="bi bi-shield-check"></i>Reset Password</button></div>
@@ -779,8 +778,8 @@
                 const password = document.getElementById('temporaryPassword').value;
                 const confirmation = document.getElementById('confirmTemporaryPassword').value;
                 const error = document.getElementById('resetPasswordError');
-                if (password !== confirmation || password.length < 8) {
-                    error.textContent = password !== confirmation ? 'Passwords do not match.' : 'Password must be at least 8 characters.';
+                if (!password || password !== confirmation) {
+                    error.textContent = !password ? 'Password is required.' : 'Passwords do not match.';
                     error.classList.remove('d-none'); return;
                 }
                 event.currentTarget.disabled = true;

@@ -168,12 +168,31 @@
     document.getElementById('printRecordButton').addEventListener('click', () => window.print());
     document.getElementById('saveRecordButton').addEventListener('click', async () => {
         form.classList.add('was-validated');
-        if (!form.checkValidity()) { form.querySelector(':invalid')?.focus(); return; }
+        if (!form.checkValidity()) {
+            const invalidFields = [...form.querySelectorAll(':invalid')];
+            invalidFields[0]?.focus();
+            const fieldNames = invalidFields.slice(0, 3).map(control => {
+                const label = form.querySelector(`label[for="${control.id}"]`);
+                return label?.textContent?.replace('*', '').trim() || control.name;
+            }).filter(Boolean);
+            notify(rtl
+                ? `يرجى استكمال الحقول المطلوبة: ${fieldNames.join('، ')}`
+                : `Complete the required fields: ${fieldNames.join(', ')}`);
+            return;
+        }
         const payload = { ID: Number(document.getElementById('recordId').value) || null };
         form.querySelectorAll('[name]:not([name="__RequestVerificationToken"]):not([name="ID"])').forEach(control => { payload[control.name] = control.type === 'checkbox' ? control.checked : control.type === 'number' || control.tagName === 'SELECT' ? (control.value === '' ? null : Number(control.value)) : control.value.trim(); });
         const response = await fetch(`/Administration/MasterData/${encodeURIComponent(entity)}/Save`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': antiForgeryToken }, body: JSON.stringify(payload) });
         const result = await response.json().catch(() => ({}));
-        if (!response.ok) { notify(result.message === 'DuplicateCode' ? (rtl ? 'الكود مستخدم في سجل آخر.' : 'The code is already used by another record.') : (rtl ? 'تعذر حفظ السجل.' : 'The record could not be saved.')); return; }
+        if (!response.ok) {
+            const message = result.message === 'DuplicateCode'
+                ? (rtl ? 'الكود مستخدم في سجل آخر.' : 'The code is already used by another record.')
+                : response.status === 403
+                    ? (rtl ? 'لا تملك صلاحية حفظ هذا السجل، أو انتهت جلسة الدخول.' : 'You do not have permission to save this record, or your session has expired.')
+                    : (result.message || (rtl ? 'تعذر حفظ السجل.' : 'The record could not be saved.'));
+            notify(message);
+            return;
+        }
         document.getElementById('recordId').value = result.id; form.classList.remove('was-validated'); notify(rtl ? 'تم حفظ السجل بنجاح.' : 'The record was saved successfully.');
     });
     document.getElementById('deleteRecordButton').addEventListener('click', async () => { const id = document.getElementById('recordId').value; if (!id) { notify(rtl ? 'اختر سجلًا من البحث أولًا.' : 'Select a record from search first.'); return; } if (!confirm(rtl ? 'هل تريد تعطيل هذا السجل؟' : 'Deactivate this record?')) return; const body = new URLSearchParams({ id, __RequestVerificationToken: antiForgeryToken }); const response = await fetch(`/Administration/MasterData/${encodeURIComponent(entity)}/Delete`, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body }); if (!response.ok) { notify(rtl ? 'تعذر تعطيل السجل.' : 'The record could not be deactivated.'); return; } notify(rtl ? 'تم تعطيل السجل بنجاح.' : 'The record was deactivated successfully.'); reset(); });

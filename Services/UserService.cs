@@ -42,7 +42,7 @@ namespace AhmedRawdiBusinessPlatform.Services
             var expiredDateParam = new SqlParameter("@ExpiredDate", (object?)model.ExpiredDate ?? DBNull.Value);
             var userIdParam = new SqlParameter("@UserID", (object?)model.UserID ?? DBNull.Value);
             var langParam = new SqlParameter("@PreferredLanguage", (object?)model.PreferredLanguage ?? DBNull.Value);
-            var passwordHash = string.IsNullOrWhiteSpace(model.UserPass) ? null : _passwordService.HashPassword(model.UserPass);
+            var passwordHash = string.IsNullOrEmpty(model.UserPass) ? null : _passwordService.HashPassword(model.UserPass);
             if (!model.UserID.HasValue && passwordHash == null)
                 throw new ArgumentException("A password is required for a new user.", nameof(model));
             var passwordHashParam = new SqlParameter("@PasswordHash", (object?)passwordHash ?? DBNull.Value);
@@ -131,8 +131,8 @@ namespace AhmedRawdiBusinessPlatform.Services
 
         private static void ValidatePassword(string password)
         {
-            if (string.IsNullOrWhiteSpace(password) || password.Length < 8)
-                throw new ArgumentException("Password must contain at least 8 characters.");
+            if (string.IsNullOrEmpty(password))
+                throw new ArgumentException("Password is required.");
         }
     }
 }
